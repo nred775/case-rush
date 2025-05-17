@@ -88,12 +88,13 @@ export default function CrateOpening({ crate, value, onSell, onAdd, onBack, onDr
   }, [prizeDone]);
 
   const getGlow = (val, isTop) => {
-    const ratio = val / crate.cost;
-    if (isTop) return "from-yellow-300 via-white to-yellow-500 animate-goldPulse";
-    if (ratio <= 0.5) return "from-gray-700 to-gray-900";
-    if (ratio <= 1.0) return "from-yellow-300 to-orange-400";
-    return "from-purple-400 to-purple-800";
-  };
+  const ratio = val / crate.cost;
+  if (isTop) return "from-yellow-300 via-white to-yellow-500 animate-goldPulse";
+  if (ratio <= 0.5) return "from-gray-700 to-gray-900";
+  if (ratio <= 1.0) return "from-sky-300 to-blue-400";
+  return "from-purple-400 to-purple-800";
+};
+
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center relative overflow-hidden">
