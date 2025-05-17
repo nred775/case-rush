@@ -392,6 +392,25 @@ const crates = [
     glowColor: "fire",
   },
 },
+{
+  name: "Legacy Case",
+  emoji: "👑",
+  cost: 100000,
+  items: [
+    { name: "🧻 Golden Toilet Paper", value: 10000 },     // Bad
+    { name: "📦 Broken Briefcase", value: 20000 },         // Bad
+    { name: "💳 Maxed Out Card", value: 45000 },           // Meh
+    { name: "🎩 Rich Grandpa’s Hat", value: 65000 },       // Meh
+    { name: "💼 Business Bundle", value: 110000 },         // Slight profit
+    { name: "🔑 Vault Access", value: 125000 },            // Slight profit
+    { name: "🛥️ Mega Yacht Key", value: 160000 },          // Big win
+    { name: "🌌 Reality Shifter", value: 300000 },         // Jackpot (3x)
+  ],
+  style: {
+    gradient: "from-yellow-300 via-orange-500 to-red-700",
+    glowColor: "legendary",
+  },
+},
 
 
 ];
