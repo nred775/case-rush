@@ -411,6 +411,45 @@ const crates = [
     glowColor: "legendary",
   },
 },
+{
+  name: "Flex Case",
+  emoji: "💎",
+  cost: 10000,
+  items: [
+    { name: "🧢 Custom Designer Cap", value: 2500 },
+    { name: "👟 Limited Edition Sneakers", value: 5000 },
+    { name: "💼 Micro Louis Bag", value: 7500 },
+    { name: "🪙 Gold-Plated Gift Card", value: 9500 },
+    { name: "🧥 Supreme Jacket", value: 10000 }, // break even
+    { name: "🎧 Diamond AirPods", value: 15000 },
+    { name: "📱 Gold iPhone", value: 20000 },
+    { name: "🚁 Hypebeast Helicopter Ride", value: 35000 },
+  ],
+  style: {
+    gradient: "from-purple-700 via-pink-600 to-yellow-400",
+    glowColor: "bling",
+  },
+},
+{
+  name: "Cosmic Crate",
+  emoji: "🌌",
+  cost: 50000,
+  items: [
+    { name: "🪐 Planetary Pebble", value: 5000 },
+    { name: "🛰️ Crashed Satellite Piece", value: 10000 },
+    { name: "🌠 Meteor Dust Jar", value: 25000 },
+    { name: "🛸 Alien Gadget", value: 40000 },
+    { name: "🧪 Space-Time Serum", value: 50000 }, // break even
+    { name: "📡 Dimensional Beacon", value: 75000 },
+    { name: "🚀 Mars Condo Deed", value: 100000 },
+    { name: "🪞 Universe Mirror", value: 200000 },
+  ],
+  style: {
+    gradient: "from-blue-900 via-indigo-700 to-violet-500",
+    glowColor: "cosmic",
+  },
+}
+
 
 
 ];

@@ -5,6 +5,8 @@ import CrateOpening from "./components/CrateOpening";
 import GlobalAudio from "./components/GlobalAudio";
 import AuthPage from "./components/AuthPage";
 import Leaderboard from "./components/Leaderboard";
+import WheelSpin from "./components/WheelSpin";
+import WheelOpening from "./components/WheelOpening";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import { auth, db } from "./firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
@@ -15,6 +17,7 @@ function App() {
   const [balance, setBalance] = useState(0);
   const [inventory, setInventory] = useState([]);
   const [selectedCrate, setSelectedCrate] = useState(null);
+  const [selectedWheel, setSelectedWheel] = useState(null);
   const [username, setUsername] = useState("");
   const [needsUsername, setNeedsUsername] = useState(false);
   const [usernameError, setUsernameError] = useState("");
@@ -56,11 +59,15 @@ function App() {
     });
   };
 
+  const handleSpend = (amount) => {
+    const newBalance = balance - amount;
+    setBalance(newBalance);
+    saveUserData(newBalance, inventory);
+  };
+
   const handleOpenCrate = (crate) => {
     if (balance >= crate.cost) {
-      const newBalance = balance - crate.cost;
-      setBalance(newBalance);
-      saveUserData(newBalance, inventory);
+      handleSpend(crate.cost);
       setSelectedCrate(crate);
     }
   };
@@ -72,21 +79,23 @@ function App() {
     setBalance(newBalance);
     saveUserData(newBalance, inventory);
     resetCrate();
+    resetWheel();
   };
 
   const handleAddToInventory = (item) => {
-    if (!item || !selectedCrate) return;
+    if (!item) return;
     const updatedInventory = [
       ...inventory,
       {
-        case: selectedCrate.name,
-        item: item.name,
+        case: item.case || selectedCrate?.name || selectedWheel?.name || "Unknown",
+        item: item.item || item.name,
         value: item.value,
       },
     ];
     setInventory(updatedInventory);
     saveUserData(balance, updatedInventory);
     resetCrate();
+    resetWheel();
   };
 
   const handleSellFromInventory = (index) => {
@@ -98,25 +107,38 @@ function App() {
     saveUserData(newBalance, updatedInventory);
   };
 
-  const resetCrate = () => {
-    setSelectedCrate(null);
-  };
+  const resetCrate = () => setSelectedCrate(null);
+  const resetWheel = () => setSelectedWheel(null);
 
-  if (!user) {
-    return <AuthPage onLogin={setUser} />;
-  }
+  if (!user) return <AuthPage onLogin={setUser} />;
 
   return (
     <Router>
-      <div className="min-h-screen bg-black text-white flex flex-col items-center relative">
+      <div className="min-h-screen bg-black text-white flex flex-col items-center relative overflow-y-scroll">
         <GlobalAudio />
 
-        {/* 💰 Balance */}
-        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-40 bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-6 py-2 rounded-full shadow-xl border-4 border-yellow-200 text-lg sm:text-xl font-bold tracking-wide">
-          💰 Balance: ${balance.toFixed(2)}
-        </div>
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-40 flex items-center gap-6 bg-black bg-opacity-60 px-6 py-3 rounded-full shadow-xl border border-gray-700">
+  <Link
+    to="/inventory"
+    className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-semibold text-sm sm:text-base shadow transition-transform hover:scale-105"
+  >
+    📦 Inventory
+  </Link>
 
-        {/* 🚪 Logout Button */}
+  <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-6 py-2 rounded-full text-lg sm:text-xl font-bold tracking-wide border-2 border-yellow-300 shadow-inner">
+    💰 ${Math.floor(balance)}
+  </div>
+
+  <Link
+    to="/leaderboard"
+    className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-semibold text-sm sm:text-base shadow transition-transform hover:scale-105"
+  >
+    🏆 Leaderboard
+  </Link>
+</div>
+
+
+
         <button
           onClick={() => signOut(auth)}
           className="fixed top-4 right-4 z-50 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg shadow-md transition-transform hover:scale-105"
@@ -124,7 +146,6 @@ function App() {
           🚪 Log Out
         </button>
 
-        {/* 👤 Username Floating Tag */}
         {username && (
           <div className="fixed top-4 left-4 z-50 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg text-sm font-semibold opacity-90">
             👤 {username}
@@ -133,29 +154,16 @@ function App() {
 
         <h1 className="text-4xl font-bold mt-24 mb-2">🎰 Case Rush</h1>
 
-        {/* Nav */}
         <div className="mb-6 flex flex-wrap justify-center gap-4">
-          <Link
-            to="/"
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition-transform hover:scale-105"
-          >
-            🛍️ Shop
-          </Link>
-          <Link
-            to="/inventory"
-            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg shadow-md transition-transform hover:scale-105"
-          >
-            📦 Inventory
-          </Link>
-          <Link
-            to="/leaderboard"
-            className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold rounded-lg shadow-md transition-transform hover:scale-105"
-          >
-            🏆 Leaderboard
-          </Link>
-        </div>
+  <Link to="/" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition-transform hover:scale-105">
+    🛍️ Cases
+  </Link>
+  <Link to="/wheel" className="px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white font-semibold rounded-lg shadow-md transition-transform hover:scale-105">
+    🌀 Wheels
+  </Link>
+</div>
 
-        {/* Routes */}
+
         <Routes>
           <Route
             path="/"
@@ -174,19 +182,36 @@ function App() {
               )
             }
           />
+
           <Route
             path="/inventory"
+            element={<InventoryPanel inventory={inventory} onSellItem={handleSellFromInventory} />}
+          />
+
+          <Route path="/leaderboard" element={<Leaderboard />} />
+
+          <Route
+            path="/wheel"
             element={
-              <InventoryPanel
-                inventory={inventory}
-                onSellItem={handleSellFromInventory}
-              />
+              !selectedWheel ? (
+                <WheelSpin
+                  balance={balance}
+                  onPick={(wheel) => setSelectedWheel(wheel)}
+                  onSpend={handleSpend} // 💸 Now passed into WheelSpin
+                />
+              ) : (
+                <WheelOpening
+                  wheel={selectedWheel}
+                  onSell={handleSell}
+                  onAdd={handleAddToInventory}
+                  onSpend={handleSpend} // ✅ Also passed here
+                  onBack={resetWheel}
+                />
+              )
             }
           />
-          <Route path="/leaderboard" element={<Leaderboard />} />
         </Routes>
 
-        {/* 📝 Username Prompt Overlay */}
         {needsUsername && (
           <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50">
             <div className="bg-gray-900 p-6 rounded-lg shadow-xl w-full max-w-sm">
@@ -201,9 +226,7 @@ function App() {
                   setUsernameError("");
                 }}
               />
-              {usernameError && (
-                <p className="text-red-500 text-sm mb-3">{usernameError}</p>
-              )}
+              {usernameError && <p className="text-red-500 text-sm mb-3">{usernameError}</p>}
               <button
                 className="w-full py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded"
                 onClick={async () => {
