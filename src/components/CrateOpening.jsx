@@ -246,7 +246,8 @@ export default function CrateOpening({ crate, value, onSell, onAdd, onBack, onDr
             onClick={() => onSell(centerItem?.value)}
             className="px-5 py-2 bg-green-500 hover:bg-green-600 rounded text-white font-semibold text-lg"
           >
-            Sell for ${centerItem?.value}
+           Sell for ${centerItem?.value.toLocaleString()}
+
           </motion.button>
           <motion.button
             whileTap={{ scale: 0.95 }}
