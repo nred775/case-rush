@@ -429,7 +429,66 @@ const wheels = [
     gradient: "from-black via-indigo-950 to-white",
     glowColor: "unreal",
   },
-}
+},
+{
+  name: "DOOM SPIN",
+  emoji: "☠️",
+  cost: 250,
+  items: [
+    { name: "Shattered Mirror", value: 1 },
+    { name: "Black Cat Fur", value: 2 },
+    { name: "Broken Umbrella", value: 3 },
+    { name: "Cursed Penny", value: 5 },
+    { name: "Back Luck Charm", value: 10 },
+    { name: "Golden Horseshoe", value: 1200 }, // absurd jackpot
+  ],
+  style: {
+    gradient: "from-black via-red-900 to-purple-800",
+  },
+},
+{
+  name: "All or Nothing",
+  emoji: "🎯",
+  cost: 500,
+  items: [
+    { name: "Nothing", value: 0 },
+    { name: "Nothing", value: 0 },
+    { name: "Nothing", value: 0 },
+    { name: "Lucky Win", value: 1250 },
+    { name: "Insane Upside", value: 2000 },
+  ],
+  style: {
+    gradient: "from-gray-900 via-slate-600 to-yellow-400",
+  },
+},
+{
+  name: "High Stakes Flip",
+  emoji: "🪙",
+  cost: 100000,
+  items: [
+    { name: "1$ Tragedy", value: 1 },
+    { name: "200k Miracle", value: 200000 },
+  ],
+  style: {
+    gradient: "from-yellow-900 via-black to-green-400",
+  },
+},
+{
+  name: "1 in 5 Millionaire",
+  emoji: "💸",
+  cost: 100000,
+  items: [
+    { name: "Dusty Penny", value: 1 },
+    { name: "Crumpled Receipt", value: 1 },
+    { name: "Fake Gold Chain", value: 1 },
+    { name: "Scratched Raffle Ticket", value: 1 },
+    { name: "Millionaire's Briefcase", value: 1000000 },
+  ],
+  style: {
+    gradient: "from-black via-gray-700 to-gold-500",
+  },
+},
+
 
 
 

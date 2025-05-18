@@ -116,45 +116,42 @@ function App() {
 
   return (
     <Router>
-      <div className="min-h-screen bg-black text-white flex flex-col items-center relative overflow-y-scroll">
+      <div className="min-h-screen bg-black text-white flex flex-col items-center relative overflow-x-hidden overflow-y-auto touch-manipulation">
         <GlobalAudio />
 
-        {/* Top nav: balance + locked/active nav */}
-        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-40 flex items-center gap-6 bg-black bg-opacity-60 px-6 py-3 rounded-full shadow-xl border border-gray-700">
+        {/* Top nav */}
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-40 flex items-center gap-4 sm:gap-6 bg-black bg-opacity-60 px-4 sm:px-6 py-2 sm:py-3 rounded-full shadow-xl border border-gray-700">
           {navigationLocked ? (
             <button
               disabled
-              className="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold text-sm sm:text-base opacity-50 cursor-not-allowed"
+              className="bg-purple-600 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-semibold text-sm sm:text-base opacity-50 cursor-not-allowed"
             >
               📦 Inventory
             </button>
           ) : (
             <Link
               to="/inventory"
-              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-semibold text-sm sm:text-base shadow transition-transform hover:scale-105"
+              className="bg-purple-600 hover:bg-purple-700 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-semibold text-sm sm:text-base shadow transition-transform hover:scale-105"
             >
               📦 Inventory
             </Link>
           )}
 
-          <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-6 py-2 rounded-full text-lg sm:text-xl font-bold tracking-wide border-2 border-yellow-300 shadow-inner">
+          <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-4 sm:px-6 py-1.5 sm:py-2 rounded-full text-base sm:text-xl font-bold tracking-wide border-2 border-yellow-300 shadow-inner">
             💰 {Number(balance).toLocaleString()}
-
-
-
           </div>
 
           {navigationLocked ? (
             <button
               disabled
-              className="bg-yellow-500 text-white px-4 py-2 rounded-lg font-semibold text-sm sm:text-base opacity-50 cursor-not-allowed"
+              className="bg-yellow-500 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-semibold text-sm sm:text-base opacity-50 cursor-not-allowed"
             >
               🏆 Leaderboard
             </button>
           ) : (
             <Link
               to="/leaderboard"
-              className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-semibold text-sm sm:text-base shadow transition-transform hover:scale-105"
+              className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-semibold text-sm sm:text-base shadow transition-transform hover:scale-105"
             >
               🏆 Leaderboard
             </Link>
@@ -163,54 +160,52 @@ function App() {
 
         <button
           onClick={() => signOut(auth)}
-          className="fixed top-4 right-4 z-50 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg shadow-md transition-transform hover:scale-105"
+          className="fixed top-4 right-4 z-50 px-3 sm:px-4 py-1.5 sm:py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg shadow-md transition-transform hover:scale-105 text-sm sm:text-base"
         >
           🚪 Log Out
         </button>
 
         {username && (
-          <div className="fixed top-4 left-4 z-50 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg text-sm font-semibold opacity-90">
+          <div className="fixed top-4 left-4 z-50 bg-gray-800 text-white px-3 py-1.5 rounded-lg shadow-lg text-xs sm:text-sm font-semibold opacity-90">
             👤 {username}
           </div>
         )}
 
-        <h1 className="text-4xl font-bold mt-24 mb-2">🎰 Case Rush</h1>
+        <h1 className="text-3xl sm:text-4xl font-bold mt-24 mb-4 text-center">🎰 Case Rush</h1>
 
-        {/* Main section links */}
-        <div className="mb-6 flex flex-wrap justify-center gap-4">
-  {navigationLocked ? (
-    <button
-      disabled
-      className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md opacity-50 cursor-not-allowed"
-    >
-      🛍️ Cases
-    </button>
-  ) : (
-    <Link
-      to="/"
-      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition-transform hover:scale-105"
-    >
-      🛍️ Cases
-    </Link>
-  )}
+        <div className="mb-4 flex flex-wrap justify-center gap-3 sm:gap-4">
+          {navigationLocked ? (
+            <button
+              disabled
+              className="px-3 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md opacity-50 cursor-not-allowed text-sm"
+            >
+              🛍️ Cases
+            </button>
+          ) : (
+            <Link
+              to="/"
+              className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition-transform hover:scale-105 text-sm"
+            >
+              🛍️ Cases
+            </Link>
+          )}
 
-  {navigationLocked ? (
-    <button
-      disabled
-      className="px-4 py-2 bg-teal-500 text-white font-semibold rounded-lg shadow-md opacity-50 cursor-not-allowed"
-    >
-      🌀 Wheels
-    </button>
-  ) : (
-    <Link
-      to="/wheel"
-      className="px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white font-semibold rounded-lg shadow-md transition-transform hover:scale-105"
-    >
-      🌀 Wheels
-    </Link>
-  )}
-</div>
-
+          {navigationLocked ? (
+            <button
+              disabled
+              className="px-3 py-2 bg-teal-500 text-white font-semibold rounded-lg shadow-md opacity-50 cursor-not-allowed text-sm"
+            >
+              🌀 Wheels
+            </button>
+          ) : (
+            <Link
+              to="/wheel"
+              className="px-3 py-2 bg-teal-500 hover:bg-teal-600 text-white font-semibold rounded-lg shadow-md transition-transform hover:scale-105 text-sm"
+            >
+              🌀 Wheels
+            </Link>
+          )}
+        </div>
 
         <Routes>
           <Route
@@ -230,14 +225,11 @@ function App() {
               )
             }
           />
-
           <Route
             path="/inventory"
             element={<InventoryPanel inventory={inventory} onSellItem={handleSellFromInventory} />}
           />
-
           <Route path="/leaderboard" element={<Leaderboard />} />
-
           <Route
             path="/wheel"
             element={
@@ -261,9 +253,9 @@ function App() {
         </Routes>
 
         {needsUsername && (
-          <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 px-4">
             <div className="bg-gray-900 p-6 rounded-lg shadow-xl w-full max-w-sm">
-              <h2 className="text-xl font-bold mb-4 text-white">Choose a Username</h2>
+              <h2 className="text-lg sm:text-xl font-bold mb-4 text-white">Choose a Username</h2>
               <input
                 type="text"
                 className="w-full p-2 rounded text-black mb-2"

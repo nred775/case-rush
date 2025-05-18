@@ -5,9 +5,6 @@ import Confetti from "react-confetti";
 import { motion } from "framer-motion";
 import { useWindowSize } from "@react-hook/window-size";
 
-const WHEEL_SIZE = 600;
-const bigWinAudio = new Audio("/sounds/rare-sparkle.mp3");
-
 export default function WheelOpening({ wheel, onSell, onAdd, onSpend }) {
   const [rotation, setRotation] = useState(0);
   const [spinning, setSpinning] = useState(false);
@@ -16,14 +13,16 @@ export default function WheelOpening({ wheel, onSell, onAdd, onSpend }) {
   const [width, height] = useWindowSize();
   const { playLidOpen } = useCrateSounds();
 
+  const WHEEL_SIZE = Math.min(width * 0.9, 600);
+  const bigWinAudio = new Audio("/sounds/rare-sparkle.mp3");
+
   const getSegmentColor = (value) => {
     const ratio = value / wheel.cost;
     const topValue = Math.max(...wheel.items.map((item) => item.value));
-
-    if (value === topValue) return "#facc15"; // gold
-    if (ratio <= 0.5) return "#374151";       // gray
-    if (ratio <= 1.0) return "#3b82f6";       // blue
-    return "#9333ea";                         // purple
+    if (value === topValue) return "#facc15";
+    if (ratio <= 0.5) return "#374151";
+    if (ratio <= 1.0) return "#3b82f6";
+    return "#9333ea";
   };
 
   const spin = () => {
@@ -67,15 +66,16 @@ export default function WheelOpening({ wheel, onSell, onAdd, onSpend }) {
   const result = resultIndex !== null ? wheel.items[resultIndex] : null;
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-start pt-20 px-2 relative">
+    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-start pt-16 sm:pt-20 px-2 sm:px-4 relative">
       {showConfetti && (
-  <div className="fixed inset-0 z-50 pointer-events-none">
-    <Confetti width={width} height={height} numberOfPieces={200} gravity={0.4} />
-  </div>
-)}
+        <div className="fixed inset-0 z-50 pointer-events-none">
+          <Confetti width={width} height={height} numberOfPieces={200} gravity={0.4} />
+        </div>
+      )}
 
-
-      <h2 className="text-4xl font-bold mb-6">🎡 {wheel.emoji} {wheel.name}</h2>
+      <h2 className="text-2xl sm:text-4xl font-bold mb-6 text-center">
+        🎡 {wheel.emoji} {wheel.name}
+      </h2>
 
       <div className="relative mb-4" style={{ width: WHEEL_SIZE, height: WHEEL_SIZE }}>
         <div
@@ -83,9 +83,8 @@ export default function WheelOpening({ wheel, onSell, onAdd, onSpend }) {
           style={{ transform: "translateX(-50%)" }}
         >
           <div
-            className="w-0 h-0 border-l-[24px] border-r-[24px] border-t-[44px]
-              border-l-transparent border-r-transparent border-t-yellow-400 
-              animate-pulse-slow"
+            className="w-0 h-0 border-l-[16px] border-r-[16px] border-t-[28px] sm:border-l-[24px] sm:border-r-[24px] sm:border-t-[44px]
+              border-l-transparent border-r-transparent border-t-yellow-400 animate-pulse-slow"
             style={{
               borderTopColor: "#facc15",
               filter: "drop-shadow(0 0 3px #000) drop-shadow(0 3px 4px #000)",
@@ -103,11 +102,7 @@ export default function WheelOpening({ wheel, onSell, onAdd, onSpend }) {
           animate={{ rotate: rotation }}
           transition={{ duration: 4.5, ease: [0.1, 1, 0.2, 1] }}
         >
-          <svg
-            width={WHEEL_SIZE}
-            height={WHEEL_SIZE}
-            viewBox={`0 0 ${WHEEL_SIZE} ${WHEEL_SIZE}`}
-          >
+          <svg width={WHEEL_SIZE} height={WHEEL_SIZE} viewBox={`0 0 ${WHEEL_SIZE} ${WHEEL_SIZE}`}>
             <g transform={`translate(${WHEEL_SIZE / 2}, ${WHEEL_SIZE / 2}) rotate(-90)`}>
               {wheel.items.map((item, i) => {
                 const angle = 360 / wheel.items.length;
@@ -153,24 +148,23 @@ export default function WheelOpening({ wheel, onSell, onAdd, onSpend }) {
                     />
 
                     <text
-  x={textX}
-  y={textY}
-  textAnchor="middle"
-  alignmentBaseline="middle"
-  fill={resultIndex === i ? "#ffffff" : "#eeeeee"}
-  fontSize={resultIndex === i ? "17" : "16"}
-  stroke="black"
-  strokeWidth="0.75"
-  paintOrder="stroke"
-  style={{
-    fontWeight: resultIndex === i ? "800" : "bold",
-    transition: "all 0.3s ease",
-  }}
-  transform={`rotate(${midAngle}, ${textX}, ${textY})`}
->
-  {item.name}
-</text>
-
+                      x={textX}
+                      y={textY}
+                      textAnchor="middle"
+                      alignmentBaseline="middle"
+                      fill={resultIndex === i ? "#ffffff" : "#eeeeee"}
+                      fontSize={resultIndex === i ? "14" : "13"}
+                      stroke="black"
+                      strokeWidth="0.75"
+                      paintOrder="stroke"
+                      style={{
+                        fontWeight: resultIndex === i ? "800" : "bold",
+                        transition: "all 0.3s ease",
+                      }}
+                      transform={`rotate(${midAngle}, ${textX}, ${textY})`}
+                    >
+                      {item.name}
+                    </text>
                   </motion.g>
                 );
               })}
@@ -189,15 +183,14 @@ export default function WheelOpening({ wheel, onSell, onAdd, onSpend }) {
       )}
 
       {result && (
-        <div className="mt-6 text-center animate-pulse">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-2">🎉 You got: {result.name}</h2>
-          <div className="flex gap-4 justify-center mt-4">
+        <div className="mt-6 text-center animate-pulse px-2">
+          <h2 className="text-xl sm:text-2xl font-bold mb-2">🎉 You got: {result.name}</h2>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mt-4">
             <button
               onClick={() => onSell?.(result.value)}
-              className="px-6 py-3 bg-green-500 hover:bg-green-600 rounded text-lg"
+              className="px-5 py-2 bg-green-500 hover:bg-green-600 rounded text-lg"
             >
               Sell for ${result.value.toLocaleString()}
-
             </button>
             <button
               onClick={() =>
@@ -207,7 +200,7 @@ export default function WheelOpening({ wheel, onSell, onAdd, onSpend }) {
                   value: result.value,
                 })
               }
-              className="px-6 py-3 bg-purple-500 hover:bg-purple-600 rounded text-lg"
+              className="px-5 py-2 bg-purple-500 hover:bg-purple-600 rounded text-lg"
             >
               Add to Inventory
             </button>
