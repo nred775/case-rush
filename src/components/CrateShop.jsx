@@ -19,11 +19,10 @@ export default function CrateShop({ balance, onOpenCrate }) {
               `}
               onClick={() => canAfford && onOpenCrate(crate)}
             >
-              {/* Main Content */}
               <div className="text-5xl mb-2">{crate.emoji}</div>
               <h3 className="text-lg font-bold text-white">{crate.name}</h3>
               <p className="text-sm text-gray-200 mb-2">
-                {crate.cost === 0 ? "Free" : `$${crate.cost}`}
+                {crate.cost === 0 ? "Free" : `$${crate.cost.toLocaleString()}`}
               </p>
               {crate.items && (
                 <p className="text-xs text-gray-300">
@@ -37,7 +36,7 @@ export default function CrateShop({ balance, onOpenCrate }) {
                 <ul className="text-xs max-h-32 overflow-y-auto text-center space-y-1">
                   {crate.items.map((item, i) => (
                     <li key={i}>
-                      {item.name} — ${item.value}
+                      {item.name} — ${item.value.toLocaleString()}
                     </li>
                   ))}
                 </ul>

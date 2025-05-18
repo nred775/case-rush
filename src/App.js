@@ -22,6 +22,8 @@ function App() {
   const [needsUsername, setNeedsUsername] = useState(false);
   const [usernameError, setUsernameError] = useState("");
 
+  const navigationLocked = !!selectedCrate || !!selectedWheel;
+
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
@@ -117,27 +119,47 @@ function App() {
       <div className="min-h-screen bg-black text-white flex flex-col items-center relative overflow-y-scroll">
         <GlobalAudio />
 
+        {/* Top nav: balance + locked/active nav */}
         <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-40 flex items-center gap-6 bg-black bg-opacity-60 px-6 py-3 rounded-full shadow-xl border border-gray-700">
-  <Link
-    to="/inventory"
-    className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-semibold text-sm sm:text-base shadow transition-transform hover:scale-105"
-  >
-    📦 Inventory
-  </Link>
+          {navigationLocked ? (
+            <button
+              disabled
+              className="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold text-sm sm:text-base opacity-50 cursor-not-allowed"
+            >
+              📦 Inventory
+            </button>
+          ) : (
+            <Link
+              to="/inventory"
+              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-semibold text-sm sm:text-base shadow transition-transform hover:scale-105"
+            >
+              📦 Inventory
+            </Link>
+          )}
 
-  <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-6 py-2 rounded-full text-lg sm:text-xl font-bold tracking-wide border-2 border-yellow-300 shadow-inner">
-    💰 ${Math.floor(balance)}
-  </div>
-
-  <Link
-    to="/leaderboard"
-    className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-semibold text-sm sm:text-base shadow transition-transform hover:scale-105"
-  >
-    🏆 Leaderboard
-  </Link>
-</div>
+          <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-6 py-2 rounded-full text-lg sm:text-xl font-bold tracking-wide border-2 border-yellow-300 shadow-inner">
+            💰 {Number(balance).toLocaleString()}
 
 
+
+          </div>
+
+          {navigationLocked ? (
+            <button
+              disabled
+              className="bg-yellow-500 text-white px-4 py-2 rounded-lg font-semibold text-sm sm:text-base opacity-50 cursor-not-allowed"
+            >
+              🏆 Leaderboard
+            </button>
+          ) : (
+            <Link
+              to="/leaderboard"
+              className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-semibold text-sm sm:text-base shadow transition-transform hover:scale-105"
+            >
+              🏆 Leaderboard
+            </Link>
+          )}
+        </div>
 
         <button
           onClick={() => signOut(auth)}
@@ -154,13 +176,39 @@ function App() {
 
         <h1 className="text-4xl font-bold mt-24 mb-2">🎰 Case Rush</h1>
 
+        {/* Main section links */}
         <div className="mb-6 flex flex-wrap justify-center gap-4">
-  <Link to="/" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition-transform hover:scale-105">
-    🛍️ Cases
-  </Link>
-  <Link to="/wheel" className="px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white font-semibold rounded-lg shadow-md transition-transform hover:scale-105">
-    🌀 Wheels
-  </Link>
+  {navigationLocked ? (
+    <button
+      disabled
+      className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md opacity-50 cursor-not-allowed"
+    >
+      🛍️ Cases
+    </button>
+  ) : (
+    <Link
+      to="/"
+      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition-transform hover:scale-105"
+    >
+      🛍️ Cases
+    </Link>
+  )}
+
+  {navigationLocked ? (
+    <button
+      disabled
+      className="px-4 py-2 bg-teal-500 text-white font-semibold rounded-lg shadow-md opacity-50 cursor-not-allowed"
+    >
+      🌀 Wheels
+    </button>
+  ) : (
+    <Link
+      to="/wheel"
+      className="px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white font-semibold rounded-lg shadow-md transition-transform hover:scale-105"
+    >
+      🌀 Wheels
+    </Link>
+  )}
 </div>
 
 
@@ -197,14 +245,14 @@ function App() {
                 <WheelSpin
                   balance={balance}
                   onPick={(wheel) => setSelectedWheel(wheel)}
-                  onSpend={handleSpend} // 💸 Now passed into WheelSpin
+                  onSpend={handleSpend}
                 />
               ) : (
                 <WheelOpening
                   wheel={selectedWheel}
                   onSell={handleSell}
                   onAdd={handleAddToInventory}
-                  onSpend={handleSpend} // ✅ Also passed here
+                  onSpend={handleSpend}
                   onBack={resetWheel}
                 />
               )

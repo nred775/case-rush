@@ -67,10 +67,13 @@ export default function WheelOpening({ wheel, onSell, onAdd, onSpend }) {
   const result = resultIndex !== null ? wheel.items[resultIndex] : null;
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-start pt-8 px-2 relative">
+    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-start pt-20 px-2 relative">
       {showConfetti && (
-        <Confetti width={width} height={height} numberOfPieces={200} gravity={0.4} />
-      )}
+  <div className="fixed inset-0 z-50 pointer-events-none">
+    <Confetti width={width} height={height} numberOfPieces={200} gravity={0.4} />
+  </div>
+)}
+
 
       <h2 className="text-4xl font-bold mb-6">🎡 {wheel.emoji} {wheel.name}</h2>
 

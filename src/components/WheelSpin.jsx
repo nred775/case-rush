@@ -18,16 +18,15 @@ export default function WheelSpin({ balance, onPick, onSpend }) {
               `}
               onClick={() => {
                 if (canAfford) {
-                  onSpend?.(wheel.cost);  // 💸 Spend as soon as it's picked
+                  onSpend?.(wheel.cost);
                   onPick?.(wheel);
                 }
               }}
             >
-              {/* Main Content */}
               <div className="text-5xl mb-2">{wheel.emoji}</div>
               <h3 className="text-lg font-bold text-white">{wheel.name}</h3>
               <p className="text-sm text-gray-200 mb-2">
-                {wheel.cost === 0 ? "Free" : `$${wheel.cost}`}
+                {wheel.cost === 0 ? "Free" : `$${wheel.cost.toLocaleString()}`}
               </p>
               <p className="text-xs text-gray-300">
                 {wheel.items.length} possible items
@@ -38,13 +37,12 @@ export default function WheelSpin({ balance, onPick, onSpend }) {
                 <h4 className="text-md font-bold mb-2">🎁 Prizes</h4>
                 <ul className="text-xs max-h-32 overflow-y-auto text-center space-y-1">
                   {[...wheel.items]
-  .sort((a, b) => a.value - b.value)
-  .map((item, i) => (
-    <li key={i}>
-      {item.name} — ${item.value}
-    </li>
-))}
-
+                    .sort((a, b) => a.value - b.value)
+                    .map((item, i) => (
+                      <li key={i}>
+                        {item.name} — ${item.value.toLocaleString()}
+                      </li>
+                    ))}
                 </ul>
               </div>
             </div>
