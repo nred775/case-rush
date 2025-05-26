@@ -17,6 +17,8 @@ import {
   deleteDoc,
   onSnapshot
 } from "firebase/firestore";
+import { getDatabase, ref, onDisconnect, set as rtdbSet, remove as rtdbRemove } from "firebase/database";
+
 
 import { useState, useEffect, useRef } from "react";
 import SetsPanel from "./components/SetsPanel";
@@ -165,32 +167,27 @@ const [loginBlocked, setLoginBlocked] = useState(false);
 useEffect(() => {
   if (!user || user.isAnonymous || !user.uid) return;
 
-  // 🛑 Prevent marking online if login was blocked
-  const userRef = doc(db, "users", user.uid);
+  const rtdb = getDatabase();
+  const userStatusRef = ref(rtdb, `status/${user.uid}`);
+  const userDocRef = doc(db, "users", user.uid);
 
-  const markOnline = async () => {
-    try {
-      await setDoc(userRef, { online: true }, { merge: true });
-    } catch (err) {
-      console.error("🔥 Failed to mark user online:", err);
-    }
-  };
+  // 💾 Mark Firestore online
+  setDoc(userDocRef, { online: true }, { merge: true }).catch(console.error);
 
-  markOnline();
+  // 🔌 Realtime Database presence tracking
+  onDisconnect(userStatusRef).remove().catch(console.error);
 
-  const handleUnload = () => {
-    setDoc(userRef, { online: false }, { merge: true }).catch((err) => {
-      console.error("Failed to mark offline on unload:", err);
-    });
-  };
-
-  window.addEventListener("beforeunload", handleUnload);
+  rtdbSet(userStatusRef, {
+    state: "online",
+    lastChanged: Date.now(),
+  });
 
   return () => {
-    handleUnload();
-    window.removeEventListener("beforeunload", handleUnload);
+    setDoc(userDocRef, { online: false }, { merge: true }).catch(console.error);
+    rtdbRemove(userStatusRef).catch(console.error);
   };
 }, [user]);
+
 
 
 useEffect(() => {
