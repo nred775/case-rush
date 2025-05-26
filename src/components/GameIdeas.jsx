@@ -18,11 +18,11 @@ const GameIdeas = () => {
         <h2 className="text-2xl font-bold mb-2 text-yellow-300">📈 Level Up</h2>
         <p>Open crates and spin wheels to gain XP and level up! Each rarity gives a different XP boost:</p>
         <ul className="list-disc list-inside pl-4 mt-2 text-white/80">
-          <li>Common = +1 XP</li>
-          <li>Rare = +5 XP</li>
-          <li>Epic = +10 XP</li>
-          <li>Legendary = +25 XP</li>
-          <li>Mythic = +50 XP</li>
+          <li>Common = +5 XP</li>
+          <li>Rare = +10 XP</li>
+          <li>Epic = +25 XP</li>
+          <li>Legendary = +50 XP</li>
+          <li>Mythic = +100 XP</li>
         </ul>
       </div>
 
