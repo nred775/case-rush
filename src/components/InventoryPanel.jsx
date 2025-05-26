@@ -13,13 +13,9 @@ function timeAgo(dateString) {
 
 export default function InventoryPanel({ inventory, onSellItem, onSellAll }) {
   const sortedInventory = useMemo(() => {
-    return [...inventory]
-      .map((item) => ({
-        ...item,
-        addedAt: item.addedAt || new Date().toISOString(),
-      }))
-      .sort((a, b) => b.value - a.value);
-  }, [inventory]);
+  return [...inventory].sort((a, b) => b.value - a.value);
+}, [inventory]);
+
 
   const totalValue = sortedInventory.reduce((sum, item) => sum + item.value, 0);
 
@@ -53,7 +49,7 @@ export default function InventoryPanel({ inventory, onSellItem, onSellAll }) {
           <ul className="space-y-2">
             {sortedInventory.map((item, index) => (
               <li
-                key={index}
+                key={item.addedAt}
                 className="bg-gray-800 rounded p-3 flex items-center justify-between"
               >
                 <div>

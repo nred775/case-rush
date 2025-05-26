@@ -17,8 +17,8 @@ import {
   deleteDoc,
   onSnapshot
 } from "firebase/firestore";
-import { getDatabase, ref, onDisconnect, set as rtdbSet, remove as rtdbRemove } from "firebase/database";
-
+import { ref, onDisconnect, onValue, set as rtdbSet, remove as rtdbRemove } from "firebase/database";
+import { rtdb } from "./firebase"; // ✅ pull configured instance
 
 import { useState, useEffect, useRef } from "react";
 import SetsPanel from "./components/SetsPanel";
@@ -168,26 +168,48 @@ const [trackedSet, setTrackedSet] = useState(null);
 useEffect(() => {
   if (!user || user.isAnonymous || !user.uid) return;
 
-  const rtdb = getDatabase();
   const userStatusRef = ref(rtdb, `status/${user.uid}`);
   const userDocRef = doc(db, "users", user.uid);
+  const connectedRef = ref(rtdb, ".info/connected");
 
-  // 💾 Mark Firestore online
-  setDoc(userDocRef, { online: true }, { merge: true }).catch(console.error);
+  const isOfflineForFirestore = {
+    online: false,
+    lastOffline: Date.now(),
+  };
 
-  // 🔌 Realtime Database presence tracking
-  onDisconnect(userStatusRef).remove().catch(console.error);
+  const isOnlineForFirestore = {
+    online: true,
+    lastOnline: Date.now(),
+  };
 
-  rtdbSet(userStatusRef, {
-    state: "online",
-    lastChanged: Date.now(),
+  const handleConnected = onValue(connectedRef, (snap) => {
+    const connected = snap.val();
+    if (connected === false) {
+      return;
+    }
+
+    // Only set onDisconnect after confirming connection
+    onDisconnect(userStatusRef)
+      .set({ state: "offline", lastChanged: Date.now() })
+      .then(() => {
+        rtdbSet(userStatusRef, {
+          state: "online",
+          lastChanged: Date.now(),
+        });
+
+        // NOW set online in Firestore
+        setDoc(userDocRef, isOnlineForFirestore, { merge: true });
+      });
   });
 
   return () => {
-    setDoc(userDocRef, { online: false }, { merge: true }).catch(console.error);
+    handleConnected(); // unsubscribe from .info/connected
+    setDoc(userDocRef, isOfflineForFirestore, { merge: true }).catch(console.error);
     rtdbRemove(userStatusRef).catch(console.error);
   };
 }, [user]);
+
+
 useEffect(() => {
   if (!user || user.isAnonymous) return;
 
@@ -763,11 +785,12 @@ const handleAddToInventory = (item) => {
   const updatedInventory = [
     ...inventory,
     {
-      case: item.case || selectedCrate?.name || selectedWheel?.name || "Unknown",
-      item: item.item || item.name,
-      value: item.value,
-      rarity,
-    },
+  case: item.case || selectedCrate?.name || selectedWheel?.name || "Unknown",
+  item: item.item || item.name,
+  value: item.value,
+  rarity,
+  addedAt: new Date().toISOString(),
+},
   ];
 
   setXp(newXp);
@@ -782,19 +805,15 @@ const handleAddToInventory = (item) => {
 
 
   const handleSellFromInventory = (itemToSell) => {
-const updatedInventory = inventory.filter(
-  (item) =>
-    !(
-      item.item === itemToSell.item &&
-      item.value === itemToSell.value &&
-      item.case === itemToSell.case
-    )
-);
+  const updatedInventory = inventory.filter(
+    (item) => item.addedAt !== itemToSell.addedAt
+  );
   const newBalance = balance + itemToSell.value;
   setInventory(updatedInventory);
   setBalance(newBalance);
   saveUserData(newBalance, updatedInventory, opals);
 };
+
 
     
   const handleSellAll = () => {
