@@ -68,7 +68,7 @@ export default function InventoryPanel({ inventory, onSellItem, onSellAll }) {
                   </p>
                 </div>
                 <button
-                  onClick={() => onSellItem(index)}
+onClick={() => onSellItem(item)}
                   className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
                 >
                   Sell for ${item.value.toLocaleString()}

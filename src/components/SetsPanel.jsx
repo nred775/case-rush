@@ -40,7 +40,7 @@ const getBadgeDisplayName = (id) => {
 };
 
 
-export default function SetsPanel({ inventory, onTurnInSet, completedSets = [] }) {
+export default function SetsPanel({ inventory, onTurnInSet, completedSets = [], trackedSet, setTrackedSet }) {
   const [activeTab, setActiveTab] = useState("notCompleted");
 
   const hasItems = (required) => {
@@ -110,7 +110,19 @@ export default function SetsPanel({ inventory, onTurnInSet, completedSets = [] }
                     : "border-gray-700 bg-gray-900 opacity-60"
                 }`}
               >
-                <h2 className="text-2xl font-bold text-white mb-2">{set.name}</h2>
+<div className="flex items-center justify-between mb-2">
+  <h2 className="text-2xl font-bold text-white">{set.name}</h2>
+  <button
+    onClick={() => setTrackedSet(trackedSet === set.name ? null : set.name)}
+    className={`ml-2 px-3 py-1 rounded-full text-xs font-semibold border ${
+      trackedSet === set.name
+        ? "bg-purple-700 border-purple-400 text-white animate-pulse"
+        : "bg-gray-800 border-gray-500 text-gray-300"
+    }`}
+  >
+    {trackedSet === set.name ? "Tracking" : "Track"}
+  </button>
+</div>
 <div className="text-sm text-gray-300 mb-2">
   {set.requiredItems ? (
     <div className="flex flex-wrap gap-2">
@@ -148,6 +160,9 @@ export default function SetsPanel({ inventory, onTurnInSet, completedSets = [] }
     ? `🏅 Reward: ${getBadgeDisplayName(set.badge)} Badge`
     : `💠 Reward: ${set.reward} Opal${set.reward > 1 ? "s" : ""}`}
 </p>
+
+
+
 
 
                 {isComplete ? (

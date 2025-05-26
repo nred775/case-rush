@@ -3,8 +3,10 @@ import { useEffect, useState } from "react";
 import Confetti from "react-confetti";
 import { useWindowSize } from "@react-hook/window-size";
 import useCrateSounds from "./useCrateSounds";
+import sets from "../data/sets";
 
-export default function CrateOpening({ crate, value, onSell, onAdd, onBack, onDrawn, caseVolume, isMuted, overallVolume }) {
+
+export default function CrateOpening({ crate, value, onSell, onAdd, onBack, onDrawn, caseVolume, isMuted, overallVolume, trackedSet }) {
   const [opened, setOpened] = useState(false);
   const [prizeDone, setPrizeDone] = useState(false);
   const [highlighted, setHighlighted] = useState(false);
@@ -17,6 +19,13 @@ export default function CrateOpening({ crate, value, onSell, onAdd, onBack, onDr
   const { playLidOpen, playBigPrize } = useCrateSounds(caseVolume, isMuted, overallVolume);
 
   const topValue = Math.max(...crate.items.map((item) => item.value));
+
+const isTrackedItem = (itemName) => {
+  if (!trackedSet) return false;
+  const set = sets.find(s => s.name === trackedSet);
+  return set?.requiredItems?.some(req => req.name === itemName);
+};
+
 
   useEffect(() => {
     const items = crate.items;
@@ -210,9 +219,12 @@ export default function CrateOpening({ crate, value, onSell, onAdd, onBack, onDr
                     }}
                     className="absolute w-full flex flex-col items-center z-30 pointer-events-none"
                   >
-                    <span className="text-white text-base sm:text-lg font-semibold drop-shadow-md">
+                    <span className={`text-base sm:text-lg font-semibold drop-shadow-md ${
+  isTrackedItem(item?.name) ? "text-purple-400 animate-pulse" : "text-white"
+}`}>
   {item?.name}
 </span>
+
 
                   </motion.div>
                 )}

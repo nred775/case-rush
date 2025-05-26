@@ -154,6 +154,7 @@ const [openCount, setOpenCount] = useState(0);
 const [macroButtonPos, setMacroButtonPos] = useState({ top: "50%", left: "50%" });
 const [isUILocked, setIsUILocked] = useState(false); // 👈 NEW
 const [loginBlocked, setLoginBlocked] = useState(false);
+const [trackedSet, setTrackedSet] = useState(null);
 
 
 
@@ -187,7 +188,24 @@ useEffect(() => {
     rtdbRemove(userStatusRef).catch(console.error);
   };
 }, [user]);
+useEffect(() => {
+  if (!user || user.isAnonymous) return;
 
+  const handleUnload = async () => {
+    try {
+      const userDocRef = doc(db, "users", user.uid);
+      await setDoc(userDocRef, { online: false }, { merge: true });
+    } catch (err) {
+      console.error("Error setting online to false on unload:", err);
+    }
+  };
+
+  window.addEventListener("beforeunload", handleUnload);
+
+  return () => {
+    window.removeEventListener("beforeunload", handleUnload);
+  };
+}, [user]);
 
 
 useEffect(() => {
@@ -763,15 +781,22 @@ const handleAddToInventory = (item) => {
 
 
 
-  const handleSellFromInventory = (index) => {
-    const item = inventory[index];
-    const updatedInventory = inventory.filter((_, i) => i !== index);
-    const newBalance = balance + item.value;
-    setInventory(updatedInventory);
-    setBalance(newBalance);
-    saveUserData(newBalance, updatedInventory, opals);
+  const handleSellFromInventory = (itemToSell) => {
+const updatedInventory = inventory.filter(
+  (item) =>
+    !(
+      item.item === itemToSell.item &&
+      item.value === itemToSell.value &&
+      item.case === itemToSell.case
+    )
+);
+  const newBalance = balance + itemToSell.value;
+  setInventory(updatedInventory);
+  setBalance(newBalance);
+  saveUserData(newBalance, updatedInventory, opals);
+};
 
-  };
+    
   const handleSellAll = () => {
   const totalSellValue = inventory.reduce((sum, item) => sum + item.value, 0);
   const newBalance = balance + totalSellValue;
@@ -1142,7 +1167,8 @@ if (!user) return (
             path="/"
             element={
               !selectedCrate ? (
-                <CrateShop balance={balance} onOpenCrate={handleOpenCrate} />
+                <CrateShop balance={balance} onOpenCrate={handleOpenCrate}   trackedSet={trackedSet}
+ />
               ) : (
                 <CrateOpening
   crate={selectedCrate}
@@ -1153,6 +1179,8 @@ if (!user) return (
   caseVolume={caseVolume}
   isMuted={isMuted}
   overallVolume={overallVolume}
+  trackedSet={trackedSet}
+  
 />
 
               )
@@ -1235,6 +1263,8 @@ if (!user) return (
     <SetsPanel
       inventory={inventory}
       completedSets={completedSets}
+      trackedSet={trackedSet}
+  setTrackedSet={setTrackedSet}
       onTurnInSet={(set) => {
   let newInventory = [...inventory];
 
@@ -1358,6 +1388,8 @@ if (!user) return (
                   balance={balance}
                   onPick={(wheel) => setSelectedWheel(wheel)}
                     isUILocked={isUILocked} // ✅ pass this in
+                      trackedSet={trackedSet}
+
 
 onSpend={handleBuyWheel}
         macroBlocked={macroBlocked} // 👈 add this
@@ -1374,6 +1406,7 @@ onSpend={handleBuyWheel}
   caseVolume={caseVolume}
   isMuted={isMuted}
   overallVolume={overallVolume}
+  trackedSet={trackedSet}
 />
 
               )

@@ -4,12 +4,14 @@ import useCrateSounds from "./useCrateSounds";
 import Confetti from "react-confetti";
 import { motion } from "framer-motion";
 import { useWindowSize } from "@react-hook/window-size";
+import sets from "../data/sets";
+
 
 
 const bigWinAudio = new Audio("/sounds/rare-sparkle.mp3");
 const tickAudio = new Audio("/sounds/tick.mp3");
 
-export default function WheelOpening({ wheel, onSell, onAdd, onSpend, onBack, tickVolume, caseVolume, isMuted, overallVolume }) {
+export default function WheelOpening({ wheel, onSell, onAdd, onSpend, onBack, tickVolume, caseVolume, isMuted, overallVolume, trackedSet }) {
 
 
   const [rotation, setRotation] = useState(0);
@@ -35,6 +37,13 @@ const WHEEL_SIZE = isMobile ? Math.min(width * 0.9, 360) : 600;
     if (ratio <= 1.0) return "#3b82f6";
     return "#9333ea";
   };
+
+const isTrackedItem = (itemName) => {
+  if (!trackedSet) return false;
+  const set = sets.find(s => s.name === trackedSet);
+  return set?.requiredItems?.some(req => req.name === itemName);
+};
+
 
   const spin = () => {
   if (!wheel || spinning) return;
@@ -175,29 +184,29 @@ const WHEEL_SIZE = isMobile ? Math.min(width * 0.9, 360) : 600;
                     transition={{ duration: 0.4 }}
                   >
                     <path
-                      d={pathData}
-                      fill={getSegmentColor(item.value)}
-                      stroke="#111"
-                      strokeWidth="0.75"
-                      style={{
-                        filter:
-  item.value === topPrizeValue
-    ? "drop-shadow(0 0 8px #fff8dc) drop-shadow(0 0 16px #ffef9f) drop-shadow(0 0 32px #fff5b1)"
-    : "none",
+  d={pathData}
+  fill={getSegmentColor(item.value)}
+  stroke={isTrackedItem(item.name) ? "#000000" : "#ffffff"}
+  strokeWidth="0.75"
+  style={{
+    filter:
+      item.value === topPrizeValue
+        ? "drop-shadow(0 0 8px #fff8dc) drop-shadow(0 0 16px #ffef9f) drop-shadow(0 0 32px #fff5b1)"
+        : "none",
+    transition: "filter 0.3s ease",
+  }}
+/>
 
-
-                        transition: "filter 0.3s ease",
-                      }}
-                    />
 
                     <text
   x={textX}
   y={textY}
   textAnchor="middle"
   alignmentBaseline="middle"
-  fill={resultIndex === i ? "#111827" : "#1f2937"}  // dark grays
+  fill={isTrackedItem(item.name) ? "#c084fc" : (resultIndex === i ? "#111827" : "#1f2937")}
+  className={isTrackedItem(item.name) ? "animate-pulse" : ""}
   fontSize={resultIndex === i ? "17" : "16"}
-  stroke="white"
+  stroke={isTrackedItem(item.name) ? "#000000" : "white"}  // 🔁 right here
   strokeWidth="0.75"
   paintOrder="stroke"
   style={{
@@ -208,6 +217,8 @@ const WHEEL_SIZE = isMobile ? Math.min(width * 0.9, 360) : 600;
 >
   {item.name}
 </text>
+
+
 
                   </motion.g>
                 );
