@@ -127,19 +127,21 @@ const isTrackedItem = (itemName) => {
 
       <div className="relative mb-4" style={{ width: WHEEL_SIZE, height: WHEEL_SIZE }}>
         <div
-          className="absolute top-0 left-1/2 z-30 pointer-events-none"
-          style={{ transform: "translateX(-50%)" }}
-        >
-          <div
-            className="w-0 h-0 border-l-[24px] border-r-[24px] border-t-[44px]
-              border-l-transparent border-r-transparent border-t-yellow-400 
-              animate-pulse-slow"
-            style={{
-              borderTopColor: "#facc15",
-              filter: "drop-shadow(0 0 3px #000) drop-shadow(0 3px 4px #000)",
-            }}
-          />
-        </div>
+  className="absolute top-0 left-0 w-full flex justify-center z-30 pointer-events-none"
+style={{ transform: "translateX(5.5px)" }}
+>
+
+  <div
+    className="w-0 h-0 border-l-[12px] border-r-[12px] border-t-[36px]
+      border-l-transparent border-r-transparent border-t-pink-500 
+      animate-pulse-slow"
+    style={{
+      borderTopColor: "#ec4899",
+      filter: "drop-shadow(0 0 5px #ec4899) drop-shadow(0 3px 6px #ec4899)",
+    }}
+  />
+</div>
+
 
         <motion.div
   className="rounded-full overflow-hidden border-[6px] border-gray-900 shadow-[0_0_20px_rgba(0,0,0,0.8),0_0_40px_rgba(75,85,99,0.7)]"

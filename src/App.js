@@ -33,6 +33,7 @@ import bannedUsernames from "./data/bannedUsernames";
 import NotificationsPanel from "./components/NotificationsPanel";
 import ChatBox from "./components/ChatBox";
 import GameIdeas from "./components/GameIdeas";
+import { get } from "firebase/database";
 
 
 
@@ -198,36 +199,16 @@ useEffect(() => {
         });
 
         // NOW set online in Firestore
-        setDoc(userDocRef, isOnlineForFirestore, { merge: true });
       });
   });
 
   return () => {
     handleConnected(); // unsubscribe from .info/connected
-    setDoc(userDocRef, isOfflineForFirestore, { merge: true }).catch(console.error);
     rtdbRemove(userStatusRef).catch(console.error);
   };
 }, [user]);
 
 
-useEffect(() => {
-  if (!user || user.isAnonymous) return;
-
-  const handleUnload = async () => {
-    try {
-      const userDocRef = doc(db, "users", user.uid);
-      await setDoc(userDocRef, { online: false }, { merge: true });
-    } catch (err) {
-      console.error("Error setting online to false on unload:", err);
-    }
-  };
-
-  window.addEventListener("beforeunload", handleUnload);
-
-  return () => {
-    window.removeEventListener("beforeunload", handleUnload);
-  };
-}, [user]);
 
 
 useEffect(() => {
@@ -455,7 +436,7 @@ useEffect(() => {
     equippedAvatar: full.equippedAvatar,
     ownedWorkers: full.ownedWorkers,
     profileWorkers: full.profileWorkers,
-    online: full.online || false,
+online: false, // temp default, we’ll subscribe below
   };
 
   return updated;
@@ -482,15 +463,14 @@ useEffect(() => {
   const unsub = onAuthStateChanged(auth, async (currentUser) => {
   if (currentUser) {
     // 🔒 Check if already online from a different session
-    const userDoc = await getDoc(doc(db, "users", currentUser.uid));
-    if (userDoc.exists()) {
-      const isOnline = userDoc.data().online;
-      if (isOnline) {
-        setLoginBlocked(true);
-        await signOut(auth);
-        return;
-      }
-    }
+    const statusSnap = await get(ref(rtdb, `status/${currentUser.uid}`));
+const isOnline = statusSnap.exists() && statusSnap.val().state === "online";
+if (isOnline) {
+  setLoginBlocked(true);
+  await signOut(auth);
+  return;
+}
+
 
     // Full reset
     setBalance(0);
@@ -522,8 +502,8 @@ useEffect(() => {
   const loadFriendsOnce = async () => {
     if (!user || user.isAnonymous) return;
 
-    const ref = collection(db, "users", user.uid, "friends");
-    const snap = await getDocs(ref);
+const friendsRef = collection(db, "users", user.uid, "friends");
+const snap = await getDocs(friendsRef);
 
     const results = [];
 
@@ -547,11 +527,23 @@ useEffect(() => {
         equippedAvatar: full.equippedAvatar,
         ownedWorkers: full.ownedWorkers,
         profileWorkers: full.profileWorkers,
-        online: full.online || false,
+online: false, // temp default, we’ll subscribe below
       });
     }
 
     setFriends(results);
+    results.forEach(friend => {
+  const statusRef = ref(rtdb, `status/${friend.uid}`);
+  onValue(statusRef, (snap) => {
+    const status = snap.val();
+    setFriends((prev) =>
+      prev.map((f) =>
+        f.uid === friend.uid ? { ...f, online: status?.state === "online" } : f
+      )
+    );
+  });
+});
+
   };
 
   loadFriendsOnce();
@@ -1040,7 +1032,10 @@ if (!user) return (
     <button
   onClick={async () => {
     if (user && !user.isAnonymous) {
-      await setDoc(doc(db, "users", user.uid), { online: false }, { merge: true });
+await rtdbSet(ref(rtdb, `status/${user.uid}`), {
+  state: "offline",
+  lastChanged: Date.now(),
+});
     }
     await signOut(auth);
     window.location.reload(); // 🧼 hard refresh
