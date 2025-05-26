@@ -477,7 +477,6 @@ useEffect(() => {
     setUser(null);
   }
 });
-s
 
   return () => unsub();
 }, []);
