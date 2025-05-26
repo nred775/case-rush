@@ -162,7 +162,8 @@ const [openCount, setOpenCount] = useState(() => {
 });
 const [macroThreshold, setMacroThreshold] = useState(() => {
   const stored = localStorage.getItem("macroThreshold");
-  return stored ? parseInt(stored, 10) : Math.floor(Math.random() * 3) + 3;
+  return stored ? parseInt(stored, 10) : Math.floor(Math.random() * 11) + 30; // old range: 30–40
+
 });
 
 const [macroButtonPos, setMacroButtonPos] = useState({ top: "50%", left: "50%" });
@@ -1868,7 +1869,7 @@ localStorage.setItem("macroBlocked", "false");
   setMacroCheckVisible(false);
   setIsUILocked(false);
   localStorage.setItem("macroCheckVisible", "false");
-  const newThreshold = Math.floor(Math.random() * 3) + 3;
+const newThreshold = Math.floor(Math.random() * 11) + 30;
   localStorage.setItem("openCount", "0");
   localStorage.setItem("macroThreshold", newThreshold);
   setOpenCount(0);
