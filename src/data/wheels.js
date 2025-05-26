@@ -754,12 +754,12 @@ const wheels = [
     emoji: "📊",
     cost: 30000,
     items: [
-      { name: "🖊️ Luxury Pen Set", value: 10600 },
-      { name: "📘 Executive Notebook", value: 16000 },
+      { name: "🖊️ Luxury Pen Set", value: 600 },
+      { name: "📘 Executive Notebook", value: 160 },
       { name: "🪑 Ergonomic Command Chair", value: 21400 },
       { name: "🖥️ Quad Monitor Setup", value: 26600 },
       { name: "📦 Strategy Suite Kit", value: 32000 },
-      { name: "💼 Business Elite Package", value: 37400 }
+      { name: "💼 Business Elite Package", value: 100000 }
     ],
     style: {
       gradient: "from-amber-600 via-yellow-400 to-amber-600",
