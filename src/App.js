@@ -598,11 +598,11 @@ const loadUserData = async (user) => {
 
 const getXpFromRarity = (rarity) => {
   switch (rarity) {
-    case "common": return 1;
-    case "rare": return 5;
-    case "epic": return 10;
-    case "legendary": return 25;
-    case "mythic": return 50;
+    case "common": return 5;
+    case "rare": return 10;
+    case "epic": return 25;
+    case "legendary": return 50;
+    case "mythic": return 100;
     default: return 0;
   }
 };
