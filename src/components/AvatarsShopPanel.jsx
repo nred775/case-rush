@@ -10,8 +10,10 @@ export default function AvatarsShopPanel({ ownedAvatars, equippedAvatar, opals, 
 {[...avatars]
   .filter((avatar) => {
   const isLocked = avatar.lockedLevel && !ownedAvatars.includes(avatar.name);
-  return !isLocked;
+  const isGridOnly = avatar.gridUnlock && !ownedAvatars.includes(avatar.name);
+  return !isLocked && !isGridOnly;
 })
+
 
   .sort((a, b) => a.cost - b.cost)
   .map((avatar, index) => {

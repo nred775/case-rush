@@ -211,60 +211,61 @@ const sets = [
     reward: 10
   },
    {
-    name: "Elite Trial 1",
-    requiredItems: [
-      { name: "🔒 Locked Abyss Lockbox", rarity: "legendary", source: "Vault of the Void" },
-      { name: "🎖️ First Edition Stock Stamp", rarity: "legendary", source: "Hall of Riches" },
-      { name: "🪞 Reflective Nothing Tag", rarity: "legendary", source: "Vault of the Void" },
-      { name: "👑 Imperial Holder Case", rarity: "legendary", source: "Hall of Riches" },
-      { name: "🧳 Endless Loop Case", rarity: "legendary", source: "Vault of the Void" },
-      { name: "📜 Forgotten Treasure Deed", rarity: "epic", source: "Hall of Riches" },
-      { name: "🏛️ Hall of Riches Seal", rarity: "legendary", source: "Hall of Riches" },
-      { name: "📄 Blank Entry Form", rarity: "epic", source: "Vault of the Void" }
-    ],
-    reward: 25
-  },
-  {
-    name: "Elite Trial 2",
-    requiredItems: [
-      { name: "🎫 Exclusive Concert Passes", rarity: "legendary", source: "World Tour" },
-      { name: "🖥️ Dev Tower Build", rarity: "common", source: "Code Black" },
-      { name: "👾 Live Coding Arena Access", rarity: "mythic", source: "Code Black" },
-      { name: "🌎 Global Explorer Experience", rarity: "legendary", source: "World Tour" },
-      { name: "💾 Cloud Datacenter Credits", rarity: "common", source: "Code Black" },
-      { name: "🧠 AI Research Workstation", rarity: "common", source: "Code Black" },
-      { name: "📦 Cultural Experience Kit", rarity: "legendary", source: "World Tour" },
-      { name: "🛫 First-Class Ticket Pair", rarity: "legendary", source: "World Tour" }
-    ],
-    reward: 25
-  },
-  {
-    name: "Elite Trial 3",
-    requiredItems: [
-      { name: "🧑‍🚀 Zero-Gravity Training", rarity: "common", source: "Starlight Run" },
-      { name: "🪙 Golden Paradox Coin", rarity: "epic", source: "Golden Exit" },
-      { name: "🌠 Astronaut Night Tour", rarity: "common", source: "Starlight Run" },
-      { name: "🛰️ Suborbital Flight Ticket", rarity: "common", source: "Starlight Run" },
-      { name: "🎓 Winner's Envelope", rarity: "legendary", source: "Golden Exit" },
-      { name: "🫄 Clean Slate Plaque", rarity: "epic", source: "Golden Exit" },
-      { name: "🏁 Golden Exit Portal", rarity: "mythic", source: "Golden Exit" },
-      { name: "🪐 Edge of Orbit Access", rarity: "mythic", source: "Starlight Run" }
-    ],
-    reward: 25
-  },
-  {
-    name: "Elite Trial 4",
-    requiredItems: [
-      { name: "🪪 Luxury Owner’s License", rarity: "legendary", source: "The Millionaire's Mark" },
-      { name: "🛋️ Designer Suite Package", rarity: "common", source: "Skyline Pulse" },
-      { name: "🎩 Supreme Status Hat", rarity: "legendary", source: "The Millionaire's Mark" },
-      { name: "🏙️ Penthouse Weekend Stay", rarity: "common", source: "Skyline Pulse" },
-      { name: "🧖 Full Spa Immersion", rarity: "legendary", source: "Skyline Pulse" },
-      { name: "📸 Helicopter Photo Tour", rarity: "common", source: "Skyline Pulse" },
-      { name: "💲 The Millionaire’s Emblem", rarity: "mythic", source: "The Millionaire's Mark" }
-    ],
-    reward: 25
-  },
+  name: "Elite Trial 1",
+  requiredItems: [
+    { name: "🔒 Locked Abyss Lockbox", rarity: "legendary", source: "🕳️ Vault of the Void" },
+    { name: "🎖️ First Edition Stock Stamp", rarity: "legendary", source: "🏛️ Hall of Riches" },
+    { name: "🪞 Reflective Nothing Tag", rarity: "legendary", source: "🕳️ Vault of the Void" },
+    { name: "👑 Imperial Holder Case", rarity: "legendary", source: "🏛️ Hall of Riches" },
+    { name: "🧳 Endless Loop Case", rarity: "legendary", source: "🕳️ Vault of the Void" },
+    { name: "📜 Forgotten Treasure Deed", rarity: "epic", source: "🏛️ Hall of Riches" },
+    { name: "🏛️ Hall of Riches Seal", rarity: "legendary", source: "🏛️ Hall of Riches" },
+    { name: "📄 Blank Entry Form", rarity: "epic", source: "🕳️ Vault of the Void" }
+  ],
+  reward: 25
+},
+{
+  name: "Elite Trial 2",
+  requiredItems: [
+    { name: "🎫 Exclusive Concert Passes", rarity: "legendary", source: "🌎 World Tour" },
+    { name: "🖥️ Dev Tower Build", rarity: "common", source: "💻 Code Black" },
+    { name: "👾 Live Coding Arena Access", rarity: "mythic", source: "💻 Code Black" },
+    { name: "🌎 Global Explorer Experience", rarity: "legendary", source: "🌎 World Tour" },
+    { name: "💾 Cloud Datacenter Credits", rarity: "common", source: "💻 Code Black" },
+    { name: "🧠 AI Research Workstation", rarity: "common", source: "💻 Code Black" },
+    { name: "📦 Cultural Experience Kit", rarity: "legendary", source: "🌎 World Tour" },
+    { name: "🛫 First-Class Ticket Pair", rarity: "legendary", source: "🌎 World Tour" }
+  ],
+  reward: 25
+},
+{
+  name: "Elite Trial 3",
+  requiredItems: [
+    { name: "🧑‍🚀 Zero-Gravity Training", rarity: "common", source: "🪐 Starlight Run" },
+    { name: "🪙 Golden Paradox Coin", rarity: "epic", source: "🚪 Golden Exit" },
+    { name: "🌠 Astronaut Night Tour", rarity: "common", source: "🪐 Starlight Run" },
+    { name: "🛰️ Suborbital Flight Ticket", rarity: "common", source: "🪐 Starlight Run" },
+    { name: "🎓 Winner's Envelope", rarity: "legendary", source: "🚪 Golden Exit" },
+    { name: "🫄 Clean Slate Plaque", rarity: "epic", source: "🚪 Golden Exit" },
+    { name: "🏁 Golden Exit Portal", rarity: "mythic", source: "🚪 Golden Exit" },
+    { name: "🪐 Edge of Orbit Access", rarity: "mythic", source: "🪐 Starlight Run" }
+  ],
+  reward: 25
+},
+{
+  name: "Elite Trial 4",
+  requiredItems: [
+    { name: "🪪 Identity Restoration Kit", rarity: "mythic", source: "🧠 Dream Archives" },
+    { name: "🔮 Memory Vault Seal", rarity: "legendary", source: "🧠 Dream Archives" },
+    { name: "💽 Experimental Data Core", rarity: "legendary", source: "🔬 Mind Lab Prime" },
+    { name: "🧬 Genetic Simulation Override", rarity: "epic", source: "🔬 Mind Lab Prime" },
+    { name: "🧠 Consciousness Uplink Badge", rarity: "legendary", source: "🔬 Mind Lab Prime" },
+    { name: "🗝️ Dream Entry Keycard", rarity: "legendary", source: "🧠 Dream Archives" },
+    { name: "🛏️ Sleepcycle Token", rarity: "epic", source: "🧠 Dream Archives" },
+    { name: "📊 Behavior Chart Fragment", rarity: "legendary", source: "🔬 Mind Lab Prime" }
+  ],
+  reward: 25
+},
   {
   name: "Mythic Completionist",
   requiredItems: [
@@ -325,8 +326,7 @@ const sets = [
   ],
   reward: 0,
   badge: "mythiccompletionist"
-}
-
+},
 ];
 
 

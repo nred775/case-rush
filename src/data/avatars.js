@@ -142,7 +142,14 @@ const avatars = [
   headshot: "/avatars/sir_hopsalot_head.png",
   description: "swamp-born and overly dramatic.",
 },
-
+{
+  name: "Boom Buddy",
+  cost: 0,
+  image: "/avatars/boom_buddy.png",
+  headshot: "/avatars/boom_buddy_head.png",
+  description: "unlocked by surviving explosions.",
+  gridUnlock: true // 🔥 Add this flag
+},
 
 
 ];

@@ -4,6 +4,15 @@ import { db } from "../firebase";
 
 const generateGrid = (level) => {
   const grid = Array(25).fill(null).map(() => {
+    // 1 in 5 chance for Boom Buddy
+    // prevent Boom Buddy from spawning if already owned
+if (!window?.currentUserHasBoomBuddy && Math.random() < 1 / 1000) {
+  return {
+    revealed: false,
+    boomBuddy: true,
+  };
+}
+
     const isMoney = Math.random() < 0.5;
     let minMoney = 100, maxMoney = 500;
     let minOpals = 1, maxOpals = 3;
@@ -34,6 +43,7 @@ const generateGrid = (level) => {
   return grid;
 };
 
+
 const BombGrid = ({ user, balance, opals, setBalance, setOpals }) => {
   const [grid, setGrid] = useState(null);
   const [collected, setCollected] = useState({ money: 0, opals: 0 });
@@ -44,6 +54,8 @@ const BombGrid = ({ user, balance, opals, setBalance, setOpals }) => {
   const [bombHitIndex, setBombHitIndex] = useState(null);
   const [showCooldownMessage, setShowCooldownMessage] = useState(false);
   const [timeLeft, setTimeLeft] = useState("");
+  const [toastMessage, setToastMessage] = useState("");
+
 
   const checkCooldown = async () => {
     const ref = doc(db, "users", user.uid);
@@ -56,6 +68,9 @@ const BombGrid = ({ user, balance, opals, setBalance, setOpals }) => {
     if (now - lastTime >= 86400000) {
       setCooldown(false);
       setShowCooldownMessage(false);
+      const ownedAvatars = data?.ownedAvatars || [];
+window.currentUserHasBoomBuddy = ownedAvatars.includes("Boom Buddy");
+
       setGrid(generateGrid(user.level || 1));
     } else {
       setCooldown(true);
@@ -85,6 +100,20 @@ const handleReveal = async (index) => {
     setGrid(revealedGrid);
 
     const tile = revealedGrid[index];
+    if (tile.boomBuddy) {
+  const userRef = doc(db, "users", user.uid);
+  const userSnap = await getDoc(userRef);
+  const data = userSnap.data();
+  const ownedAvatars = data?.ownedAvatars || [];
+
+  if (!ownedAvatars.includes("Boom Buddy")) {
+    ownedAvatars.push("Boom Buddy");
+    await setDoc(userRef, { ownedAvatars }, { merge: true });
+setToastMessage("🔥 You unlocked Boom Buddy!");
+setTimeout(() => setToastMessage(""), 5000); // hide after 5 sec
+  }
+}
+
 
     if (tile.bomb) {
       setBombHitIndex(index);
@@ -97,6 +126,10 @@ setTimeout(() => {
   setShowCooldownMessage(true);
   setTimeLeft("24h 0m");
 }, 1000); // ⏱️ 1 second delay to show the bomb visually
+
+
+
+
 
 await setDoc(doc(db, "users", user.uid), {
   lastBombGameTime: Timestamp.fromMillis(now),
@@ -173,22 +206,30 @@ await setDoc(doc(db, "users", user.uid), {
     transition-transform duration-500 transform-gpu 
     ${tile.revealed ? 'rotate-y-180' : ''} 
     ${tile.revealed === true
-  ? tile.bomb
+  ? tile.boomBuddy
+    ? "bg-red-900 text-white shadow-[0_0_20px_rgba(255,0,0,0.6)] animate-pulse"
+  : tile.bomb
     ? `bg-red-700 text-white ${bombHitIndex === i ? 'animate-ping' : ''}`
-    : tile.reward === "$"
+  : tile.reward === "$"
     ? "bg-green-600 text-white shadow-[inset_0_0_10px_rgba(0,0,0,0.4),0_0_10px_rgba(34,197,94,0.5)]"
-    : "bg-blue-600 text-white shadow-[inset_0_0_10px_rgba(0,0,0,0.4),0_0_10px_rgba(59,130,246,0.5)]"
+  : "bg-blue-600 text-white shadow-[inset_0_0_10px_rgba(0,0,0,0.4),0_0_10px_rgba(59,130,246,0.5)]"
+
   : "bg-gray-900 text-gray-300 hover:bg-gray-800 shadow-[inset_0_0_8px_rgba(255,255,255,0.1)]"}
 
     }`}
 >
   {tile.revealed === true ? (
   <div className="transform rotate-y-180">
-    {tile.bomb ? "💣" : `${tile.reward}${tile.value}`}
+    {tile.bomb
+      ? "💣"
+      : tile.boomBuddy
+      ? <img src="/avatars/boom_buddy_head.png" alt="Boom Buddy" className="w-10 h-10 mx-auto" />
+      : `${tile.reward}${tile.value}`}
   </div>
 ) : (
   "❓"
 )}
+
 
 </button>
 
@@ -211,8 +252,21 @@ await setDoc(doc(db, "users", user.uid), {
           💥 BOOM! You hit the bomb!
         </div>
       )}
+      {toastMessage && (
+  <div
+    className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-fuchsia-700 via-purple-700 to-indigo-700 border-2 border-pink-400 text-white px-6 py-3 rounded-2xl shadow-[0_0_20px_rgba(255,0,255,0.6)] z-50 text-center text-lg font-bold animate-enter-bounce"
+    style={{
+      animation: "enterBounce 0.4s ease-out, glowPulse 1.5s ease-in-out infinite",
+    }}
+  >
+    {toastMessage}
+  </div>
+)}
+
+
     </div>
   );
+  
 };
 
 export default BombGrid;
