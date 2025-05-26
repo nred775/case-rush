@@ -443,30 +443,41 @@ useEffect(() => {
 
   useEffect(() => {
   const unsub = onAuthStateChanged(auth, async (currentUser) => {
-    if (currentUser) {
-    // Full reset
-setBalance(0);
-setInventory([]);
-setOpals(0);
-setOwnedAvatars([]);
-setEquippedAvatar("");
-setOwnedWorkers([]);
-setCompletedSets([]);
-setXp(0);
-setLevel(1);
-setClaimedRewards([]);
-setProfileWorkers([]);
-
-if (!currentUser.isAnonymous) {
-  await loadUserData(currentUser);
-}
-
-setUser(currentUser); // ⬅️ Move this AFTER loadUserData
-
-    } else {
-      setUser(null);
+  if (currentUser) {
+    // 🔒 Check if already online from a different session
+    const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+    if (userDoc.exists()) {
+      const isOnline = userDoc.data().online;
+      if (isOnline) {
+        setLoginBlocked(true);
+        await signOut(auth);
+        return;
+      }
     }
-  });
+
+    // Full reset
+    setBalance(0);
+    setInventory([]);
+    setOpals(0);
+    setOwnedAvatars([]);
+    setEquippedAvatar("");
+    setOwnedWorkers([]);
+    setCompletedSets([]);
+    setXp(0);
+    setLevel(1);
+    setClaimedRewards([]);
+    setProfileWorkers([]);
+
+    if (!currentUser.isAnonymous) {
+      await loadUserData(currentUser);
+    }
+
+    setUser(currentUser); // ⬅️ AFTER loadUserData
+  } else {
+    setUser(null);
+  }
+});
+s
 
   return () => unsub();
 }, []);
