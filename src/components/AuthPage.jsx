@@ -53,7 +53,9 @@ const handleAuth = async (e) => {
 
   try {
     await setPersistence(auth, browserSessionPersistence);
-    const userCred = await signInWithEmailAndPassword(auth, email, password);
+const userCred = isRegistering
+  ? await createUserWithEmailAndPassword(auth, email, password)
+  : await signInWithEmailAndPassword(auth, email, password);
     const tempUid = userCred.user.uid;
 
     try {
