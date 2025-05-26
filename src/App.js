@@ -629,8 +629,8 @@ const getXpFromRarity = (rarity) => {
     case "common": return 5;
     case "rare": return 10;
     case "epic": return 25;
-    case "legendary": return 50;
-    case "mythic": return 100;
+    case "legendary": return 250;
+    case "mythic": return 1000;
     default: return 0;
   }
 };

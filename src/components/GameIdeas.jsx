@@ -21,8 +21,8 @@ const GameIdeas = () => {
           <li>Common = +5 XP</li>
           <li>Rare = +10 XP</li>
           <li>Epic = +25 XP</li>
-          <li>Legendary = +50 XP</li>
-          <li>Mythic = +100 XP</li>
+          <li>Legendary = +250 XP</li>
+          <li>Mythic = +1000 XP</li>
         </ul>
       </div>
 
