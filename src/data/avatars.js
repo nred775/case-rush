@@ -1,0 +1,151 @@
+const avatars = [
+  {
+    name: "Lucky Duck",
+    cost: 100,
+    image: "/avatars/lucky_duck.png",
+    headshot: "/avatars/lucky_duck_head.png",
+    description: "born lucky.",
+  },
+  {
+  name: "Slick Vicky",
+  cost: 125,
+  image: "/avatars/slick_vicky.png",
+  headshot: "/avatars/slick_vicky_head.png",
+  description: "vinyl and vibes.",
+},
+{
+  name: "Roasty Toasty",
+  cost: 200,
+  image: "/avatars/roasty_toasty.png",
+  headshot: "/avatars/roasty_toasty_head.png",
+  description: "burns bread and egos.",
+},
+  {
+    name: "Neon Ninja",
+    cost: 50,
+    image: "/avatars/neon_ninja.png",
+    headshot: "/avatars/neon_ninja_head.png",
+    description: "strikes clean.",
+  },
+  {
+    name: "Cheddar Champ",
+    cost: 150,
+    image: "/avatars/cheddar_champ.png",
+    headshot: "/avatars/cheddar_champ_head.png",
+    description: "cheese secured.",
+  },
+  {
+    name: "Glitch Goblin",
+    cost: 125,
+    image: "/avatars/glitch_goblin.png",
+    headshot: "/avatars/glitch_goblin_head.png",
+    description: "bugged and proud.",
+  },
+  {
+    name: "Pixel Pirate",
+    cost: 150,
+    image: "/avatars/pixel_pirate.png",
+    headshot: "/avatars/pixel_pirate_head.png",
+    description: "loot or lag.",
+  },
+  {
+    name: "Cool Cat",
+    cost: 200,
+    image: "/avatars/cool_cat.png",
+    headshot: "/avatars/cool_cat_head.png",
+    description: "zero stress.",
+  },
+  {
+    name: "Byte Brawler",
+    cost: 75,
+    image: "/avatars/byte_brawler.png",
+    headshot: "/avatars/byte_brawler_head.png",
+    description: "fights in 8-bit.",
+  },
+  {
+    name: "Crypto Crab",
+    cost: 100,
+    image: "/avatars/crypto_crab.png",
+    headshot: "/avatars/crypto_crab_head.png",
+    description: "claws in crypto.",
+  },
+  {
+    name: "Bubble Bot",
+    cost: 100,
+    image: "/avatars/bubble_bot.png",
+    headshot: "/avatars/bubble_bot_head.png",
+    description: "squeaky clean.",
+  },
+  {
+    name: "Sneaker Sloth",
+    cost: 150,
+    image: "/avatars/sneaker_sloth.png",
+    headshot: "/avatars/sneaker_sloth_head.png",
+    description: "dripped out.",
+  },
+  {
+    name: "Drama Llama",
+    cost: 100,
+    image: "/avatars/drama_llama.png",
+    headshot: "/avatars/drama_llama_head.png",
+    description: "lives for chaos.",
+  },
+  {
+  name: "Bread Head",
+  cost: 240,
+  image: "/avatars/bread_head.png",
+  headshot: "/avatars/bread_head_head.png",
+  description: "toasted genius.",
+},
+{
+  name: "Grizzled Grump",
+  cost: 100,
+  image: "/avatars/grizzled_grump.png",
+  headshot: "/avatars/grizzled_grump_head.png",
+  description: "not in the mood.",
+},
+{
+  name: "Velocity Viper",
+  cost: 0,
+  lockedLevel: 60, // 🔥 add this line
+  image: "/avatars/level_60_avatar.png",
+  headshot: "/avatars/velocity_viper_head.png",
+  description: "earned at level 60.",
+},
+{
+  name: "Boss Hog",
+  cost: 0,
+  lockedLevel: 120, // 🔥 add this line
+  image: "/avatars/boss_hog.png",
+  headshot: "/avatars/boss_hog_head.png",
+  description: "Get off the game.",
+},
+{
+  name: "Beta Bandit",
+  cost: 0,
+  lockedLevel: 1000, // manually granted only
+  image: "/avatars/beta_bandit.png",
+  headshot: "/avatars/beta_bandit_head.png",
+  description: "Played before first update.",
+},
+{
+  name: "Synthwave Slicer",
+  cost: 150,
+  image: "/avatars/synthwave_slicer.png",
+  headshot: "/avatars/synthwave_slicer_head.png",
+  description: "slashes through timelines with neon precision.",
+},
+{
+  name: "Sir Hopsalot",
+  cost: 180,
+  image: "/avatars/sir_hopsalot.png",
+  headshot: "/avatars/sir_hopsalot_head.png",
+  description: "swamp-born and overly dramatic.",
+},
+
+
+
+];
+
+
+export default avatars;

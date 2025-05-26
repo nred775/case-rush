@@ -36,3 +36,55 @@
     transform: rotate(360deg);
   }
 }
+
+/* 🥇🥈🥉 Leaderboard Color Classes */
+.leaderboard-gold {
+  background-color: #1f1f0f;
+  border: 2px solid #facc15;
+}
+
+.leaderboard-silver {
+  background-color: #1f1f1f;
+  border: 2px solid #d1d5db;
+}
+
+.leaderboard-bronze {
+  background-color: #2a1a0f;
+  border: 2px solid #fdba74;
+}
+
+/* Optional: Hover glow for ranks 4+ */
+.hover-glow:hover {
+  border-color: #818cf8;
+  box-shadow: 0 0 12px rgba(129, 140, 248, 0.8);
+  transition: box-shadow 0.3s ease-in-out, border-color 0.3s ease-in-out;
+}
+
+/* 🏱 Fully custom scrollbar for crate prize overlay */
+.custom-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #f59e0b transparent;
+}
+
+.custom-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+  background-color: #f59e0b; /* amber-500 */
+  border-radius: 9999px;
+}
+
+/* ✨ Patterned background addition */
+.bg-pattern-radial {
+  background-image: radial-gradient(circle at 20% 20%, rgba(255, 0, 255, 0.08) 0%, transparent 30%),
+                    radial-gradient(circle at 80% 30%, rgba(0, 255, 255, 0.08) 0%, transparent 30%),
+                    radial-gradient(circle at 50% 80%, rgba(255, 255, 0, 0.08) 0%, transparent 30%);
+  background-repeat: repeat;
+  background-size: 600px 600px;
+}

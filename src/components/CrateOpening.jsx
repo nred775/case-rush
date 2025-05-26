@@ -4,7 +4,7 @@ import Confetti from "react-confetti";
 import { useWindowSize } from "@react-hook/window-size";
 import useCrateSounds from "./useCrateSounds";
 
-export default function CrateOpening({ crate, value, onSell, onAdd, onBack, onDrawn }) {
+export default function CrateOpening({ crate, value, onSell, onAdd, onBack, onDrawn, caseVolume, isMuted, overallVolume }) {
   const [opened, setOpened] = useState(false);
   const [prizeDone, setPrizeDone] = useState(false);
   const [highlighted, setHighlighted] = useState(false);
@@ -14,7 +14,7 @@ export default function CrateOpening({ crate, value, onSell, onAdd, onBack, onDr
   const [openedCrates, setOpenedCrates] = useState([false, false, false, false, false]);
   const [centerItem, setCenterItem] = useState(null);
   const [width, height] = useWindowSize();
-  const { playLidOpen } = useCrateSounds();
+  const { playLidOpen, playBigPrize } = useCrateSounds(caseVolume, isMuted, overallVolume);
 
   const topValue = Math.max(...crate.items.map((item) => item.value));
 
@@ -26,9 +26,10 @@ export default function CrateOpening({ crate, value, onSell, onAdd, onBack, onDr
     );
     fakes[2] = realItem;
     setDrawnItem(fakes);
-
+  
     if (onDrawn) onDrawn(realItem);
-  }, [crate, onDrawn]);
+  }, [crate.name]);
+  
 
   useEffect(() => {
     let shuffleCount = 0;
@@ -97,8 +98,8 @@ export default function CrateOpening({ crate, value, onSell, onAdd, onBack, onDr
 
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center relative overflow-hidden">
-      <style>
+<div className="min-h-screen bg-transparent text-white flex flex-col items-center justify-center relative overflow-hidden">
+<style>
         {`
         @keyframes goldPulse {
           0%, 100% {
@@ -143,7 +144,7 @@ export default function CrateOpening({ crate, value, onSell, onAdd, onBack, onDr
         </div>
       )}
 
-      <div className="flex gap-6 mt-4 mb-2">
+<div className="flex gap-1 sm:gap-4 mt-4 mb-2 justify-center">
         <AnimatePresence>
           {crateOrder.map((crateId, visualIndex) => {
             const isCenter = visualIndex === 2;
@@ -162,11 +163,25 @@ export default function CrateOpening({ crate, value, onSell, onAdd, onBack, onDr
                   rotateX: isCenter && highlighted ? 5 : 0,
                 }}
                 transition={{ type: "spring", stiffness: 220, damping: 16 }}
-                className={`w-32 h-32 sm:w-40 sm:h-40 rounded-xl relative z-20
-                  bg-gradient-to-br ${getGlow(item?.value, isTopPrize)}
-                  ${darkenLosers ? "opacity-40 grayscale" : ""}
-                  ${isCenter && prizeDone ? "ring-4 ring-yellow-400" : ""}
-                `}
+                className={`
+  w-[17vw] h-[17vw]
+  sm:w-32 sm:h-32 
+  md:w-36 md:h-36 
+  lg:w-40 lg:h-40 
+  relative z-20
+  rounded-[20px]
+  bg-gradient-radial from-black via-zinc-800 to-black
+  border-[3px] border-white/20
+  drop-shadow-indigo-glow
+  ${getGlow(item?.value, isTopPrize)}
+  ${darkenLosers ? "opacity-40 grayscale" : ""}
+  ${isCenter && prizeDone ? "ring-4 ring-yellow-400 scale-105" : ""}
+`}
+
+
+
+
+
                 style={{ perspective: "1000px" }}
               >
                 {isCenter && prizeDone && isTopPrize && (
@@ -187,17 +202,18 @@ export default function CrateOpening({ crate, value, onSell, onAdd, onBack, onDr
                       if (isCenter) {
                         setPrizeDone(true);
                         if (item?.value === topValue) {
-                          const audio = new Audio("/sounds/rare-sparkle.mp3");
-                          audio.volume = 0.5;
-                          audio.play();
+                          playBigPrize();
+
+
                         }
                       }
                     }}
                     className="absolute w-full flex flex-col items-center z-30 pointer-events-none"
                   >
-                    <span className="text-white text-xl sm:text-2xl font-semibold drop-shadow-md">
-                      {item?.name}
-                    </span>
+                    <span className="text-white text-base sm:text-lg font-semibold drop-shadow-md">
+  {item?.name}
+</span>
+
                   </motion.div>
                 )}
 
@@ -249,15 +265,22 @@ export default function CrateOpening({ crate, value, onSell, onAdd, onBack, onDr
            Sell for ${centerItem?.value.toLocaleString()}
 
           </motion.button>
-          <motion.button
+                    <motion.button
             whileTap={{ scale: 0.95 }}
             whileHover={{ scale: 1.05 }}
             transition={{ type: "spring", stiffness: 300 }}
-            onClick={() => onAdd(centerItem)}
+            onClick={() =>
+              onAdd({
+                item: centerItem?.name,
+                value: centerItem?.value,
+                case: crate.name,
+              })
+            }
             className="px-5 py-2 bg-blue-500 hover:bg-blue-600 rounded text-white font-semibold text-lg"
           >
             Add to Inventory
           </motion.button>
+
         </div>
       )}
     </div>

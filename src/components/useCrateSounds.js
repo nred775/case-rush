@@ -1,19 +1,23 @@
 import useSound from "use-sound";
 
-export default function useCrateSounds() {
+export default function useCrateSounds(baseVolume = 1, isMuted = false, overallVolume = 1) {
+  const effectiveVolume = isMuted ? 0 : baseVolume * overallVolume;
+
   const [playLidOpen] = useSound("/sounds/lid-open.mp3", {
-    volume: 0.3,
+    volume: effectiveVolume,
   });
 
-  const [playBGM, { stop: stopBGM }] = useSound("/sounds/background.mp3", {
-    loop: true,
-    volume: 0.2,
-    soundEnabled: true,
+  const [playBigPrize] = useSound("/sounds/rare-sparkle.mp3", {
+    volume: effectiveVolume,
+  });
+
+  const [playTick] = useSound("/sounds/tick.mp3", {
+    volume: effectiveVolume * 0.6, // 👈 Lower the tick volume specifically
   });
 
   return {
     playLidOpen,
-    playBGM,
-    stopBGM,
+    playBigPrize,
+    playTick,
   };
 }

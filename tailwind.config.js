@@ -1,6 +1,17 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
+  safelist: [
+    {
+      pattern: /bg-(gray|orange|purple|yellow|fuchsia)-(400|500)/,
+    },
+    {
+      pattern: /text-(gray|orange|purple|yellow|fuchsia)-(100|400)/,
+    },
+    {
+      pattern: /border-(gray|orange|purple|yellow|fuchsia)-400/,
+    }
+  ],
   theme: {
     extend: {
       keyframes: {
@@ -11,6 +22,12 @@ module.exports = {
       },
       animation: {
         'pulse-slow': 'pulse-slow 2s ease-in-out infinite',
+      },
+      dropShadow: {
+        'indigo-glow': '0 0 12px rgba(99, 102, 241, 0.7)',
+      },
+      backgroundImage: {
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
       },
     },
   },
