@@ -149,9 +149,22 @@ const [chatUser, setChatUser] = useState(null);
 const [userBadges, setUserBadges] = useState([]);
 const [toastMessage, setToastMessage] = useState("");
 const [friendToRemove, setFriendToRemove] = useState(null);
-const [macroCheckVisible, setMacroCheckVisible] = useState(false);
-const [macroBlocked, setMacroBlocked] = useState(false);
-const [openCount, setOpenCount] = useState(0);
+const [macroCheckVisible, setMacroCheckVisible] = useState(() => {
+  const stored = localStorage.getItem("macroCheckVisible");
+  return stored === "true";
+});
+const [macroBlocked, setMacroBlocked] = useState(() => {
+  return localStorage.getItem("macroBlocked") === "true";
+});
+const [openCount, setOpenCount] = useState(() => {
+  const stored = localStorage.getItem("openCount");
+  return stored ? parseInt(stored, 10) : 0;
+});
+const [macroThreshold, setMacroThreshold] = useState(() => {
+  const stored = localStorage.getItem("macroThreshold");
+  return stored ? parseInt(stored, 10) : Math.floor(Math.random() * 3) + 3;
+});
+
 const [macroButtonPos, setMacroButtonPos] = useState({ top: "50%", left: "50%" });
 const [isUILocked, setIsUILocked] = useState(false); // 👈 NEW
 const [loginBlocked, setLoginBlocked] = useState(false);
@@ -687,9 +700,11 @@ const getLevelFromXp = (xp) => {
 
   };
 const triggerMacroCheck = () => {
-  setMacroBlocked(true);
+setMacroBlocked(true);
+localStorage.setItem("macroBlocked", "true");
   setMacroCheckVisible(true);
-  setIsUILocked(true); // 👈 lock everything
+  setIsUILocked(true);
+  localStorage.setItem("macroCheckVisible", "true");
   setMacroButtonPos({
     top: `${Math.random() * 70 + 10}%`,
     left: `${Math.random() * 70 + 10}%`,
@@ -697,14 +712,20 @@ const triggerMacroCheck = () => {
 };
 
 
+
   const handleOpenCrate = (crate) => {
   if (macroBlocked) return;
 
   setOpenCount((prev) => {
-    const next = prev + 1;
-if (next % 30 === 0) triggerMacroCheck();
-    return next;
-  });
+  const next = prev + 1;
+  localStorage.setItem("openCount", next);
+  if (next >= macroThreshold) {
+    triggerMacroCheck();
+  }
+  return next;
+});
+
+
 
   if (balance >= crate.cost) {
     const rarity = getRarity(crate.cost);
@@ -727,7 +748,7 @@ const handleBuyWheel = (wheelCost) => {
 
   setOpenCount((prev) => {
     const next = prev + 1;
-if (next % 30 === 0) triggerMacroCheck();
+if (next % 5 === 0) triggerMacroCheck();
     return next;
   });
 
@@ -1841,11 +1862,21 @@ badges={selectedProfileUser.badges || []}
 </>
 {macroCheckVisible && (
   <button
-    onClick={() => {
-      setMacroBlocked(false);
-      setMacroCheckVisible(false);
-      setIsUILocked(false); // ✅ unlock all buttons
-    }}
+  onClick={() => {
+setMacroBlocked(false);
+localStorage.setItem("macroBlocked", "false");
+  setMacroCheckVisible(false);
+  setIsUILocked(false);
+  localStorage.setItem("macroCheckVisible", "false");
+  const newThreshold = Math.floor(Math.random() * 3) + 3;
+  localStorage.setItem("openCount", "0");
+  localStorage.setItem("macroThreshold", newThreshold);
+  setOpenCount(0);
+  setMacroThreshold(newThreshold);
+}}
+
+
+
 
     style={{
       position: "absolute",
