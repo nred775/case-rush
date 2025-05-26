@@ -88,12 +88,14 @@ ${isTracked ? "ring-4 ring-purple-400 shadow-[0_0_25px_rgba(192,132,252,1)] anim
                 group z-0 flex flex-col items-center text-center
               `}
               onClick={(e) => {
-                if (isUILocked) return;
-                if (e.target.tagName !== "BUTTON" && canAfford) {
-                  onSpend?.(wheel.cost);
-                  onPick?.(wheel);
-                }
-              }}
+  const hardBlocked = localStorage.getItem("macroBlocked") === "true";
+  if (isUILocked || hardBlocked) return;
+  if (e.target.tagName !== "BUTTON" && canAfford) {
+    onSpend?.(wheel.cost);
+    onPick?.(wheel);
+  }
+}}
+
             >
               <div className={`${canAfford ? "" : "opacity-50"} w-full flex flex-col items-center`}>
                 {/* Favorite Star */}

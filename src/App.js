@@ -162,10 +162,9 @@ const [openCount, setOpenCount] = useState(() => {
 });
 const [macroThreshold, setMacroThreshold] = useState(() => {
   const stored = localStorage.getItem("macroThreshold");
-  return stored ? parseInt(stored, 10) : Math.floor(Math.random() * 3) + 3; // new range: 3–5
-
-
+  return stored ? parseInt(stored, 10) : Math.floor(Math.random() * 11) + 25;
 });
+
 
 const [macroButtonPos, setMacroButtonPos] = useState({ top: "50%", left: "50%" });
 const [isUILocked, setIsUILocked] = useState(false); // 👈 NEW
@@ -746,11 +745,15 @@ localStorage.setItem("macroBlocked", "true");
 };
 
 const handleBuyWheel = (wheelCost) => {
-  if (macroBlocked) return;
+  const currentBlocked = localStorage.getItem("macroBlocked") === "true";
+  if (currentBlocked || macroBlocked) return;
 
   setOpenCount((prev) => {
     const next = prev + 1;
-if (next % 5 === 0) triggerMacroCheck();
+    localStorage.setItem("openCount", next);
+    if (next >= macroThreshold) {
+      triggerMacroCheck();
+    }
     return next;
   });
 
@@ -766,6 +769,7 @@ if (next % 5 === 0) triggerMacroCheck();
 
   saveUserData(newBalance, inventory, opals, ownedAvatars, equippedAvatar, ownedWorkers, completedSets, newXp, newLevel);
 };
+
 
 
 
@@ -1870,7 +1874,7 @@ localStorage.setItem("macroBlocked", "false");
   setMacroCheckVisible(false);
   setIsUILocked(false);
   localStorage.setItem("macroCheckVisible", "false");
-const newThreshold = Math.floor(Math.random() * 3) + 3;
+const newThreshold = Math.floor(Math.random() * 11) + 25;
   localStorage.setItem("openCount", "0");
   localStorage.setItem("macroThreshold", newThreshold);
   setOpenCount(0);
