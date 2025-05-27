@@ -1,5 +1,5 @@
 // src/components/AuthPage.jsx
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -47,6 +47,14 @@ const AuthPage = ({ onAuth, setLoginBlocked, loginBlocked }) => {
   const [blockedMessage, setBlockedMessage] = useState("");
 
 
+const loginBlockedRef = useRef(false);
+
+useEffect(() => {
+  loginBlockedRef.current = loginBlocked;
+}, [loginBlocked]);
+
+
+
 const handleAuth = async (e) => {
   e.preventDefault();
   setError("");
@@ -73,11 +81,12 @@ setBlockedMessage("You are already logged in elsewhere.");
 
     } catch (docErr) {
   console.error("❌ Failed to read user doc:", docErr);
-  if (loginBlocked) return; // 🛑 Already handled in App.js
+  if (loginBlockedRef.current) return; // ✅ Stop if already blocked
   await signOut(auth);
   setError("Could not verify account status. Try again.");
   return;
 }
+
 
 
     // ✅ If registering, create user doc
