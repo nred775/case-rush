@@ -72,11 +72,13 @@ setBlockedMessage("You are already logged in elsewhere.");
 }
 
     } catch (docErr) {
-      console.error("❌ Failed to read user doc:", docErr);
-      await signOut(auth);
-      setError("Could not verify account status. Try again.");
-      return;
-    }
+  console.error("❌ Failed to read user doc:", docErr);
+  if (loginBlocked) return; // 🛑 Already handled in App.js
+  await signOut(auth);
+  setError("Could not verify account status. Try again.");
+  return;
+}
+
 
     // ✅ If registering, create user doc
     if (isRegistering) {
