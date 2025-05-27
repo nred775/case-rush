@@ -4,9 +4,10 @@ const GameIdeas = () => {
   return (
   <div className="w-full px-4 sm:px-8 py-6 text-white space-y-6">
     <div className="w-full max-w-3xl mx-auto p-6 rounded-xl bg-black/40 border border-white/10 shadow-lg text-center">
-      <h1 className="text-5xl sm:text-6xl font-extrabold bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-500 bg-clip-text text-transparent">
-        stackedodds.net
-      </h1>
+      <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-500 bg-clip-text text-transparent break-words">
+  stackedodds.net
+</h1>
+
     </div>
 
     <div className="w-full max-w-3xl mx-auto space-y-6">
