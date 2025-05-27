@@ -1,9 +1,9 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "StackedOdds",
+  "name": "Stacked Odds – Open Cases & Spin Wheels",
   "icons": [
     {
-      "src": "favicon.ico",
+      "src": "favicon-new.ico",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/x-icon"
     },
@@ -18,8 +18,8 @@
       "sizes": "512x512"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#6d28d9",
+  "background_color": "#0f0f0f"
 }

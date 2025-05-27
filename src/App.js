@@ -1898,7 +1898,7 @@ const newThreshold = Math.floor(Math.random() * 11) + 25;
     }}
     className="animate-pulse"
   >
-👀 Still There?
+Tap to Resume
   </button>
 )}
 
