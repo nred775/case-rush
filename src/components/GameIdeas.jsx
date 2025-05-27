@@ -7,9 +7,6 @@ const GameIdeas = () => {
       <h1 className="text-5xl sm:text-6xl font-extrabold bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-500 bg-clip-text text-transparent">
         stackedodds.net
       </h1>
-      <p className="text-lg text-white/80 mt-2">
-        feel free to stick with case-rush.vercel.app, but stackedodds.net just feels right 😁
-      </p>
     </div>
 
     <div className="w-full max-w-3xl mx-auto space-y-6">
