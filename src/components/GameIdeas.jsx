@@ -24,25 +24,29 @@ const GameIdeas = () => {
         </ul>
       </div>
 
-      {/* Section: Friends */}
-      <div className="w-full p-5 rounded-xl bg-black/30 border border-pink-400/30">
-        <h2 className="text-2xl font-bold mb-2 text-pink-400">👥 Make Friends</h2>
-        <p>
-          Search up players on the leaderboard, click their profile, and hit <span className="font-semibold">Add Friend</span>. Once you're connected, you can send messages and build your squad.
-        </p>
-      </div>
+      {/* Section: Blackjack */}
+<div className="w-full p-5 rounded-xl bg-black/30 border border-blue-400/30">
+  <h2 className="text-2xl font-bold mb-2 text-blue-300">♠️ Blackjack</h2>
+  <p>
+    Test your luck and skills in Blackjack! Bet up to $25,000 per round and play against the dealer — hit, stand, and try not to bust.
+  </p>
+</div>
 
-      {/* Section: Daily Grid */}
+{/* Section: Daily Grid */}
       <div className="w-full p-5 rounded-xl bg-black/30 border border-red-400/30">
         <h2 className="text-2xl font-bold mb-2 text-red-400">🧨 Daily Grid</h2>
         <p>
-          Play the 5x5 bomb grid every day for a shot at free money and opals! Just don’t click the bomb or you’ll lose it all. 😬
+          Play the 5x5 bomb grid every day for a shot at free money, opals and maybe even an avatar! Just don’t get greedy, there is one bomb per grid.
         </p>
       </div>
 
+      
+
+      
+
       {/* Section: Inventory & Sets */}
       <div className="w-full p-5 rounded-xl bg-black/30 border border-purple-400/30">
-        <h2 className="text-2xl font-bold mb-2 text-purple-400">📦 Collect & Craft</h2>
+        <h2 className="text-2xl font-bold mb-2 text-purple-400">📦 Inventory & Sets</h2>
         <p>
           Hang onto your rewards from cases and wheels — store them in your inventory and use them to complete sets. Turn sets in for big Opal rewards and show off your collection.
         </p>
@@ -55,8 +59,18 @@ const GameIdeas = () => {
           Customize your profile by equipping a unique avatar and selecting up to four workers to stand by your side. They don’t just look cool — workers also generate passive income. Click your avatar in the top bar to view or edit your profile and see how your team is stacked!
         </p>
       </div>
+{/* Section: Friends */}
+      <div className="w-full p-5 rounded-xl bg-black/30 border border-pink-400/30">
+        <h2 className="text-2xl font-bold mb-2 text-pink-400">👥 Make Friends</h2>
+        <p>
+          Search up players on the leaderboard, click their profile, and hit <span className="font-semibold">Add Friend</span>. Once you're connected, you can send messages and build your squad.
+        </p>
+      </div>
+      
     </div>
   </div>
+
+  
 );
 
 

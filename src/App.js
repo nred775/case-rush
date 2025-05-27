@@ -34,6 +34,7 @@ import NotificationsPanel from "./components/NotificationsPanel";
 import ChatBox from "./components/ChatBox";
 import GameIdeas from "./components/GameIdeas";
 import { get } from "firebase/database";
+import Blackjack from "./components/Blackjack";
 
 
 
@@ -1128,6 +1129,23 @@ await rtdbSet(ref(rtdb, `status/${user.uid}`), {
         🌀 Wheels
       </Link>
     )}
+    {navigationLocked ? (
+  <button
+    disabled
+    className="px-3 py-2 bg-black text-white font-semibold rounded-lg shadow-md opacity-50 cursor-not-allowed text-sm"
+  >
+    ♠️ Blackjack
+  </button>
+) : (
+  <Link
+  to="/blackjack"
+  className="px-3 py-2 bg-violet-900 hover:bg-violet-950 text-white font-semibold rounded-lg shadow-md transition-transform hover:scale-105 text-sm"
+>
+  ♠️ Blackjack
+</Link>
+
+)}
+
 
     {navigationLocked ? (
       <button
@@ -1239,6 +1257,8 @@ await rtdbSet(ref(rtdb, `status/${user.uid}`), {
   />
 }
 
+
+
           />
 <Route path="/levels" element={
   <LevelsPanel
@@ -1293,7 +1313,13 @@ await rtdbSet(ref(rtdb, `status/${user.uid}`), {
 />
 
 
-
+<Route path="/blackjack" element={
+  <Blackjack
+    balance={balance}
+    setBalance={setBalance}
+    saveUserData={saveUserData}
+  />
+} />
 
 
 
