@@ -55,6 +55,8 @@ import {
   verticalListSortingStrategy
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import TooltipPortal from "./components/TooltipPortal";
+import Tooltip from "./components/Tooltip";
 
 
 
@@ -990,8 +992,9 @@ if (!user) return (
       <div className="min-h-screen text-white flex flex-col items-center relative overflow-x-hidden touch-manipulation bg-neon-pattern" style={{ overflowY: 'clip' }}>
         {!user ? null : (
           <>
-<div className="fixed top-8 left-0 right-0 z-40 flex justify-center overflow-visible">
-  <div className="flex flex-row items-center gap-2 bg-gray-900 px-4 py-2 rounded-xl shadow-xl border border-gray-700 h-16 text-xs sm:text-sm overflow-visible">
+<div className="fixed top-4 left-0 right-0 z-40 px-2 scrollbar-hide flex sm:justify-center">
+<div className="flex items-center gap-2 bg-gray-900 px-2 py-2 sm:px-4 rounded-xl shadow-xl border border-gray-700 w-full sm:w-max overflow-x-auto sm:overflow-visible max-w-full">
+
 
                 
                 {/* Avatar + Username + Level */}
@@ -1039,7 +1042,128 @@ if (!user) return (
 
                 </div>
 
-                {navigationLocked ? (
+                {!navigationLocked ? (
+  <>
+    {/* 🏠 Home */}
+    <div className="relative group">
+      <Link
+        to="/"
+        className="bg-gray-800 hover:bg-gray-700 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md transition-transform hover:scale-105"
+      >
+        🏠
+      </Link>
+      <span className="absolute top-full mt-1 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] sm:text-xs font-semibold text-white bg-black bg-opacity-80 px-2 py-1 rounded hidden group-hover:inline-block z-50 shadow-lg">
+        Home
+      </span>
+    </div>
+
+    <DragDropContext
+      onDragEnd={(result) => {
+        if (!result.destination) return;
+        const items = reorder(topBarButtons, result.source.index, result.destination.index);
+        setTopBarButtons(items);
+        saveUserData(
+          balance,
+          inventory,
+          opals,
+          ownedAvatars,
+          equippedAvatar,
+          ownedWorkers,
+          completedSets,
+          xp,
+          level,
+          claimedRewards,
+          userBadges,
+          items
+        );
+      }}
+    >
+      <Droppable droppableId="topBarButtons" direction="horizontal">
+        {(provided) => (
+          <div
+            className="flex flex-row gap-2"
+            {...provided.droppableProps}
+            ref={provided.innerRef}
+          >
+            {topBarButtons.map((btnKey, index) => (
+              <Draggable key={btnKey} draggableId={btnKey} index={index}>
+                {(provided) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    {...provided.dragHandleProps}
+                    className="flex-shrink-0"
+                  >
+                    <div className="relative group">
+                      {topBarButtonMap[btnKey]}
+                      <span className="absolute top-full mt-1 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] sm:text-xs font-semibold text-white bg-black bg-opacity-80 px-2 py-1 rounded hidden group-hover:inline-block z-50 shadow-lg">
+                        {labelMap[btnKey] || btnKey}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </Draggable>
+            ))}
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
+    </DragDropContext>
+
+    {/* 🔔 Notifications */}
+    <div className="relative group">
+      <button
+        onClick={() => setShowNotifications(true)}
+        className="bg-indigo-500 hover:bg-indigo-600 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md transition-transform hover:scale-105 relative"
+      >
+        🔔
+        {notifications.length > 0 && (
+          <span className="absolute -top-1 -right-1 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold shadow-lg">
+            {notifications.length}
+          </span>
+        )}
+      </button>
+      <span className="absolute top-full mt-1 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] sm:text-xs font-semibold text-white bg-black bg-opacity-80 px-2 py-1 rounded hidden group-hover:inline-block z-50 shadow-lg">
+        Notifications
+      </span>
+    </div>
+
+    {/* ⚙️ Settings */}
+    <div className="relative group">
+      <button
+        onClick={() => setShowSettings(true)}
+        className="bg-gray-700 hover:bg-gray-800 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md transition-transform hover:scale-105"
+      >
+        ⚙️
+      </button>
+      <span className="absolute top-full mt-1 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] sm:text-xs font-semibold text-white bg-black bg-opacity-80 px-2 py-1 rounded hidden group-hover:inline-block z-50 shadow-lg">
+        Settings
+      </span>
+    </div>
+
+    {/* 🚪 Log Out */}
+    <div className="relative group">
+      <button
+        onClick={async () => {
+          if (user && !user.isAnonymous) {
+            await rtdbSet(ref(rtdb, `status/${user.uid}`), {
+              state: "offline",
+              lastChanged: Date.now(),
+            });
+          }
+          await signOut(auth);
+          window.location.reload();
+        }}
+        className="bg-red-600 hover:bg-red-700 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md transition-transform hover:scale-105"
+      >
+        🚪
+      </button>
+      <span className="absolute top-full mt-1 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] sm:text-xs font-semibold text-white bg-black bg-opacity-80 px-2 py-1 rounded hidden group-hover:inline-block z-50 shadow-lg">
+        Log Out
+      </span>
+    </div>
+  </>
+) : (
   <>
     <button
       disabled
@@ -1066,140 +1190,8 @@ if (!user) return (
       🚪
     </button>
   </>
-) : (
-  <>
-    {/* 🏠 Home */}
-    <div className="relative group">
-      <Link
-        to="/"
-        className="bg-gray-800 hover:bg-gray-700 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md transition-transform hover:scale-105"
-      >
-        🏠
-      </Link>
-<span className="absolute top-[calc(100%+10px)] left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] sm:text-xs font-semibold text-white bg-black bg-opacity-80 px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 shadow-lg">
-        Home
-      </span>
-    </div>
-
-    
-
-    <DragDropContext
-  onDragEnd={(result) => {
-    if (!result.destination) return;
-    const items = reorder(topBarButtons, result.source.index, result.destination.index);
-    setTopBarButtons(items);
-    saveUserData(
-      balance,
-      inventory,
-      opals,
-      ownedAvatars,
-      equippedAvatar,
-      ownedWorkers,
-      completedSets,
-      xp,
-      level,
-      claimedRewards,
-      userBadges,
-      items
-    );
-  }}
->
-
-
-  
-  <Droppable droppableId="topBarButtons" direction="horizontal">
-    {(provided) => (
-      <div
-        className="flex flex-row gap-2"
-        {...provided.droppableProps}
-        ref={provided.innerRef}
-      >
-
-
-        
-        {topBarButtons.map((btnKey, index) => (
-          <Draggable key={btnKey} draggableId={btnKey} index={index}>
-            {(provided) => (
-              <div
-                ref={provided.innerRef}
-                {...provided.draggableProps}
-                {...provided.dragHandleProps}
-                className="relative group flex-shrink-0"
-              >
-                {topBarButtonMap[btnKey]}
-                <span className="absolute top-[calc(100%+10px)] left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] sm:text-xs font-semibold text-white bg-black bg-opacity-80 px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 shadow-lg">
-                  {labelMap[btnKey] || btnKey}
-                </span>
-              </div>
-            )}
-          </Draggable>
-        ))}
-        {provided.placeholder}
-      </div>
-    )}
-  </Droppable>
-</DragDropContext>
-
-
-
-    {/* 🔔 Notifications */}
-    <div className="relative group">
-      <button
-        onClick={() => setShowNotifications(true)}
-        className="bg-indigo-500 hover:bg-indigo-600 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md transition-transform hover:scale-105 relative"
-      >
-        🔔
-        {notifications.length > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold shadow-lg">
-            {notifications.length}
-          </span>
-        )}
-      </button>
-<span className="absolute top-[calc(100%+10px)] left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] sm:text-xs font-semibold text-white bg-black bg-opacity-80 px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 shadow-lg">
-        Notifications
-      </span>
-    </div>
-
-    {/* ⚙️ Settings */}
-    <div className="relative group">
-      <button
-        onClick={() => setShowSettings(true)}
-        className="bg-gray-700 hover:bg-gray-800 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md transition-transform hover:scale-105"
-      >
-        ⚙️
-      </button>
-<span className="absolute top-[calc(100%+10px)] left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] sm:text-xs font-semibold text-white bg-black bg-opacity-80 px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 shadow-lg">
-        Settings
-      </span>
-    </div>
-
-    {/* 🚪 Log Out */}
-    <div className="relative group">
-      <button
-        onClick={async () => {
-          if (user && !user.isAnonymous) {
-            await rtdbSet(ref(rtdb, `status/${user.uid}`), {
-              state: "offline",
-              lastChanged: Date.now(),
-            });
-          }
-          await signOut(auth);
-          window.location.reload();
-        }}
-        className="bg-red-600 hover:bg-red-700 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md transition-transform hover:scale-105"
-      >
-        🚪
-      </button>
-      <span className="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-[10px] sm:text-xs font-semibold text-white bg-black bg-opacity-80 px-2 py-1 rounded hidden group-hover:inline-block z-50 shadow-lg whitespace-nowrap">
-  Log Out
-</span>
-
-
-
-
-    </div>
-  </>
 )}
+
 
               </div>
             </div>
