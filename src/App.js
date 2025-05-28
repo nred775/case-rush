@@ -35,6 +35,8 @@ import ChatBox from "./components/ChatBox";
 import GameIdeas from "./components/GameIdeas";
 import { get } from "firebase/database";
 import Blackjack from "./components/Blackjack";
+import WelcomePage from "./components/WelcomePage";
+
 
 
 
@@ -864,220 +866,183 @@ if (!user) return (
   <Router>
     <>
       <div className="min-h-screen text-white flex flex-col items-center relative overflow-x-hidden touch-manipulation bg-neon-pattern" style={{ overflowY: 'clip' }}>
-
         {!user ? null : (
-          <div className="fixed top-4 left-0 right-0 z-40 overflow-x-auto whitespace-nowrap px-2 scrollbar-hide">
+          <>
+            <div className="fixed top-4 left-0 right-0 z-40 px-2 flex flex-wrap justify-center items-center gap-2">
+              <div className="flex items-center gap-2 bg-gray-900 px-2 py-2 rounded-xl shadow-xl border border-gray-700 w-fit max-w-full mx-auto overflow-visible h-16 text-xs sm:text-sm">
 
-  
-              <div className="flex items-center gap-2 sm:gap-4 bg-gray-900 px-3 py-2 rounded-xl shadow-xl border border-gray-700 w-max mx-auto">
-  {/* Avatar + Username + Level */}
-  <div className="flex items-center gap-4">
-    {navigationLocked ? (
-  <div className="cursor-not-allowed">
+                
+                {/* Avatar + Username + Level */}
+                <div className="flex items-center gap-4">
+                  {navigationLocked ? (
+                    <div className="cursor-not-allowed">
+                      {equippedAvatar ? (
+                        <img
+                          src={`/avatars/${equippedAvatar.toLowerCase().replace(/\s+/g, "_")}_head.png`}
+                          alt={equippedAvatar}
+                          className="w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white shadow transition-transform"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center text-xl rounded-full border-2 border-white bg-gray-700 shadow">
+                          👤
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="relative group">
+  <Link to="/profile">
     {equippedAvatar ? (
       <img
         src={`/avatars/${equippedAvatar.toLowerCase().replace(/\s+/g, "_")}_head.png`}
         alt={equippedAvatar}
-        className="w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white shadow transition-transform"
+        className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 bg-black/30 transition-transform shrink-0 ${getLevelBorderClass(level)}`}
       />
     ) : (
       <div className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center text-xl rounded-full border-2 border-white bg-gray-700 shadow">
         👤
       </div>
     )}
-  </div>
-) : (
-  <Link to="/profile">
-    {equippedAvatar ? (
-      <img
-  src={`/avatars/${equippedAvatar.toLowerCase().replace(/\s+/g, "_")}_head.png`}
-  alt={equippedAvatar}
-  className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full border-4 bg-black/30 hover:scale-110 transition-transform ${getLevelBorderClass(level)}`}
-/>
-
-
-
-    ) : (
-      <div className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center text-xl rounded-full border-2 border-white bg-gray-700 shadow">
-        👤
-      </div>
-    )}
   </Link>
-)}
-
-
-    <span className={`text-lg sm:text-xl ${getLevelColorClass(level)}`}>
-  [{level}] <span className="font-bold">{user.isAnonymous ? "Guest" : username}</span>
-</span>
-  </div>
-
-  {/* Level Rewards */}
-  {navigationLocked ? (
-    <button
-      disabled
-      className="bg-yellow-500 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md opacity-50 cursor-not-allowed"
-    >
-      📈
-    </button>
-  ) : (
-    <Link
-      to="/levels"
-      className="bg-yellow-500 hover:bg-yellow-600 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md transition-transform hover:scale-105"
-    >
-      📈
-    </Link>
-  )}
-
-  {/* Inventory */}
-  {navigationLocked ? (
-    <button
-      disabled
-      className="bg-purple-600 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md opacity-50 cursor-not-allowed"
-    >
-      📦
-    </button>
-  ) : (
-    <Link
-      to="/inventory"
-      className="bg-purple-600 hover:bg-purple-700 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md transition-transform hover:scale-105"
-    >
-      📦
-    </Link>
-  )}
-  {navigationLocked ? (
-    <button
-      disabled
-      className="bg-yellow-500 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md opacity-50 cursor-not-allowed"
-    >
-      🏆
-    </button>
-  ) : (
-    <Link
-      to="/leaderboard"
-      className="bg-yellow-500 hover:bg-yellow-600 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md transition-transform hover:scale-105"
-    >
-      🏆
-    </Link>
-  )}
-  {navigationLocked ? (
-  <button
-    disabled
-    className="bg-blue-400 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md opacity-50 cursor-not-allowed"
-  >
-    💡
-  </button>
-) : (
-  <Link
-    to="/game-ideas"
-    className="bg-blue-400 hover:bg-blue-500 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md transition-transform hover:scale-105"
-  >
-    💡
-  </Link>
-)}
-
-  {/* 💰 Balance */}
-  <div className="flex items-center gap-1 px-4 py-2 bg-gray-900 border-2 border-green-500 rounded-full shadow-[0_0_10px_rgba(34,197,94,0.8)] h-12 sm:h-14">
-  <span className="text-2xl sm:text-3xl">💰</span>
-  <span className="ml-1 font-mono text-green-300 text-2xl sm:text-3xl font-extrabold drop-shadow-[0_0_6px_rgba(34,197,94,0.7)]">
-    ${Number(balance).toLocaleString()}
+  <span className="absolute top-full mt-1 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] sm:text-xs font-semibold text-white bg-black bg-opacity-80 px-2 py-1 rounded hidden group-hover:inline-block z-50 shadow-lg">
+    View Profile
   </span>
 </div>
 
+                  )}
 
-  {/* 💠 Opals */}
-  <div className="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-500 border-2 border-purple-300 rounded-full shadow-[0_0_12px_rgba(168,85,247,0.9)] text-sm sm:text-lg h-10">
-    💠
-    <span className="font-mono text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.6)] text-base sm:text-xl font-bold">
-      {Number(opals).toLocaleString()}
-    </span>
-  </div>
+                  <div className={`flex flex-col sm:flex-row sm:items-center sm:gap-1 text-[10px] sm:text-sm md:text-base lg:text-lg xl:text-xl leading-tight ${getLevelColorClass(level)}`}>
+  <span>[{level}]</span>
+  <span className="font-bold break-words whitespace-normal">{user.isAnonymous ? "Guest" : username}</span>
+</div>
 
+                </div>
 
-
-  {navigationLocked ? (
-  <button
-    disabled
-    className="bg-pink-500 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md opacity-50 cursor-not-allowed"
-  >
-    👥
-  </button>
-) : (
-  <button
-    onClick={() => setShowFriends(true)}
-    className="bg-pink-500 hover:bg-pink-600 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md transition-transform hover:scale-105"
-  >
-    👥
-  </button>
-)}
-{navigationLocked ? (
-  <button
-    disabled
-    className="bg-indigo-500 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md opacity-50 cursor-not-allowed"
-  >
-    🔔
-  </button>
-) : (
-  <button
-    onClick={() => setShowNotifications(true)}
-    className="bg-indigo-500 hover:bg-indigo-600 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md transition-transform hover:scale-105 relative"
-  >
-    🔔
-    {notifications.length > 0 && (
-      <span className="absolute -top-1 -right-1 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold shadow-lg">
-        {notifications.length}
-      </span>
-    )}
-  </button>
-)}
-
-
-  {/* Settings */}
-  {navigationLocked ? (
+                {navigationLocked ? (
+  <>
+    <button
+      disabled
+      className="bg-gray-800 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md opacity-50 cursor-not-allowed"
+    >
+      🏠
+    </button>
+    <button
+      disabled
+      className="bg-indigo-500 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md opacity-50 cursor-not-allowed"
+    >
+      🔔
+    </button>
     <button
       disabled
       className="bg-gray-700 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md opacity-50 cursor-not-allowed"
     >
       ⚙️
     </button>
-  ) : (
-    <button
-      onClick={() => setShowSettings(true)}
-      className="bg-gray-700 hover:bg-gray-800 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md transition-transform hover:scale-105"
-    >
-      ⚙️
-    </button>
-  )}
-
-  {/* Log Out */}
-  {navigationLocked ? (
     <button
       disabled
       className="bg-red-600 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md opacity-50 cursor-not-allowed"
     >
-      🚪 Log Out
+      🚪
     </button>
-  ) : (
-    <button
-  onClick={async () => {
-    if (user && !user.isAnonymous) {
-await rtdbSet(ref(rtdb, `status/${user.uid}`), {
-  state: "offline",
-  lastChanged: Date.now(),
-});
-    }
-    await signOut(auth);
-    window.location.reload(); // 🧼 hard refresh
-  }}
+  </>
+) : (
+  <>
+    {/* 🏠 Home */}
+    <div className="relative group">
+      <Link
+        to="/"
+        className="bg-gray-800 hover:bg-gray-700 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md transition-transform hover:scale-105"
+      >
+        🏠
+      </Link>
+      <span className="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-[10px] sm:text-xs font-semibold text-white bg-black bg-opacity-80 px-2 py-1 rounded hidden group-hover:inline-block z-50 shadow-lg">
+        Home
+      </span>
+    </div>
 
-      className="bg-red-600 hover:bg-red-700 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md transition-transform hover:scale-105"
-    >
-      🚪 Log Out
-    </button>
-  )}
+    {/* 🔔 Notifications */}
+    <div className="relative group">
+      <button
+        onClick={() => setShowNotifications(true)}
+        className="bg-indigo-500 hover:bg-indigo-600 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md transition-transform hover:scale-105 relative"
+      >
+        🔔
+        {notifications.length > 0 && (
+          <span className="absolute -top-1 -right-1 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold shadow-lg">
+            {notifications.length}
+          </span>
+        )}
+      </button>
+      <span className="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-[10px] sm:text-xs font-semibold text-white bg-black bg-opacity-80 px-2 py-1 rounded hidden group-hover:inline-block z-50 shadow-lg">
+        Notifications
+      </span>
+    </div>
+
+    {/* ⚙️ Settings */}
+    <div className="relative group">
+      <button
+        onClick={() => setShowSettings(true)}
+        className="bg-gray-700 hover:bg-gray-800 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md transition-transform hover:scale-105"
+      >
+        ⚙️
+      </button>
+      <span className="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-[10px] sm:text-xs font-semibold text-white bg-black bg-opacity-80 px-2 py-1 rounded hidden group-hover:inline-block z-50 shadow-lg">
+        Settings
+      </span>
+    </div>
+
+    {/* 🚪 Log Out */}
+    <div className="relative group">
+      <button
+        onClick={async () => {
+          if (user && !user.isAnonymous) {
+            await rtdbSet(ref(rtdb, `status/${user.uid}`), {
+              state: "offline",
+              lastChanged: Date.now(),
+            });
+          }
+          await signOut(auth);
+          window.location.reload();
+        }}
+        className="bg-red-600 hover:bg-red-700 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md transition-transform hover:scale-105"
+      >
+        🚪
+      </button>
+      <span className="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-[10px] sm:text-xs font-semibold text-white bg-black bg-opacity-80 px-2 py-1 rounded hidden group-hover:inline-block z-50 shadow-lg whitespace-nowrap">
+  Log Out
+</span>
+
+    </div>
+  </>
+)}
+
+              </div>
+            </div>
+
+            {/* Spacer below fixed top bar */}
+<div className="mt-24 mb-4 h-[5px]" />
+
+{/* 💰 Balance + 💠 Opals (moved below spacer) */}
+<div className="flex justify-center w-full mb-4 z-30 relative">
+  <div className="flex items-center gap-3">
+    {/* Balance */}
+    <div className="flex items-center gap-1 px-4 py-2 bg-gray-900 border-2 border-green-500 rounded-full shadow-[0_0_10px_rgba(34,197,94,0.8)] h-12 sm:h-14">
+      <span className="text-2xl sm:text-3xl">💰</span>
+      <span className="ml-1 font-mono text-green-300 text-2xl sm:text-3xl font-extrabold drop-shadow-[0_0_6px_rgba(34,197,94,0.7)]">
+        ${Number(balance).toLocaleString()}
+      </span>
+    </div>
+
+    {/* Opals */}
+    <div className="flex items-center gap-1 px-3 py-2 bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-500 border-2 border-purple-300 rounded-full shadow-[0_0_12px_rgba(168,85,247,0.9)] text-sm sm:text-lg h-12 sm:h-14">
+      💠
+      <span className="font-mono text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.6)] text-base sm:text-xl font-bold">
+        {Number(opals).toLocaleString()}
+      </span>
+    </div>
+  </div>
 </div>
 
-
-            </div>
+          </>
         )}
 
 
@@ -1090,161 +1055,48 @@ await rtdbSet(ref(rtdb, `status/${user.uid}`), {
 
 
 
-        <h1 className="mt-24 mb-4 text-center text-4xl sm:text-5xl font-extrabold tracking-wide bg-clip-text text-transparent bg-gradient-to-r from-yellow-300 via-orange-400 to-pink-500 drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
-  STACKED ODDS
-</h1>
+
+
 
 
         <div className="mb-4 flex flex-wrap justify-center items-center gap-3 sm:gap-6">
-  {/* Group 1: Cases + Wheels + Daily Grid */}
-  <div className="flex gap-3 sm:gap-4 px-4 py-2 bg-gray-900 border border-gray-700 rounded-full shadow-lg">
-    {navigationLocked ? (
-      <button
-        disabled
-        className="px-3 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md opacity-50 cursor-not-allowed text-sm"
-      >
-        🛍️ Cases
-      </button>
-    ) : (
-      <Link
-        to="/"
-        className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition-transform hover:scale-105 text-sm"
-      >
-        🛍️ Cases
-      </Link>
-    )}
+  
 
-    {navigationLocked ? (
-      <button
-        disabled
-        className="px-3 py-2 bg-teal-500 text-white font-semibold rounded-lg shadow-md opacity-50 cursor-not-allowed text-sm"
-      >
-        🌀 Wheels
-      </button>
-    ) : (
-      <Link
-        to="/wheel"
-        className="px-3 py-2 bg-teal-500 hover:bg-teal-600 text-white font-semibold rounded-lg shadow-md transition-transform hover:scale-105 text-sm"
-      >
-        🌀 Wheels
-      </Link>
-    )}
-    {navigationLocked ? (
-  <button
-    disabled
-    className="px-3 py-2 bg-black text-white font-semibold rounded-lg shadow-md opacity-50 cursor-not-allowed text-sm"
-  >
-    ♠️ Blackjack
-  </button>
-) : (
-  <Link
-  to="/blackjack"
-  className="px-3 py-2 bg-violet-900 hover:bg-violet-950 text-white font-semibold rounded-lg shadow-md transition-transform hover:scale-105 text-sm"
->
-  ♠️ Blackjack
-</Link>
+ 
 
-)}
-
-
-    {navigationLocked ? (
-      <button
-        disabled
-        className="px-3 py-2 bg-red-600 text-white font-semibold rounded-lg shadow-md opacity-50 cursor-not-allowed text-sm"
-      >
-        🧨 Daily Grid
-      </button>
-    ) : (
-      <Link
-        to="/bombgame"
-        className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg shadow-md transition-transform hover:scale-105 text-sm"
-      >
-        🧨 Daily Grid
-      </Link>
-    )}
-  </div>
-
-
-
-
-  {/* Group 2: Sets + Avatars + Workers */}
-<div className="flex gap-3 sm:gap-4 px-4 py-2 bg-gray-900 border border-gray-700 rounded-full shadow-lg">
-    {navigationLocked ? (
-      <button
-        disabled
-        className="px-3 py-2 bg-fuchsia-600 text-white font-semibold rounded-lg shadow-md opacity-50 cursor-not-allowed text-sm"
-      >
-        💠 Sets
-      </button>
-    ) : (
-      <Link
-        to="/sets"
-        className="px-3 py-2 bg-fuchsia-600 hover:bg-fuchsia-700 text-white font-semibold rounded-lg shadow-md transition-transform hover:scale-105 text-sm"
-      >
-        💠 Sets
-      </Link>
-    )}
-
-    {navigationLocked ? (
-      <button
-        disabled
-        className="px-3 py-2 bg-indigo-500 text-white font-semibold rounded-lg shadow-md opacity-50 cursor-not-allowed text-sm"
-      >
-        🧍 Avatars
-      </button>
-    ) : (
-      <Link
-        to="/avatars"
-        className="px-3 py-2 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-lg shadow-md transition-transform hover:scale-105 text-sm"
-      >
-        🧍 Avatars
-      </Link>
-    )}
-
-    {navigationLocked ? (
-      <button
-        disabled
-        className="px-3 py-2 bg-emerald-600 text-white font-semibold rounded-lg shadow-md opacity-50 cursor-not-allowed text-sm"
-      >
-        🛠️ Workers
-      </button>
-    ) : (
-      <Link
-        to="/workers"
-        className="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg shadow-md transition-transform hover:scale-105 text-sm"
-      >
-        🛠️ Workers
-      </Link>
-    )}
-  </div>
 </div>
 
 
 
         <Routes>
-          <Route
-            path="/"
-            element={
-              !selectedCrate ? (
-                <CrateShop balance={balance} onOpenCrate={handleOpenCrate}   trackedSet={trackedSet}
- />
-              ) : (
-                <CrateOpening
-  crate={selectedCrate}
-  value={null}
-  onSell={handleSell}
-  onAdd={handleAddToInventory}
-  onBack={resetCrate}
-  caseVolume={caseVolume}
-  isMuted={isMuted}
-  overallVolume={overallVolume}
-  trackedSet={trackedSet}
-  
-/>
 
-              )
-            }
-          />
+<Route path="/" element={<WelcomePage username={username} setShowFriends={setShowFriends} />} />
+
+
+          <Route path="/home" element={
+  !selectedCrate ? (
+    <CrateShop
+      balance={balance}
+      onOpenCrate={handleOpenCrate}
+      trackedSet={trackedSet}
+    />
+  ) : (
+    <CrateOpening
+      crate={selectedCrate}
+      value={null}
+      onSell={handleSell}
+      onAdd={handleAddToInventory}
+      onBack={resetCrate}
+      caseVolume={caseVolume}
+      isMuted={isMuted}
+      overallVolume={overallVolume}
+      trackedSet={trackedSet}
+    />
+  )
+} />
+
+
+             
           <Route path="/game-ideas" element={<GameIdeas />} />
 
           <Route

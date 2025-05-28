@@ -12,6 +12,15 @@ export default function WheelSpin({ balance, onPick, onSpend, isUILocked, tracke
     localStorage.setItem("wheelFilterRange", filterRange);
   }, [filterRange]);
 
+  const [compactView, setCompactView] = useState(() => {
+  return localStorage.getItem("wheelCompactView") === "true";
+});
+
+useEffect(() => {
+  localStorage.setItem("wheelCompactView", compactView);
+}, [compactView]);
+
+
   const [favorites, setFavorites] = useState(() => {
     const saved = localStorage.getItem("wheelFavorites");
     return saved ? JSON.parse(saved) : [];
@@ -65,8 +74,45 @@ export default function WheelSpin({ balance, onPick, onSpend, isUILocked, tracke
         />
       </div>
 
+      <div className="ml-2 flex items-center space-x-1">
+  <button
+    onClick={() => setCompactView(false)}
+    className={`p-1 rounded hover:scale-110 transition ${
+      !compactView ? "bg-white text-black" : "text-white"
+    }`}
+    title="Normal Grid View"
+  >
+    <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+      <rect x="3" y="3" width="7" height="7" />
+      <rect x="14" y="3" width="7" height="7" />
+      <rect x="3" y="14" width="7" height="7" />
+      <rect x="14" y="14" width="7" height="7" />
+    </svg>
+  </button>
+  <button
+    onClick={() => setCompactView(true)}
+    className={`p-1 rounded hover:scale-110 transition ${
+      compactView ? "bg-white text-black" : "text-white"
+    }`}
+    title="Compact Grid View"
+  >
+    <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+      <rect x="2" y="2" width="4" height="4" />
+      <rect x="9" y="2" width="4" height="4" />
+      <rect x="16" y="2" width="4" height="4" />
+      <rect x="2" y="9" width="4" height="4" />
+      <rect x="9" y="9" width="4" height="4" />
+      <rect x="16" y="9" width="4" height="4" />
+      <rect x="2" y="16" width="4" height="4" />
+      <rect x="9" y="16" width="4" height="4" />
+      <rect x="16" y="16" width="4" height="4" />
+    </svg>
+  </button>
+</div>
+
+
       {/* Wheel Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+<div className={`grid ${compactView ? "gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5" : "gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"}`}>
         {filteredWheels.map((wheel, index) => {
           const canAfford = balance >= wheel.cost;
           const isFavorited = favorites.includes(wheel.name);
@@ -79,24 +125,25 @@ export default function WheelSpin({ balance, onPick, onSpend, isUILocked, tracke
 
           return (
             <div
-              key={index}
-              className={`relative rounded-xl p-4 border shadow-lg
-                bg-gradient-to-br ${wheel.style?.gradient || "from-gray-700 to-black"}
-                ${wheel.style?.extraClasses || ""}
-${isTracked ? "ring-4 ring-purple-400 shadow-[0_0_25px_rgba(192,132,252,1)] animate-pulse" : ""}
-                ${canAfford ? "hover:scale-105 hover:brightness-110 hover:saturate-150 cursor-pointer transition-all duration-300" : ""}
-                group z-0 flex flex-col items-center text-center
-              `}
-              onClick={(e) => {
-  const hardBlocked = localStorage.getItem("macroBlocked") === "true";
-  if (isUILocked || hardBlocked) return;
-  if (e.target.tagName !== "BUTTON" && canAfford) {
-    onSpend?.(wheel.cost);
-    onPick?.(wheel);
-  }
-}}
+  key={index}
+  className={`relative rounded-xl p-4 border shadow-lg
+    bg-gradient-to-br ${wheel.style?.gradient || "from-gray-700 to-black"}
+    ${wheel.style?.extraClasses || ""}
+    ${isTracked ? "ring-4 ring-purple-400 shadow-[0_0_25px_rgba(192,132,252,1)] animate-pulse" : ""}
+    ${canAfford ? "hover:scale-105 hover:brightness-110 hover:saturate-150 cursor-pointer transition-all duration-300" : ""}
+    group z-0 flex flex-col items-center text-center
+    ${compactView ? "p-2 text-xs scale-90" : ""}
+  `}
+  onClick={(e) => {
+    const hardBlocked = localStorage.getItem("macroBlocked") === "true";
+    if (isUILocked || hardBlocked) return;
+    if (e.target.tagName !== "BUTTON" && canAfford) {
+      onSpend?.(wheel.cost);
+      onPick?.(wheel);
+    }
+  }}
+>
 
-            >
               <div className={`${canAfford ? "" : "opacity-50"} w-full flex flex-col items-center`}>
                 {/* Favorite Star */}
                 <button

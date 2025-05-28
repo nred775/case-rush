@@ -146,3 +146,125 @@ input[type="number"].neon-input::-webkit-outer-spin-button {
 input[type="number"].neon-input {
   appearance: textfield;
 }
+.neon-btn {
+  @apply px-6 py-3 rounded-lg font-semibold text-white shadow-md transition-transform hover:scale-105;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.15);
+}
+
+.glow-btn {
+  @apply flex items-center gap-2 px-5 py-2.5 rounded-full font-semibold text-white transition-transform hover:scale-105 shadow-md;
+  background: linear-gradient(to right, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+  box-shadow:
+    inset 0 1px 2px rgba(255,255,255,0.1),
+    0 0 10px rgba(255,255,255,0.15);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.glow-btn-wrapper {
+  @apply inline-flex items-center justify-center px-3 py-1 rounded-full shadow-inner transition-transform hover:scale-105;
+  background-color: rgba(23, 23, 23, 0.9);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
+}
+
+/* 🔥 Color variants */
+.glow-core         { background: linear-gradient(to right, #facc15, #fbbf24); color: #111; }
+.glow-inventory    { background: linear-gradient(to right, #a78bfa, #8b5cf6); }
+.glow-leaderboard  { background: linear-gradient(to right, #fcd34d, #fbbf24); color: #111; }
+.glow-friends      { background: linear-gradient(to right, #ec4899, #db2777); }
+
+.glow-cases        { background: linear-gradient(to right, #3b82f6, #2563eb); }
+.glow-wheels       { background: linear-gradient(to right, #14b8a6, #0d9488); }
+.glow-blackjack    { background: linear-gradient(to right, #8b5cf6, #6d28d9); }
+.glow-grid         { background: linear-gradient(to right, #ef4444, #b91c1c); }
+
+.glow-avatars      { background: linear-gradient(to right, #6366f1, #4f46e5); }
+.glow-sets         { background: linear-gradient(to right, #d946ef, #a21caf); }
+.glow-workers      { background: linear-gradient(to right, #10b981, #059669); }
+@keyframes fadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.3s ease-out forwards;
+}
+.glow-btn {
+  @apply flex items-center gap-2 px-5 py-2.5 rounded-full font-semibold text-white transition-transform hover:scale-110 shadow-lg;
+  background: linear-gradient(to right, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+  backdrop-filter: blur(6px);
+  box-shadow:
+    0 0 10px rgba(255, 255, 255, 0.1),
+    0 0 20px rgba(255, 255, 255, 0.08),
+    inset 0 1px 2px rgba(255, 255, 255, 0.2);
+  transition: all 0.25s ease;
+}
+
+
+.glow-btn:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow:
+    0 0 15px rgba(255, 255, 255, 0.4),
+    0 0 30px rgba(255, 255, 255, 0.2);
+  transform: scale(1.12) rotate(-1deg);
+}
+/* 🌊 Core - Light Blue */
+.glow-core,
+.glow-inventory,
+.glow-leaderboard,
+.glow-friends {
+  background-color: #0284c7; /* sky-600 */
+  border: 4px solid #7dd3fc; /* sky-300 */
+  color: #7dd3fc;
+}
+
+.section-core {
+  border: 2px solid #bae6fd; /* sky-200 */
+}
+
+.title-core {
+  color: #7dd3fc; /* sky-300 */
+}
+
+/* 🟣 Games - Updated to Lighter Purple */
+.glow-cases,
+.glow-wheels,
+.glow-blackjack,
+.glow-grid {
+  background-color: #581c87; /* purple-900 */
+  border: 4px solid #8b5cf6; /* purple-500 - lighter than before */
+  color: #8b5cf6;
+}
+
+.section-games {
+  border: 2px solid #a78bfa; /* purple-300 */
+}
+
+.title-games {
+  color: #8b5cf6; /* purple-500 */
+}
+
+
+/* 💖 Opals - Light Pink */
+.glow-avatars,
+.glow-sets,
+.glow-workers {
+  background-color: #db2777; /* pink-700 */
+  border: 4px solid #f9a8d4; /* pink-300 */
+  color: #f9a8d4;
+}
+
+.section-opals {
+  border: 2px solid #fbcfe8; /* pink-200 */
+}
+
+.title-opals {
+  color: #f9a8d4; /* pink-300 */
+}
+

@@ -8,6 +8,15 @@ export default function CrateShop({ balance, onOpenCrate, trackedSet }) {
     return localStorage.getItem("crateFilterRange") || "all";
   });
 
+  const [compactView, setCompactView] = useState(() => {
+  return localStorage.getItem("compactView") === "true";
+});
+
+useEffect(() => {
+  localStorage.setItem("compactView", compactView);
+}, [compactView]);
+
+
   useEffect(() => {
     localStorage.setItem("crateFilterRange", filterRange);
   }, [filterRange]);
@@ -65,8 +74,46 @@ export default function CrateShop({ balance, onOpenCrate, trackedSet }) {
         />
       </div>
 
+      <div className="ml-2 flex items-center space-x-1">
+  <button
+    onClick={() => setCompactView(false)}
+    className={`p-1 rounded hover:scale-110 transition ${
+      !compactView ? "bg-white text-black" : "text-white"
+    }`}
+    title="Normal Grid View"
+  >
+    <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+      <rect x="3" y="3" width="7" height="7" />
+      <rect x="14" y="3" width="7" height="7" />
+      <rect x="3" y="14" width="7" height="7" />
+      <rect x="14" y="14" width="7" height="7" />
+    </svg>
+  </button>
+  <button
+    onClick={() => setCompactView(true)}
+    className={`p-1 rounded hover:scale-110 transition ${
+      compactView ? "bg-white text-black" : "text-white"
+    }`}
+    title="Compact Grid View"
+  >
+    <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+      <rect x="2" y="2" width="4" height="4" />
+      <rect x="9" y="2" width="4" height="4" />
+      <rect x="16" y="2" width="4" height="4" />
+      <rect x="2" y="9" width="4" height="4" />
+      <rect x="9" y="9" width="4" height="4" />
+      <rect x="16" y="9" width="4" height="4" />
+      <rect x="2" y="16" width="4" height="4" />
+      <rect x="9" y="16" width="4" height="4" />
+      <rect x="16" y="16" width="4" height="4" />
+    </svg>
+  </button>
+</div>
+
+
+
       {/* Crate Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+<div className={`grid ${compactView ? "gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5" : "gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"}`}>
         {filteredCrates.map((crate, index) => {
           const canAfford = balance >= crate.cost;
           const isFavorited = favorites.includes(crate.name);
@@ -76,14 +123,16 @@ export default function CrateShop({ balance, onOpenCrate, trackedSet }) {
 
           return (
             <div
-              key={index}
-              className={`relative rounded-xl p-4 border shadow-lg
-                bg-gradient-to-br ${crate.style?.gradient || "from-gray-700 to-black"}
-                ${crate.style?.extraClasses || ""}
-${isTracked ? "ring-4 ring-purple-400 shadow-[0_0_25px_rgba(192,132,252,1)] animate-pulse" : ""}
-                ${canAfford ? "hover:scale-105 hover:brightness-110 hover:saturate-150 cursor-pointer transition-all duration-300" : ""}
-                group z-0 flex flex-col items-center text-center
-              `}
+  key={index}
+  className={`relative overflow-hidden rounded-xl ${compactView ? "p-2 text-xs" : "p-4"} border shadow-lg
+    bg-gradient-to-br ${crate.style?.gradient || "from-gray-700 to-black"}
+    ${crate.style?.extraClasses || ""}
+    ${isTracked ? "ring-4 ring-purple-400 shadow-[0_0_25px_rgba(192,132,252,1)] animate-pulse" : ""}
+    ${canAfford ? "hover:scale-105 hover:brightness-110 hover:saturate-150 cursor-pointer transition-all duration-300" : ""}
+    group z-0 flex flex-col items-center text-center
+    ${compactView ? "scale-90 text-sm" : ""}
+  `}
+
               onClick={(e) => {
                 if (e.target.tagName !== "BUTTON" && canAfford) {
                   onOpenCrate(crate);
@@ -120,15 +169,22 @@ ${isTracked ? "ring-4 ring-purple-400 shadow-[0_0_25px_rgba(192,132,252,1)] anim
                 )}
 
                 {/* Hover Overlay */}
-                <div className="absolute inset-0 bg-black bg-opacity-80 text-white rounded-xl opacity-0 group-hover:opacity-100 transition-opacity p-4 flex flex-col items-center justify-center z-10">
+<div className={`absolute inset-0 bg-black bg-opacity-80 text-white rounded-xl opacity-0 group-hover:opacity-100 transition-opacity ${compactView ? "p-2" : "p-4"} flex flex-col items-center justify-center z-10`}>
                   <h4 className="text-md font-bold mb-2">🎁 Prizes</h4>
                   <ul className="text-xs max-h-32 overflow-y-auto text-center space-y-1 pr-2 custom-scroll">
                     {[...crate.items].sort((a, b) => a.value - b.value).map((item, i) => (
                       <li
                         key={i}
-                        className="flex justify-between items-center gap-2 border-b border-white/10 pb-1 last:border-none"
+  className={`flex justify-between items-center gap-1 border-b border-white/10 ${compactView ? "pb-0.5" : "pb-1"} last:border-none`}
                       >
-                        <span className="font-medium text-white truncate">{item.name}</span>
+<span
+  className={`font-medium text-white leading-tight ${
+    compactView ? "text-[10px] max-w-[6rem]" : "text-xs max-w-[8rem]"
+  } truncate whitespace-nowrap`}
+  title={item.name}
+>
+  {item.name}
+</span>
                         <span className="text-xs text-gray-300">${item.value.toLocaleString()}</span>
                       </li>
                     ))}

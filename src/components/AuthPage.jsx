@@ -37,7 +37,7 @@ const getFriendlyAuthError = (error) => {
   return messages[code] || "Something went wrong. Try again.";
 };
 
-const AuthPage = ({ onAuth, setLoginBlocked, loginBlocked }) => {
+const AuthPage = ({ onLogin, setLoginBlocked, loginBlocked }) => {
   const [isRegistering, setIsRegistering] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -104,7 +104,7 @@ setBlockedMessage("You are already logged in elsewhere.");
       });
     }
 
-    onAuth(userCred.user); // ✅ only called if user is clear to enter
+onLogin(userCred.user); // ✅ match the prop
 
   } catch (err) {
     console.error("🔥 Firebase login error:", err);
@@ -121,7 +121,7 @@ setBlockedMessage("You are already logged in elsewhere.");
   const handleGuest = async () => {
     try {
       const userCred = await signInAnonymously(auth);
-      onAuth(userCred.user);
+onLogin(userCred.user);
     } catch (err) {
       console.error(err);
       setError(getFriendlyAuthError(err));
@@ -132,7 +132,7 @@ setBlockedMessage("You are already logged in elsewhere.");
     try {
       const provider = new GoogleAuthProvider();
       const userCred = await signInWithPopup(auth, provider);
-      onAuth(userCred.user);
+onLogin(userCred.user);
     } catch (err) {
       console.error(err);
       setError(getFriendlyAuthError(err));
