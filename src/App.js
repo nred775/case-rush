@@ -55,8 +55,7 @@ import {
   verticalListSortingStrategy
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import TooltipPortal from "./components/TooltipPortal";
-import Tooltip from "./components/Tooltip";
+
 
 
 

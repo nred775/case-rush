@@ -55,6 +55,8 @@ export default function Leaderboard() {
   const [currentUser, setCurrentUser] = useState(null);
   const [toastMessage, setToastMessage] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState("balance");
+
 
 
 
@@ -65,19 +67,27 @@ export default function Leaderboard() {
     return () => unsub();
   }, []);
 
-  useEffect(() => {
-    const loadLeaders = async () => {
-      const q = query(collection(db, "users"), orderBy("balance", "desc"), limit(20));
-      const snap = await getDocs(q);
-      const top = snap.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-setLeaders(top.map((user, index) => ({ ...user, rank: index + 1 })));
-    };
+ useEffect(() => {
+  const loadLeaders = async () => {
+    const q = query(collection(db, "users"), orderBy(sortBy, "desc"), limit(100)); // slightly larger limit in case of guests
+    const snap = await getDocs(q);
+    const rawUsers = snap.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
 
-    loadLeaders();
-  }, []);
+    // Filter out guest accounts (those with isAnonymous = true or no username)
+    const filtered = rawUsers.filter(user =>
+      user.username && typeof user.username === "string" && user.username.trim() !== ""
+    );
+
+    setLeaders(filtered.map((user, index) => ({ ...user, rank: index + 1 })));
+  };
+
+  loadLeaders();
+}, [sortBy]);
+
+
 
   const sendFriendRequest = async () => {
     if (!currentUser || !currentUser.uid || !selectedUser?.username) {
@@ -126,6 +136,18 @@ setTimeout(() => setToastMessage(""), 3000);
   onChange={(e) => setSearchTerm(e.target.value)}
   className="w-full mb-4 px-3 py-1.5 text-sm bg-gray-800 text-white placeholder-gray-400 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-600"
 />
+
+<div className="flex justify-center mb-4">
+  <select
+    value={sortBy}
+    onChange={(e) => setSortBy(e.target.value)}
+    className="bg-gray-800 border border-gray-600 text-white px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600"
+  >
+    <option value="balance">💰 Balance</option>
+    <option value="opals">💠 Opals</option>
+    <option value="level"> 📈 Level</option>
+  </select>
+</div>
 
 
 <ol className="space-y-3 sm:space-y-2">
@@ -182,8 +204,13 @@ setTimeout(() => setToastMessage(""), 3000);
       </div>
 
 <span className="text-green-300 font-mono text-lg sm:text-xl self-end sm:self-auto">
-        ${Number(user.balance).toLocaleString()}
-      </span>
+  {sortBy === "balance"
+    ? `$${Number(user.balance).toLocaleString()}`
+    : sortBy === "opals"
+    ? `💠 ${Number(user.opals || 0).toLocaleString()}`
+    : `📈 Level ${user.level || 1}`}
+</span>
+
     </li>
   );
 })}
