@@ -1,16 +1,11 @@
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
 
-
-
-
 export default function WelcomePage({ username, setShowFriends, resetCrate, resetWheel }) {
-
-useEffect(() => {
-  resetCrate();
-  resetWheel();
-}, []);
-
+  useEffect(() => {
+    resetCrate();
+    resetWheel();
+  }, []);
 
   return (
     <div className="py-12 flex justify-center">
@@ -25,13 +20,14 @@ useEffect(() => {
           <NavButton to="/inventory" label="Inventory" img="/images/inventory.png" className="glow-core" />
           <NavButton to="/leaderboard" label="Leaderboard" img="/images/leaderboard.png" className="glow-core" />
           <NavButton onClick={() => setShowFriends(true)} label="Friends" img="/images/friends.png" className="glow-core" />
+          {/* New Information button */}
+          <NavButton to="/game-ideas" label="Information" img="/images/information.png" className="glow-core" />
         </Section>
 
         {/* Games Section - Dark Purple */}
         <Section title="🎮 Games" sectionClass="section-games" titleClass="title-games">
           <NavButton to="/home" label="Cases" img="/images/cases.png" className="glow-cases" onClick={resetCrate} />
-<NavButton to="/wheel" label="Wheels" img="/images/wheels.png" className="glow-cases" onClick={resetWheel} />
-
+          <NavButton to="/wheel" label="Wheels" img="/images/wheels.png" className="glow-cases" onClick={resetWheel} />
           <NavButton to="/blackjack" label="Blackjack" img="/images/blackjack.png" className="glow-cases" />
           <NavButton to="/bombgame" label="Daily Grid" img="/images/daily-grid.png" className="glow-cases" />
         </Section>
