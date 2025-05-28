@@ -1,6 +1,17 @@
 import { Link } from "react-router-dom";
+import { useEffect } from "react";
+
+
+
 
 export default function WelcomePage({ username, setShowFriends, resetCrate, resetWheel }) {
+
+useEffect(() => {
+  resetCrate();
+  resetWheel();
+}, []);
+
+
   return (
     <div className="py-12 flex justify-center">
       <div className="w-full max-w-5xl bg-[#111827] border border-white/10 rounded-2xl shadow-2xl p-6 flex flex-col items-center gap-12">

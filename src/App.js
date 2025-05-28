@@ -909,7 +909,7 @@ if (!user) return (
         {!user ? null : (
           <>
             <div className="fixed top-4 left-0 right-0 z-40 px-2 flex flex-wrap justify-center items-center gap-2">
-              <div className="flex items-center gap-2 bg-gray-900 px-2 py-2 rounded-xl shadow-xl border border-gray-700 w-fit max-w-full mx-auto overflow-visible h-16 text-xs sm:text-sm">
+<div className="flex flex-row items-center gap-2 bg-gray-900 px-2 py-2 rounded-xl shadow-xl border border-gray-700 mx-auto overflow-x-auto overflow-y-hidden whitespace-nowrap scrollbar-thin scrollbar-thumb-gray-400 h-16 text-xs sm:text-sm">
 
                 
                 {/* Avatar + Username + Level */}
@@ -999,6 +999,12 @@ if (!user) return (
       </span>
     </div>
 
+    {topBarButtons.map((btnKey) => (
+  <div key={btnKey} className="flex-shrink-0 inline-flex">
+    {topBarButtonMap[btnKey]}
+  </div>
+))}
+
     {/* 🔔 Notifications */}
     <div className="relative group">
       <button
@@ -1050,6 +1056,9 @@ if (!user) return (
       <span className="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-[10px] sm:text-xs font-semibold text-white bg-black bg-opacity-80 px-2 py-1 rounded hidden group-hover:inline-block z-50 shadow-lg whitespace-nowrap">
   Log Out
 </span>
+
+
+
 
     </div>
   </>
@@ -1733,33 +1742,33 @@ setChatUser(f);
 
       <div className="mb-6 text-left">
 {[
-  "levels",       // 📦 Level Rewards
-  "inventory",    // 🎒 Inventory
-  "leaderboard",  // 🏆 Leaderboard
-  "friends",      // 👥 Friends
-  "wheel",        // 🎡 Wheels
-  "blackjack",    // 🃏 Blackjack
-  "bombgame",     // 💣 Daily Grid
-  "avatars",      // 🧍 Avatars
-  "sets",         // 📚 Sets
-  "workers"       // 👷 Workers
-].map((btn) => (
-          <label key={btn} className="flex items-center gap-2 mb-2">
-            <input
-              type="checkbox"
-              checked={topBarButtons.includes(btn)}
-              onChange={() =>
-                setTopBarButtons(prev =>
-                  prev.includes(btn)
-                    ? prev.filter(b => b !== btn)
-                    : [...prev, btn]
-                )
-              }
-              className="accent-purple-500"
-            />
-            {btn.charAt(0).toUpperCase() + btn.slice(1)}
-          </label>
-        ))}
+  { id: "levels", label: "Level Rewards" },
+  { id: "inventory", label: "Inventory" },
+  { id: "leaderboard", label: "Leaderboard" },
+  { id: "friends", label: "Friends" },
+  { id: "wheel", label: "Wheels" },
+  { id: "blackjack", label: "Blackjack" },
+  { id: "bombgame", label: "Daily Grid" },
+  { id: "avatars", label: "Avatars" },
+  { id: "sets", label: "Sets" },
+  { id: "workers", label: "Workers" }
+].map(({ id, label }) => (
+  <label key={id} className="flex items-center gap-2 mb-2">
+    <input
+      type="checkbox"
+      checked={topBarButtons.includes(id)}
+      onChange={() =>
+        setTopBarButtons((prev) =>
+          prev.includes(id) ? prev.filter((b) => b !== id) : [...prev, id]
+        )
+      }
+      className="accent-purple-500"
+    />
+    {label}
+  </label>
+))}
+
+            
       </div>
 
       <button
