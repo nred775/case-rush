@@ -1972,7 +1972,7 @@ setChatUser(f);
 )}
 {selectedProfileUser && (
   <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
-    <div className="bg-gray-900 rounded-2xl max-w-3xl w-full relative overflow-y-auto max-h-[90vh]">
+    <div className="bg-gray-900 rounded-2xl max-w-3xl w-full relative overflow-y-auto max-h-[90vh] custom-scroll">
       <button
         onClick={() => setSelectedProfileUser(null)}
         className="absolute top-3 right-4 text-white text-2xl font-bold hover:text-red-500"
@@ -1991,13 +1991,12 @@ setChatUser(f);
         profileWorkers={selectedProfileUser.profileWorkers}
         setProfileWorkers={() => {}}
         readOnly
-badges={selectedProfileUser.badges || []}
-
-        
+        badges={selectedProfileUser.badges || []}
       />
     </div>
   </div>
 )}
+
 
 {chatUser && (
   <ChatBox
