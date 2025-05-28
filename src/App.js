@@ -1959,17 +1959,12 @@ setChatUser(f);
           );
           setShowTopBarEditor(false);
         }}
-        className="w-full py-2 mt-6 bg-green-600 hover:bg-green-700 font-semibold rounded-md transition-transform hover:scale-105"
+        className="w-full py-2 mt-6 bg-red-600 hover:bg-red-700 font-semibold rounded-md transition-transform hover:scale-105"
       >
-        💾 Save Changes
+        💾 Close
       </button>
 
-      <button
-        onClick={() => setShowTopBarEditor(false)}
-        className="w-full py-2 mt-3 bg-red-600 hover:bg-red-700 font-semibold rounded-md transition-transform hover:scale-105"
-      >
-        ❌ Cancel
-      </button>
+      
     </div>
   </div>
 )}
