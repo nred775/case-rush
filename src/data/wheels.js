@@ -756,9 +756,9 @@ const wheels = [
     items: [
       { name: "🖊️ Luxury Pen Set", value: 600 },
       { name: "📘 Executive Notebook", value: 160 },
-      { name: "🪑 Ergonomic Command Chair", value: 21400 },
-      { name: "🖥️ Quad Monitor Setup", value: 26600 },
-      { name: "📦 Strategy Suite Kit", value: 32000 },
+      { name: "🪑 Ergonomic Command Chair", value: 3000 },
+      { name: "🖥️ Quad Monitor Setup", value: 2600 },
+      { name: "📦 Strategy Suite Kit", value: 37000 },
       { name: "💼 Business Elite Package", value: 100000 }
     ],
     style: {
