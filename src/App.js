@@ -36,6 +36,26 @@ import GameIdeas from "./components/GameIdeas";
 import { get } from "firebase/database";
 import Blackjack from "./components/Blackjack";
 import WelcomePage from "./components/WelcomePage";
+import {
+  DragDropContext,
+  Droppable,
+  Draggable,
+} from "@hello-pangea/dnd";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
 
 
 
@@ -181,6 +201,7 @@ const [showTopBarEditor, setShowTopBarEditor] = useState(false);
 
 
   const bgmRef = useRef(null);
+const sensors = useSensors(useSensor(PointerSensor));
 
 
 
@@ -227,39 +248,100 @@ useEffect(() => {
   };
 }, [user]);
 
+function SortableButton({ id, children }) {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    cursor: 'grab'
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="pointer-events-auto">
+      {children}
+    </div>
+  );
+}
+
+
+const labelMap = {
+  levels: "Level Rewards",
+  inventory: "Inventory",
+  leaderboard: "Leaderboard",
+  friends: "Friends",
+  wheel: "Wheels",
+  blackjack: "Blackjack",
+  bombgame: "Daily Grid",
+  avatars: "Avatars",
+  sets: "Sets",
+  workers: "Workers",
+};
+
+const reorder = (list, startIndex, endIndex) => {
+  const result = Array.from(list);
+  const [removed] = result.splice(startIndex, 1);
+  result.splice(endIndex, 0, removed);
+  return result;
+};
+
+
+
 
 const topBarButtonMap = {
   levels: (
-    <Link to="/levels" className="bg-yellow-500 hover:bg-yellow-600 text-black h-10 px-4 py-2 font-semibold rounded-md">🧬</Link>
+    <Link to="/levels" className="bg-yellow-500 hover:bg-yellow-600 text-black h-10 px-4 py-2 font-semibold rounded-md flex items-center justify-center">
+      <img src="/images/level-rewards.png" alt="Level Rewards" className="w-6 h-6" />
+    </Link>
   ),
   inventory: (
-    <Link to="/inventory" className="bg-green-600 hover:bg-green-700 text-white h-10 px-4 py-2 font-semibold rounded-md">🎒</Link>
+    <Link to="/inventory" className="bg-green-600 hover:bg-green-700 text-white h-10 px-4 py-2 font-semibold rounded-md flex items-center justify-center">
+      <img src="/images/inventory.png" alt="Inventory" className="w-6 h-6" />
+    </Link>
   ),
   leaderboard: (
-    <Link to="/leaderboard" className="bg-cyan-500 hover:bg-cyan-600 text-white h-10 px-4 py-2 font-semibold rounded-md">🏆</Link>
+    <Link to="/leaderboard" className="bg-cyan-500 hover:bg-cyan-600 text-white h-10 px-4 py-2 font-semibold rounded-md flex items-center justify-center">
+      <img src="/images/leaderboard.png" alt="Leaderboard" className="w-6 h-6" />
+    </Link>
   ),
   friends: (
-    <button onClick={() => setShowFriends(true)} className="bg-purple-600 hover:bg-purple-700 text-white h-10 px-4 py-2 font-semibold rounded-md">👥</button>
+    <button onClick={() => setShowFriends(true)} className="bg-purple-600 hover:bg-purple-700 text-white h-10 px-4 py-2 font-semibold rounded-md flex items-center justify-center">
+      <img src="/images/friends.png" alt="Friends" className="w-6 h-6" />
+    </button>
   ),
   wheel: (
-    <Link to="/wheel" className="bg-teal-600 hover:bg-teal-700 text-white h-10 px-4 py-2 font-semibold rounded-md">🎡</Link>
+    <Link to="/wheel" className="bg-teal-600 hover:bg-teal-700 text-white h-10 px-4 py-2 font-semibold rounded-md flex items-center justify-center">
+      <img src="/images/wheels.png" alt="Wheels" className="w-6 h-6" />
+    </Link>
   ),
   blackjack: (
-    <Link to="/blackjack" className="bg-gray-700 hover:bg-gray-800 text-white h-10 px-4 py-2 font-semibold rounded-md">🃏</Link>
+    <Link to="/blackjack" className="bg-gray-700 hover:bg-gray-800 text-white h-10 px-4 py-2 font-semibold rounded-md flex items-center justify-center">
+      <img src="/images/blackjack.png" alt="Blackjack" className="w-6 h-6" />
+    </Link>
   ),
   bombgame: (
-    <Link to="/bombgame" className="bg-red-500 hover:bg-red-600 text-white h-10 px-4 py-2 font-semibold rounded-md">💣</Link>
+    <Link to="/bombgame" className="bg-red-500 hover:bg-red-600 text-white h-10 px-4 py-2 font-semibold rounded-md flex items-center justify-center">
+      <img src="/images/daily-grid.png" alt="Daily Grid" className="w-6 h-6" />
+    </Link>
   ),
   avatars: (
-    <Link to="/avatars" className="bg-purple-500 hover:bg-purple-600 text-white h-10 px-4 py-2 font-semibold rounded-md">🧍</Link>
+    <Link to="/avatars" className="bg-purple-500 hover:bg-purple-600 text-white h-10 px-4 py-2 font-semibold rounded-md flex items-center justify-center">
+      <img src="/images/avatars.png" alt="Avatars" className="w-6 h-6" />
+    </Link>
   ),
   sets: (
-    <Link to="/sets" className="bg-indigo-500 hover:bg-indigo-600 text-white h-10 px-4 py-2 font-semibold rounded-md">📚</Link>
+    <Link to="/sets" className="bg-indigo-500 hover:bg-indigo-600 text-white h-10 px-4 py-2 font-semibold rounded-md flex items-center justify-center">
+      <img src="/images/sets.png" alt="Sets" className="w-6 h-6" />
+    </Link>
   ),
   workers: (
-    <Link to="/workers" className="bg-yellow-600 hover:bg-yellow-700 text-white h-10 px-4 py-2 font-semibold rounded-md">👷</Link>
+    <Link to="/workers" className="bg-yellow-600 hover:bg-yellow-700 text-white h-10 px-4 py-2 font-semibold rounded-md flex items-center justify-center">
+      <img src="/images/workers.png" alt="Workers" className="w-6 h-6" />
+    </Link>
   ),
 };
+
+
 
 
 useEffect(() => {
@@ -908,8 +990,8 @@ if (!user) return (
       <div className="min-h-screen text-white flex flex-col items-center relative overflow-x-hidden touch-manipulation bg-neon-pattern" style={{ overflowY: 'clip' }}>
         {!user ? null : (
           <>
-            <div className="fixed top-4 left-0 right-0 z-40 px-2 flex flex-wrap justify-center items-center gap-2">
-<div className="flex flex-row items-center gap-2 bg-gray-900 px-2 py-2 rounded-xl shadow-xl border border-gray-700 mx-auto overflow-x-auto overflow-y-hidden whitespace-nowrap scrollbar-thin scrollbar-thumb-gray-400 h-16 text-xs sm:text-sm">
+<div className="fixed top-8 left-0 right-0 z-40 flex justify-center overflow-visible">
+  <div className="flex flex-row items-center gap-2 bg-gray-900 px-4 py-2 rounded-xl shadow-xl border border-gray-700 h-16 text-xs sm:text-sm overflow-visible">
 
                 
                 {/* Avatar + Username + Level */}
@@ -994,16 +1076,71 @@ if (!user) return (
       >
         🏠
       </Link>
-      <span className="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-[10px] sm:text-xs font-semibold text-white bg-black bg-opacity-80 px-2 py-1 rounded hidden group-hover:inline-block z-50 shadow-lg">
+<span className="absolute top-[calc(100%+10px)] left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] sm:text-xs font-semibold text-white bg-black bg-opacity-80 px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 shadow-lg">
         Home
       </span>
     </div>
 
-    {topBarButtons.map((btnKey) => (
-  <div key={btnKey} className="flex-shrink-0 inline-flex">
-    {topBarButtonMap[btnKey]}
-  </div>
-))}
+    
+
+    <DragDropContext
+  onDragEnd={(result) => {
+    if (!result.destination) return;
+    const items = reorder(topBarButtons, result.source.index, result.destination.index);
+    setTopBarButtons(items);
+    saveUserData(
+      balance,
+      inventory,
+      opals,
+      ownedAvatars,
+      equippedAvatar,
+      ownedWorkers,
+      completedSets,
+      xp,
+      level,
+      claimedRewards,
+      userBadges,
+      items
+    );
+  }}
+>
+
+
+  
+  <Droppable droppableId="topBarButtons" direction="horizontal">
+    {(provided) => (
+      <div
+        className="flex flex-row gap-2"
+        {...provided.droppableProps}
+        ref={provided.innerRef}
+      >
+
+
+        
+        {topBarButtons.map((btnKey, index) => (
+          <Draggable key={btnKey} draggableId={btnKey} index={index}>
+            {(provided) => (
+              <div
+                ref={provided.innerRef}
+                {...provided.draggableProps}
+                {...provided.dragHandleProps}
+                className="relative group flex-shrink-0"
+              >
+                {topBarButtonMap[btnKey]}
+                <span className="absolute top-[calc(100%+10px)] left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] sm:text-xs font-semibold text-white bg-black bg-opacity-80 px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 shadow-lg">
+                  {labelMap[btnKey] || btnKey}
+                </span>
+              </div>
+            )}
+          </Draggable>
+        ))}
+        {provided.placeholder}
+      </div>
+    )}
+  </Droppable>
+</DragDropContext>
+
+
 
     {/* 🔔 Notifications */}
     <div className="relative group">
@@ -1018,7 +1155,7 @@ if (!user) return (
           </span>
         )}
       </button>
-      <span className="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-[10px] sm:text-xs font-semibold text-white bg-black bg-opacity-80 px-2 py-1 rounded hidden group-hover:inline-block z-50 shadow-lg">
+<span className="absolute top-[calc(100%+10px)] left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] sm:text-xs font-semibold text-white bg-black bg-opacity-80 px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 shadow-lg">
         Notifications
       </span>
     </div>
@@ -1031,7 +1168,7 @@ if (!user) return (
       >
         ⚙️
       </button>
-      <span className="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-[10px] sm:text-xs font-semibold text-white bg-black bg-opacity-80 px-2 py-1 rounded hidden group-hover:inline-block z-50 shadow-lg">
+<span className="absolute top-[calc(100%+10px)] left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] sm:text-xs font-semibold text-white bg-black bg-opacity-80 px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 shadow-lg">
         Settings
       </span>
     </div>
@@ -1741,35 +1878,68 @@ setChatUser(f);
       </h2>
 
       <div className="mb-6 text-left">
-{[
-  { id: "levels", label: "Level Rewards" },
-  { id: "inventory", label: "Inventory" },
-  { id: "leaderboard", label: "Leaderboard" },
-  { id: "friends", label: "Friends" },
-  { id: "wheel", label: "Wheels" },
-  { id: "blackjack", label: "Blackjack" },
-  { id: "bombgame", label: "Daily Grid" },
-  { id: "avatars", label: "Avatars" },
-  { id: "sets", label: "Sets" },
-  { id: "workers", label: "Workers" }
-].map(({ id, label }) => (
-  <label key={id} className="flex items-center gap-2 mb-2">
-    <input
-      type="checkbox"
-      checked={topBarButtons.includes(id)}
-      onChange={() =>
-        setTopBarButtons((prev) =>
-          prev.includes(id) ? prev.filter((b) => b !== id) : [...prev, id]
-        )
-      }
-      className="accent-purple-500"
-    />
-    {label}
-  </label>
-))}
-
-            
+        {[
+          { id: "levels", label: "Level Rewards" },
+          { id: "inventory", label: "Inventory" },
+          { id: "leaderboard", label: "Leaderboard" },
+          { id: "friends", label: "Friends" },
+          { id: "wheel", label: "Wheels" },
+          { id: "blackjack", label: "Blackjack" },
+          { id: "bombgame", label: "Daily Grid" },
+          { id: "avatars", label: "Avatars" },
+          { id: "sets", label: "Sets" },
+          { id: "workers", label: "Workers" }
+        ].map(({ id, label }) => (
+          <label key={id} className="flex items-center gap-2 mb-2">
+            <input
+              type="checkbox"
+              checked={topBarButtons.includes(id)}
+              onChange={() =>
+                setTopBarButtons((prev) =>
+                  prev.includes(id) ? prev.filter((b) => b !== id) : [...prev, id]
+                )
+              }
+              className="accent-purple-500"
+            />
+            {label}
+          </label>
+        ))}
       </div>
+
+      {/* Live Preview */}
+      <div className="mt-6">
+  <h3 className="text-lg font-semibold mb-2 text-purple-300 drop-shadow">🔃 Reorder Buttons:</h3>
+  <DndContext
+  sensors={sensors}  // ✅ uses the top-level variable
+    collisionDetection={closestCenter}
+    onDragEnd={({ active, over }) => {
+      if (active.id !== over?.id) {
+        setTopBarButtons((items) => {
+          const oldIndex = items.indexOf(active.id);
+          const newIndex = items.indexOf(over.id);
+          return arrayMove(items, oldIndex, newIndex);
+        });
+      }
+    }}
+  >
+    <SortableContext items={topBarButtons} strategy={verticalListSortingStrategy}>
+      <div className="flex flex-wrap justify-center gap-2 bg-black/30 p-4 rounded-lg border-2 border-purple-500 shadow-lg min-h-[64px]">
+        {topBarButtons.length > 0 ? (
+          topBarButtons.map((btnKey) => (
+            <SortableButton key={btnKey} id={btnKey}>
+              <div className="pointer-events-none">{topBarButtonMap[btnKey]}</div>
+            </SortableButton>
+          ))
+        ) : (
+          <div className="text-sm text-gray-400 italic">No buttons selected</div>
+        )}
+      </div>
+    </SortableContext>
+  </DndContext>
+</div>
+
+
+
 
       <button
         onClick={() => {
@@ -1789,7 +1959,7 @@ setChatUser(f);
           );
           setShowTopBarEditor(false);
         }}
-        className="w-full py-2 bg-green-600 hover:bg-green-700 font-semibold rounded-md transition-transform hover:scale-105"
+        className="w-full py-2 mt-6 bg-green-600 hover:bg-green-700 font-semibold rounded-md transition-transform hover:scale-105"
       >
         💾 Save Changes
       </button>
@@ -1803,6 +1973,7 @@ setChatUser(f);
     </div>
   </div>
 )}
+
 
 
 
