@@ -129,6 +129,7 @@ const bannedUsernames = [
   "dirty sanchez",
   "doggie style",
   "doggiestyle",
+  "balls",
   "doggy style",
   "doggystyle",
   "dog style",
