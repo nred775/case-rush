@@ -268,3 +268,49 @@ input[type="number"].neon-input {
   color: #f9a8d4; /* pink-300 */
 }
 
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes shimmer-soft {
+  0% { background-position: -150% 0; }
+  100% { background-position: 150% 0; }
+}
+
+@keyframes shimmer-soft {
+  0% { background-position: -150% 0; }
+  100% { background-position: 150% 0; }
+}
+
+@keyframes shimmer-soft {
+  0% { background-position: -150% 0; }
+  100% { background-position: 150% 0; }
+}
+
+.rank-gold {
+  background: linear-gradient(90deg, #7c6513, #bfa234, #7c6513);
+  background-size: 300% 100%;
+  animation: shimmer-soft 6s linear infinite;
+  border: 2px solid #4d3e0a;
+  box-shadow: 0 0 6px rgba(191, 162, 52, 0.2);
+}
+
+.rank-silver {
+  background: linear-gradient(90deg, #5a5a5a, #a3a3a3, #5a5a5a);
+  background-size: 300% 100%;
+  animation: shimmer-soft 6s linear infinite;
+  border: 2px solid #3a3a3a;
+  box-shadow: 0 0 6px rgba(163, 163, 163, 0.15);
+}
+
+.rank-bronze {
+  background: linear-gradient(90deg, #8a4b23, #c07c42, #8a4b23);
+  background-size: 300% 100%;
+  animation: shimmer-soft 6s linear infinite;
+  border: 2px solid #4a2d14;
+  box-shadow: 0 0 6px rgba(192, 124, 66, 0.2);
+}
+
+
+

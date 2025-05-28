@@ -255,14 +255,14 @@ const sets = [
 {
   name: "Elite Trial 4",
   requiredItems: [
-    { name: "🪪 Identity Restoration Kit", rarity: "mythic", source: "🧠 Dream Archives" },
-    { name: "🔮 Memory Vault Seal", rarity: "legendary", source: "🧠 Dream Archives" },
-    { name: "💽 Experimental Data Core", rarity: "legendary", source: "🔬 Mind Lab Prime" },
-    { name: "🧬 Genetic Simulation Override", rarity: "epic", source: "🔬 Mind Lab Prime" },
-    { name: "🧠 Consciousness Uplink Badge", rarity: "legendary", source: "🔬 Mind Lab Prime" },
-    { name: "🗝️ Dream Entry Keycard", rarity: "legendary", source: "🧠 Dream Archives" },
-    { name: "🛏️ Sleepcycle Token", rarity: "epic", source: "🧠 Dream Archives" },
-    { name: "📊 Behavior Chart Fragment", rarity: "legendary", source: "🔬 Mind Lab Prime" }
+    { name: "👑 King’s Retirement Throne", rarity: "legendary", source: "👑 Royal Treatment" },
+    { name: "🪞 Throne Reflection Glass", rarity: "legendary", source: "👑 Royal Treatment" },
+    { name: "📀 Lucid Disk", rarity: "mythic", source: "🌀 Dream Sequence" },
+    { name: "🌀 Infinite Dream Shard", rarity: "mythic", source: "🌀 Dream Sequence" },
+    { name: "🎤 Golden Microphone Replica", rarity: "legendary", source: "🌟 Pop Culture" },
+    { name: "📀 Platinum Record Plaque", rarity: "legendary", source: "🌟 Pop Culture" },
+    { name: "💎 Flawless Earring Pair", rarity: "legendary", source: "💎 Diamond Dilemma" },
+    { name: "🔷 Rare Blue Diamond Chip", rarity: "legendary", source: "💎 Diamond Dilemma" }
   ],
   reward: 25
 },

@@ -988,10 +988,10 @@ if (!user) return (
   return (
   <Router>
     <>
-      <div className="min-h-screen text-white flex flex-col items-center relative overflow-x-hidden touch-manipulation bg-neon-pattern" style={{ overflowY: 'clip' }}>
+<div className="min-h-screen text-white flex flex-col items-center relative z-0 overflow-x-hidden touch-manipulation bg-neon-pattern" style={{ overflowY: 'clip' }}>
         {!user ? null : (
           <>
-<div className="fixed top-4 left-0 right-0 z-40 px-2 scrollbar-hide flex sm:justify-center">
+<div className="fixed top-4 left-0 right-0 z-10 px-2 scrollbar-hide flex sm:justify-center">
 <div className="flex items-center gap-2 bg-gray-900 px-2 py-2 sm:px-4 rounded-xl shadow-xl border border-gray-700 w-full sm:w-max overflow-x-auto sm:overflow-visible max-w-full">
 
 
@@ -1199,7 +1199,7 @@ if (!user) return (
 <div className="mt-24 mb-4 h-[5px]" />
 
 {/* 💰 Balance + 💠 Opals (moved below spacer) */}
-<div className="flex justify-center w-full mb-4 z-30 relative">
+<div className="flex justify-center w-full mb-4 z-0 relative">
   <div className="flex items-center gap-3">
     {/* Balance */}
     <div className="flex items-center gap-1 px-4 py-2 bg-gray-900 border-2 border-green-500 rounded-full shadow-[0_0_10px_rgba(34,197,94,0.8)] h-12 sm:h-14">
