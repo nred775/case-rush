@@ -173,6 +173,8 @@ const [macroButtonPos, setMacroButtonPos] = useState({ top: "50%", left: "50%" }
 const [isUILocked, setIsUILocked] = useState(false); // 👈 NEW
 const [loginBlocked, setLoginBlocked] = useState(false);
 const [trackedSet, setTrackedSet] = useState(null);
+const [topBarButtons, setTopBarButtons] = useState(["home", "notifications"]);
+const [showTopBarEditor, setShowTopBarEditor] = useState(false);
 
 
 
@@ -226,6 +228,38 @@ useEffect(() => {
 }, [user]);
 
 
+const topBarButtonMap = {
+  levels: (
+    <Link to="/levels" className="bg-yellow-500 hover:bg-yellow-600 text-black h-10 px-4 py-2 font-semibold rounded-md">🧬</Link>
+  ),
+  inventory: (
+    <Link to="/inventory" className="bg-green-600 hover:bg-green-700 text-white h-10 px-4 py-2 font-semibold rounded-md">🎒</Link>
+  ),
+  leaderboard: (
+    <Link to="/leaderboard" className="bg-cyan-500 hover:bg-cyan-600 text-white h-10 px-4 py-2 font-semibold rounded-md">🏆</Link>
+  ),
+  friends: (
+    <button onClick={() => setShowFriends(true)} className="bg-purple-600 hover:bg-purple-700 text-white h-10 px-4 py-2 font-semibold rounded-md">👥</button>
+  ),
+  wheel: (
+    <Link to="/wheel" className="bg-teal-600 hover:bg-teal-700 text-white h-10 px-4 py-2 font-semibold rounded-md">🎡</Link>
+  ),
+  blackjack: (
+    <Link to="/blackjack" className="bg-gray-700 hover:bg-gray-800 text-white h-10 px-4 py-2 font-semibold rounded-md">🃏</Link>
+  ),
+  bombgame: (
+    <Link to="/bombgame" className="bg-red-500 hover:bg-red-600 text-white h-10 px-4 py-2 font-semibold rounded-md">💣</Link>
+  ),
+  avatars: (
+    <Link to="/avatars" className="bg-purple-500 hover:bg-purple-600 text-white h-10 px-4 py-2 font-semibold rounded-md">🧍</Link>
+  ),
+  sets: (
+    <Link to="/sets" className="bg-indigo-500 hover:bg-indigo-600 text-white h-10 px-4 py-2 font-semibold rounded-md">📚</Link>
+  ),
+  workers: (
+    <Link to="/workers" className="bg-yellow-600 hover:bg-yellow-700 text-white h-10 px-4 py-2 font-semibold rounded-md">👷</Link>
+  ),
+};
 
 
 useEffect(() => {
@@ -608,6 +642,8 @@ const loadUserData = async (user) => {
       setClaimedRewards(data.claimedRewards || []);
       setProfileWorkers(data.profileWorkers || []);
       setUserBadges(data.badges || []);
+      setTopBarButtons(data.topBarButtons || ["home", "notifications"]);
+
 
 
       if ("username" in data && typeof data.username === "string" && data.username.trim() !== "") {
@@ -667,7 +703,9 @@ const getLevelFromXp = (xp) => {
   newXp = xp,
   newLevel = level,
   newClaimedRewards = claimedRewards,
-    newBadges = userBadges // 👈 add this as the 11th param
+    newBadges = userBadges, // 👈 add this as the 11th param
+      newTopBarButtons = topBarButtons, // ✅ new param
+
 
 ) => {
   if (!user || user.isAnonymous) return;
@@ -688,6 +726,8 @@ const getLevelFromXp = (xp) => {
   profileWorkers: profileWorkers,
   claimedRewards: newClaimedRewards,
     badges: newBadges, // ✅ ADD THIS LINE
+        topBarButtons: newTopBarButtons, // ✅ save to Firestore
+
 
 }, { merge: true }); // ✅ This line prevents deleting lastBombGameTime
 };
@@ -1070,7 +1110,17 @@ if (!user) return (
 
         <Routes>
 
-<Route path="/" element={<WelcomePage username={username} setShowFriends={setShowFriends} />} />
+<Route
+  path="/"
+  element={
+    <WelcomePage
+      username={username}
+      setShowFriends={setShowFriends}
+      resetCrate={resetCrate}
+      resetWheel={resetWheel}
+    />
+  }
+/>
 
 
           <Route path="/home" element={
@@ -1549,6 +1599,18 @@ className="text-sm px-2 py-1 rounded bg-gray-700 hover:bg-gray-600"
     </button>
   </div>
 )}
+
+<button
+  onClick={() => {
+    setShowSettings(false);
+    setShowTopBarEditor(true);
+  }}
+  className="w-full py-2 bg-purple-500 hover:bg-purple-600 text-white font-semibold rounded"
+>
+  🧩 Customize Top Bar
+</button>
+
+
 <button
   onClick={() => setShowDeleteConfirm(true)}
   className="w-full py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded mt-2"
@@ -1661,6 +1723,78 @@ setChatUser(f);
     </div>
   </div>
 )}
+
+{showTopBarEditor && (
+  <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 px-4">
+    <div className="bg-gray-900 border border-purple-500 rounded-2xl shadow-[0_0_20px_rgba(168,85,247,0.5)] p-6 w-full max-w-sm text-white text-center">
+      <h2 className="text-xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-500 drop-shadow-[0_0_8px_rgba(255,255,255,0.6)]">
+        🧩 Customize Top Bar
+      </h2>
+
+      <div className="mb-6 text-left">
+{[
+  "levels",       // 📦 Level Rewards
+  "inventory",    // 🎒 Inventory
+  "leaderboard",  // 🏆 Leaderboard
+  "friends",      // 👥 Friends
+  "wheel",        // 🎡 Wheels
+  "blackjack",    // 🃏 Blackjack
+  "bombgame",     // 💣 Daily Grid
+  "avatars",      // 🧍 Avatars
+  "sets",         // 📚 Sets
+  "workers"       // 👷 Workers
+].map((btn) => (
+          <label key={btn} className="flex items-center gap-2 mb-2">
+            <input
+              type="checkbox"
+              checked={topBarButtons.includes(btn)}
+              onChange={() =>
+                setTopBarButtons(prev =>
+                  prev.includes(btn)
+                    ? prev.filter(b => b !== btn)
+                    : [...prev, btn]
+                )
+              }
+              className="accent-purple-500"
+            />
+            {btn.charAt(0).toUpperCase() + btn.slice(1)}
+          </label>
+        ))}
+      </div>
+
+      <button
+        onClick={() => {
+          saveUserData(
+            balance,
+            inventory,
+            opals,
+            ownedAvatars,
+            equippedAvatar,
+            ownedWorkers,
+            completedSets,
+            xp,
+            level,
+            claimedRewards,
+            userBadges,
+            topBarButtons
+          );
+          setShowTopBarEditor(false);
+        }}
+        className="w-full py-2 bg-green-600 hover:bg-green-700 font-semibold rounded-md transition-transform hover:scale-105"
+      >
+        💾 Save Changes
+      </button>
+
+      <button
+        onClick={() => setShowTopBarEditor(false)}
+        className="w-full py-2 mt-3 bg-red-600 hover:bg-red-700 font-semibold rounded-md transition-transform hover:scale-105"
+      >
+        ❌ Cancel
+      </button>
+    </div>
+  </div>
+)}
+
 
 
 {showNotifications && (

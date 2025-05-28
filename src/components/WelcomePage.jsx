@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-export default function WelcomePage({ username, setShowFriends }) {
+export default function WelcomePage({ username, setShowFriends, resetCrate, resetWheel }) {
   return (
     <div className="py-12 flex justify-center">
       <div className="w-full max-w-5xl bg-[#111827] border border-white/10 rounded-2xl shadow-2xl p-6 flex flex-col items-center gap-12">
@@ -18,8 +18,9 @@ export default function WelcomePage({ username, setShowFriends }) {
 
         {/* Games Section - Dark Purple */}
         <Section title="🎮 Games" sectionClass="section-games" titleClass="title-games">
-          <NavButton to="/home" label="Cases" img="/images/cases.png" className="glow-cases" />
-          <NavButton to="/wheel" label="Wheels" img="/images/wheels.png" className="glow-cases" />
+          <NavButton to="/home" label="Cases" img="/images/cases.png" className="glow-cases" onClick={resetCrate} />
+<NavButton to="/wheel" label="Wheels" img="/images/wheels.png" className="glow-cases" onClick={resetWheel} />
+
           <NavButton to="/blackjack" label="Blackjack" img="/images/blackjack.png" className="glow-cases" />
           <NavButton to="/bombgame" label="Daily Grid" img="/images/daily-grid.png" className="glow-cases" />
         </Section>
