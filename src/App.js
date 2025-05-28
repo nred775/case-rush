@@ -1552,10 +1552,11 @@ onSpend={handleBuyWheel}
             return;
           }
 
-          if (bannedUsernames.some((bad) => lower.includes(bad))) {
+          if (bannedUsernames.some((bad) => lower.includes(bad.toLowerCase()))) {
   setUsernameError("That username is not allowed.");
   return;
 }
+
 
 
           const existing = await getDoc(doc(db, "usernames", lower));
