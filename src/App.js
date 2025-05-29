@@ -62,6 +62,9 @@ import { CSS } from '@dnd-kit/utilities';
 
 
 
+
+
+
 const enforceWriteLimit = async () => {
   const usageRef = doc(db, "usage", "global");
   const usageSnap = await getDoc(usageRef);
@@ -248,6 +251,35 @@ useEffect(() => {
     rtdbRemove(userStatusRef).catch(console.error);
   };
 }, [user]);
+
+  // Inside App component
+useEffect(() => {
+  const refreshRef = ref(rtdb, "global/refreshVersion");
+
+  // 👇 Initialize local storage if missing
+  if (!localStorage.getItem("refreshVersion")) {
+    get(refreshRef).then((snap) => {
+      if (snap.exists()) {
+        localStorage.setItem("refreshVersion", snap.val());
+      }
+    });
+  }
+
+  const unsub = onValue(refreshRef, (snap) => {
+    const version = snap.val();
+    if (!version) return;
+
+    const storedVersion = localStorage.getItem("refreshVersion");
+    if (version !== storedVersion) {
+      localStorage.setItem("refreshVersion", version);
+      window.location.reload(); // 🔄 Refresh the app
+    }
+  });
+
+  return () => unsub();
+}, []);
+
+
 
 function SortableButton({ id, children }) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
@@ -1139,6 +1171,7 @@ if (!user) return (
         Settings
       </span>
     </div>
+
 
     {/* 🚪 Log Out */}
     <div className="relative group">

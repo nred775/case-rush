@@ -45,6 +45,8 @@ const AuthPage = ({ onLogin, setLoginBlocked, loginBlocked }) => {
   const [showResetBox, setShowResetBox] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
   const [blockedMessage, setBlockedMessage] = useState("");
+  const [showSupportBox, setShowSupportBox] = useState(false);
+
 
 
 const loginBlockedRef = useRef(false);
@@ -172,14 +174,25 @@ onLogin(userCred.user);
           onChange={(e) => setPassword(e.target.value)}
           required
         />
+
         {!isRegistering && (
-          <p
-            onClick={() => setShowResetBox(true)}
-            className="text-sm text-yellow-400 hover:underline cursor-pointer text-right"
-          >
-            Forgot Password?
-          </p>
-        )}
+  <div className="flex justify-between text-sm mt-[-10px]">
+    <span
+      onClick={() => setShowSupportBox(true)}
+      className="text-yellow-400 hover:underline cursor-pointer"
+    >
+      Contact Support
+    </span>
+    <span
+      onClick={() => setShowResetBox(true)}
+      className="text-yellow-400 hover:underline cursor-pointer"
+    >
+      Forgot Password?
+    </span>
+  </div>
+)}
+
+       
         <button
           type="submit"
           className="w-full bg-gradient-to-r from-yellow-400 via-pink-500 to-fuchsia-500 text-black font-bold py-2 rounded-lg hover:brightness-110 transition"
@@ -249,6 +262,32 @@ onLogin(userCred.user);
           </div>
         </div>
       )}
+
+      {showSupportBox && (
+  <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+    <div className="bg-gray-900 p-6 rounded-xl shadow-xl w-full max-w-sm text-white relative">
+      <button
+        onClick={() => setShowSupportBox(false)}
+        className="absolute top-2 right-2 text-red-400 hover:text-red-600 text-lg"
+      >
+        ✖
+      </button>
+      <h2 className="text-xl font-bold mb-4 text-center text-yellow-300">
+        📧 Contact Support
+      </h2>
+      <p className="text-sm text-center mb-4 break-words">Email: <span className="font-mono">stackedodds.net@gmail.com</span></p>
+      <button
+        onClick={() => {
+          navigator.clipboard.writeText("stackedodds.net@gmail.com");
+        }}
+        className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 rounded transition"
+      >
+        📋 Copy to Clipboard
+      </button>
+    </div>
+  </div>
+)}
+
     </div>
   );
 };
