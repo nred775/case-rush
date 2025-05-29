@@ -65,34 +65,56 @@ import { CSS } from '@dnd-kit/utilities';
 
 
 
-const enforceWriteLimit = async () => {
+const enforceUsageLimit = async (type) => {
   const usageRef = doc(db, "usage", "global");
   const usageSnap = await getDoc(usageRef);
-  const data = usageSnap.data();
   const now = new Date();
-  const today = now.toISOString().split("T")[0]; // "YYYY-MM-DD"
+  const today = now.toISOString().split("T")[0];
+
+  const fieldMap = {
+    write: "writeCount",
+    read: "readCount",
+    delete: "deleteCount"
+  };
+
+  const limitMap = {
+    write: "writeLimit",
+    read: "readLimit",
+    delete: "deleteLimit"
+  };
+
+  const countKey = fieldMap[type];
+  const limitKey = limitMap[type];
+
+  let data = usageSnap.exists() ? usageSnap.data() : null;
 
   if (!data || data.date !== today) {
+    // Reset for new day
     await setDoc(usageRef, {
       date: today,
-      writeCount: 1,
-      limit: 20000,
+      writeCount: type === "write" ? 1 : 0,
+      readCount: type === "read" ? 1 : 0,
+      deleteCount: type === "delete" ? 1 : 0,
+      writeLimit: 20000,
+      readLimit: 50000,
+      deleteLimit: 20000
     });
     return true;
   }
 
-  if (data.writeCount >= data.limit) {
-    alert("⚠️ Site is down. Data won’t be saved. Try again later.");
+  if (data[countKey] >= data[limitKey]) {
+    alert(`⚠️ ${type} limit reached. Operation blocked.`);
     return false;
   }
 
   await setDoc(usageRef, {
     ...data,
-    writeCount: data.writeCount + 1,
+    [countKey]: (data[countKey] || 0) + 1
   });
 
   return true;
 };
+
 
 
 
@@ -490,7 +512,8 @@ useEffect(() => {
         }
       ];
     });
-
+const ok = await enforceUsageLimit("delete");
+if (!ok) return;
     await deleteDoc(doc(db, "users", user.uid, "friendRequests", reqDoc.id));
 
     console.log(`✅ Friend added: ${data.from}`);
@@ -741,6 +764,8 @@ const loadUserData = async (user) => {
   if (!user || user.isAnonymous) return;
 
   try {
+    const okRead = await enforceUsageLimit("read");
+if (!okRead) return;
     const snap = await getDoc(doc(db, "users", user.uid));
     if (snap.exists()) {
       const data = snap.data();
@@ -825,8 +850,8 @@ const getLevelFromXp = (xp) => {
 ) => {
   if (!user || user.isAnonymous) return;
 
-  const ok = await enforceWriteLimit(); // ✅ always check here
-  if (!ok) return; // 🛑 bail if limit is hit
+  const okWrite = await enforceUsageLimit("write");
+if (!okWrite) return;
 
   await setDoc(doc(db, "users", user.uid), {
   balance: newBalance,
