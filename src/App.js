@@ -55,6 +55,10 @@ import {
   verticalListSortingStrategy
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import Achievements from "./components/Achievements"; // Add at the top
+import Slots from "./components/Slots";
+import SlotsPanel from "./components/SlotsPanel";
+import HorseRace from "./components/HorseRace"; // ✅ Add this import
 
 
 
@@ -115,6 +119,18 @@ const enforceUsageLimit = async (type) => {
   return true;
 };
 
+
+const allMilestoneDefs = [
+  { key: "wheelsSpun", milestones: [10, 100, 10000, 1000000] },
+  { key: "casesOpened", milestones: [10, 100, 10000, 1000000] },
+  { key: "dailyGrids", milestones: [1, 5, 10, 50, 100] },
+  { key: "blackjackWins", milestones: [1, 10, 100] },
+  { key: "workersOwned", milestones: [1, 5, 10] },
+  { key: "avatarsOwned", milestones: [1, 5] },
+  { key: "setsCompleted", milestones: [1, 5, 10, 25] },
+  { key: "slotsSpun", milestones: [1, 5, 10, 25] },          // 👈 Add this
+  { key: "horseRaces", milestones: [10, 100, 10000, 1000000] }, // 👈 And this
+];
 
 
 
@@ -221,6 +237,13 @@ const [loginBlocked, setLoginBlocked] = useState(false);
 const [trackedSet, setTrackedSet] = useState(null);
 const [topBarButtons, setTopBarButtons] = useState(["home", "notifications"]);
 const [showTopBarEditor, setShowTopBarEditor] = useState(false);
+const [wheelsSpun, setWheelsSpun] = useState(0);
+const [casesOpened, setCasesOpened] = useState(0);
+const [dailyGrids, setDailyGrids] = useState(0);
+const [blackjackWins, setBlackjackWins] = useState(0);
+const [claimedAchievements, setClaimedAchievements] = useState([]);
+const [slotsSpun, setSlotsSpun] = useState(0);
+const [horseRaces, setHorseRaces] = useState(0);
 
 
 
@@ -268,6 +291,8 @@ useEffect(() => {
       });
   });
 
+  
+
   return () => {
     handleConnected(); // unsubscribe from .info/connected
     rtdbRemove(userStatusRef).catch(console.error);
@@ -300,6 +325,78 @@ useEffect(() => {
 
   return () => unsub();
 }, []);
+
+useEffect(() => {
+  const hasNewAchievement = notifications.some(n => n.type === "achievement");
+  if (hasNewAchievement) {
+    setShowNotifications(true);
+  }
+}, [notifications]);
+
+
+
+
+useEffect(() => {
+  const completedKeys = JSON.parse(localStorage.getItem("completedAchievements") || "[]");
+  const newCompleted = [...completedKeys];
+
+  allMilestoneDefs.forEach(({ key, milestones }) => {
+    let stat = 0;
+
+    if (key === "avatarsOwned") {
+  stat = ownedAvatars.filter(name =>
+    ![
+      "Beta Bandit",
+      "Velocity Viper",
+      "Boom Buddy",
+      "Boss Hog",
+      "Wheel Master",
+      "Case Crusher",
+      "Blackjack Boss",
+      "Racing Legend", // 👈 Add this line
+    ].includes(name)
+  ).length;
+    } else if (key === "workersOwned") {
+      stat = ownedWorkers.length;
+    } else if (key === "setsCompleted") {
+      stat = completedSets.length;
+    } else {
+  stat = (() => {
+  switch (key) {
+    case "wheelsSpun": return wheelsSpun;
+    case "casesOpened": return casesOpened;
+    case "dailyGrids": return dailyGrids;
+    case "blackjackWins": return blackjackWins;
+    case "slotsSpun": return slotsSpun;          // ✅ Add this
+    case "horseRaces": return horseRaces;        // ✅ And this
+    default: return 0;
+  }
+})();
+
+}
+
+
+    milestones.forEach((target) => {
+      const uniqueKey = `${key}_${target}`;
+      if (stat >= target && !completedKeys.includes(uniqueKey)) {
+        newCompleted.push(uniqueKey);
+      }
+    });
+  });
+
+  if (newCompleted.length > completedKeys.length) {
+    localStorage.setItem("completedAchievements", JSON.stringify(newCompleted));
+  }
+}, [
+  wheelsSpun,
+  casesOpened,
+  dailyGrids,
+  blackjackWins,
+  ownedAvatars,
+  ownedWorkers,
+  completedSets,
+]);
+
 
 
 
@@ -531,7 +628,7 @@ if (!ok) return;
       }
     });
 
-    setNotifications(newNotifs);
+setNotifications((prev) => [...prev, ...newNotifs]);
   });
 
   return () => unsub();
@@ -568,6 +665,8 @@ setChatUser({ uid: data.fromUid, username: data.from });
 
   return () => unsub();
 }, [user]);
+
+
 
 
 
@@ -783,6 +882,14 @@ if (!okRead) return;
       setProfileWorkers(data.profileWorkers || []);
       setUserBadges(data.badges || []);
       setTopBarButtons(data.topBarButtons || ["home", "notifications"]);
+setClaimedAchievements(data.claimedAchievements || []);
+setWheelsSpun(data.wheelsSpun || 0);
+setCasesOpened(data.casesOpened || 0);
+setDailyGrids(data.dailyGrids || 0);
+setBlackjackWins(data.blackjackWins || 0);
+setSlotsSpun(data.slotsSpun || 0);       // ✅
+setHorseRaces(data.horseRaces || 0);     // ✅
+
 
 
 
@@ -843,34 +950,54 @@ const getLevelFromXp = (xp) => {
   newXp = xp,
   newLevel = level,
   newClaimedRewards = claimedRewards,
-    newBadges = userBadges, // 👈 add this as the 11th param
-      newTopBarButtons = topBarButtons, // ✅ new param
+  newBadges = userBadges, // 👈 add this as the 11th param
+  newTopBarButtons = topBarButtons, // ✅ new param
+  newClaimedAchievements = claimedAchievements,
+newWheelsSpun = wheelsSpun,
+newCasesOpened = casesOpened,
+newDailyGrids = dailyGrids,
+newBlackjackWins = blackjackWins,
+newHorseRaces = horseRaces,     // ✅ move horseRaces here
+newSlotsSpun = slotsSpun        // ✅ move slotsSpun to last
 
 
 ) => {
   if (!user || user.isAnonymous) return;
 
   const okWrite = await enforceUsageLimit("write");
-if (!okWrite) return;
+  if (!okWrite) return;
 
-  await setDoc(doc(db, "users", user.uid), {
-  balance: newBalance,
-  inventory: newInventory,
-  opals: newOpals,
-  ownedAvatars: newOwnedAvatars,
-  equippedAvatar: newEquippedAvatar,
-  ownedWorkers: newOwnedWorkers,
-  completedSets: newCompletedSets,
-  xp: newXp,
-  level: newLevel,
-  profileWorkers: profileWorkers,
-  claimedRewards: newClaimedRewards,
-    badges: newBadges, // ✅ ADD THIS LINE
-        topBarButtons: newTopBarButtons, // ✅ save to Firestore
+  const data = {
+    balance: newBalance,
+    inventory: newInventory,
+    opals: newOpals,
+    ownedAvatars: newOwnedAvatars,
+    equippedAvatar: newEquippedAvatar,
+    ownedWorkers: newOwnedWorkers,
+    completedSets: newCompletedSets,
+    xp: newXp,
+    level: newLevel,
+    profileWorkers: profileWorkers,
+    claimedRewards: newClaimedRewards,
+    badges: newBadges,
+    topBarButtons: newTopBarButtons,
+    claimedAchievements: newClaimedAchievements,
+    wheelsSpun: newWheelsSpun,
+    casesOpened: newCasesOpened,
+    dailyGrids: newDailyGrids,
+    blackjackWins: newBlackjackWins,
+     slotsSpun: newSlotsSpun,        // ✅ Add to Firestore
+    horseRaces: newHorseRaces      // ✅ Add to Firestore
+  };
 
+  // ✅ Remove any fields with undefined values
+  const filteredData = Object.fromEntries(
+    Object.entries(data).filter(([_, v]) => v !== undefined)
+  );
 
-}, { merge: true }); // ✅ This line prevents deleting lastBombGameTime
+  await setDoc(doc(db, "users", user.uid), filteredData, { merge: true });
 };
+
 
 
 
@@ -912,6 +1039,8 @@ localStorage.setItem("macroBlocked", "true");
 
 
   if (balance >= crate.cost) {
+    const newCasesOpened = casesOpened + 1;
+setCasesOpened(newCasesOpened);
     const rarity = getRarity(crate.cost);
     const gainedXp = getXpFromRarity(rarity);
     const newXp = xp + gainedXp;
@@ -921,7 +1050,25 @@ localStorage.setItem("macroBlocked", "true");
     setXp(newXp);
     setLevel(newLevel);
 
-    saveUserData(balance - crate.cost, inventory, opals, ownedAvatars, equippedAvatar, ownedWorkers, completedSets, newXp, newLevel);
+saveUserData(
+  balance - crate.cost,
+  inventory,
+  opals,
+  ownedAvatars,
+  equippedAvatar,
+  ownedWorkers,
+  completedSets,
+  newXp,
+  newLevel,
+  claimedRewards,
+  userBadges,
+  topBarButtons,
+  claimedAchievements,
+  wheelsSpun,
+  newCasesOpened,
+  dailyGrids,
+  blackjackWins
+);
 
     setSelectedCrate(crate);
   }
@@ -950,7 +1097,29 @@ const handleBuyWheel = (wheelCost) => {
   setXp(newXp);
   setLevel(newLevel);
 
-  saveUserData(newBalance, inventory, opals, ownedAvatars, equippedAvatar, ownedWorkers, completedSets, newXp, newLevel);
+  const newWheelsSpun = wheelsSpun + 1;
+setWheelsSpun(newWheelsSpun);
+
+
+saveUserData(
+  newBalance,
+  inventory,
+  opals,
+  ownedAvatars,
+  equippedAvatar,
+  ownedWorkers,
+  completedSets,
+  newXp,
+  newLevel,
+  claimedRewards,
+  userBadges,
+  topBarButtons,
+  claimedAchievements,
+  newWheelsSpun,
+  casesOpened,
+  dailyGrids,
+  blackjackWins
+);
 };
 
 
@@ -1049,7 +1218,7 @@ if (!user) return (
         {!user ? null : (
           <>
 <div className="fixed top-4 left-0 right-0 z-10 px-2 scrollbar-hide flex sm:justify-center">
-<div className="flex items-center gap-2 bg-gray-900 px-2 py-2 sm:px-4 rounded-xl shadow-xl border border-gray-700 w-full sm:w-max overflow-x-auto sm:overflow-visible max-w-full">
+<div className="flex items-center gap-2 bg-gray-900 px-2 py-2 sm:px-4 rounded-xl shadow-xl border border-gray-700 w-full sm:w-max overflow-x-auto sm:overflow-visible max-w-full scrollbar-hide">
 
 
                 
@@ -1137,7 +1306,7 @@ if (!user) return (
       <Droppable droppableId="topBarButtons" direction="horizontal">
         {(provided) => (
           <div
-            className="flex flex-row gap-2"
+            className="flex flex-row gap-2 flex-nowrap min-w-0"
             {...provided.droppableProps}
             ref={provided.innerRef}
           >
@@ -1316,6 +1485,78 @@ if (!user) return (
     />
   }
 />
+<Route path="/slots" element={<Slots
+  opals={opals}
+  setOpals={setOpals}
+  saveUserData={saveUserData}
+  slotsSpun={slotsSpun}
+  setSlotsSpun={setSlotsSpun}
+  claimedAchievements={claimedAchievements}
+  wheelsSpun={wheelsSpun}
+  casesOpened={casesOpened}
+  dailyGrids={dailyGrids}
+  blackjackWins={blackjackWins}
+  horseRaces={horseRaces}
+  xp={xp}
+  setXp={setXp}
+  level={level}
+  setLevel={setLevel}
+/>
+
+} />
+<Route path="/slots-panel" element={<SlotsPanel />} />
+<Route path="/achievements" element={
+  <Achievements
+    stats={{
+  wheelsSpun,
+  casesOpened,
+  dailyGrids,
+  blackjackWins,
+  slotsSpun,            // ✅ ADD THIS
+  horseRaces,           // ✅ AND THIS
+  workersOwned: ownedWorkers.length,
+  avatarsOwned: ownedAvatars.filter(name =>
+    ![
+      "Beta Bandit",
+      "Velocity Viper",
+      "Boom Buddy",
+      "Boss Hog",
+      "Wheel Master",
+      "Case Crusher",
+      "Blackjack Boss",
+    ].includes(name)
+  ).length,
+  setsCompleted: completedSets.length,
+}}
+
+    opals={opals}
+    setOpals={setOpals}
+    claimedAchievements={claimedAchievements}
+    setClaimedAchievements={setClaimedAchievements}
+    saveUserData={saveUserData}
+    balance={balance}
+    inventory={inventory}
+    ownedAvatars={ownedAvatars}
+    setOwnedAvatars={setOwnedAvatars} // ✅ ADD THIS LINE
+    equippedAvatar={equippedAvatar}
+    ownedWorkers={ownedWorkers}
+    completedSets={completedSets}
+    xp={xp}
+    level={level}
+    claimedRewards={claimedRewards}
+    userBadges={userBadges}
+    topBarButtons={topBarButtons}
+    wheelsSpun={wheelsSpun}
+    casesOpened={casesOpened}
+    dailyGrids={dailyGrids}
+    blackjackWins={blackjackWins}
+    setNotifications={setNotifications}
+
+  />
+} />
+
+
+
 
 
           <Route path="/home" element={
@@ -1338,6 +1579,22 @@ if (!user) return (
       trackedSet={trackedSet}
     />
   )
+} />
+
+<Route path="/horse-race" element={
+  <HorseRace
+  balance={balance}
+  setBalance={setBalance}
+  saveUserData={saveUserData}
+  horseRaces={horseRaces}
+  setHorseRaces={setHorseRaces}
+  claimedAchievements={claimedAchievements}
+  wheelsSpun={wheelsSpun}
+  casesOpened={casesOpened}
+  dailyGrids={dailyGrids}
+  blackjackWins={blackjackWins}
+/>
+
 } />
 
 
@@ -1387,6 +1644,9 @@ if (!user) return (
       opals={opals}
       setBalance={setBalance}
       setOpals={setOpals}
+      dailyGrids={dailyGrids}
+  setDailyGrids={setDailyGrids}
+  saveUserData={saveUserData}
     />
   }
 />
@@ -1415,8 +1675,25 @@ if (!user) return (
     balance={balance}
     setBalance={setBalance}
     saveUserData={saveUserData}
+    blackjackWins={blackjackWins}
+    setBlackjackWins={setBlackjackWins}
+    opals={opals}
+    ownedAvatars={ownedAvatars}
+    equippedAvatar={equippedAvatar}
+    ownedWorkers={ownedWorkers}
+    completedSets={completedSets}
+    xp={xp}
+    level={level}
+    claimedRewards={claimedRewards}
+    userBadges={userBadges}
+    topBarButtons={topBarButtons}
+    claimedAchievements={claimedAchievements}
+    wheelsSpun={wheelsSpun}
+    casesOpened={casesOpened}
+    dailyGrids={dailyGrids}
   />
 } />
+
 
 
 
@@ -2026,10 +2303,11 @@ setChatUser(f);
 {showNotifications && (
   <NotificationsPanel
     notifications={notifications}
-    setNotifications={setNotifications}
     onClose={() => setShowNotifications(false)}
+    setNotifications={setNotifications}
   />
 )}
+
 {selectedProfileUser && (
   <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
     <div className="bg-gray-900 rounded-2xl max-w-3xl w-full relative overflow-y-auto max-h-[90vh] custom-scroll">

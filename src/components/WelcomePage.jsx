@@ -14,15 +14,19 @@ export default function WelcomePage({ username, setShowFriends, resetCrate, rese
           👋 Welcome, {username}!
         </h2>
 
-        {/* Core Section - Light Blue */}
-        <Section title="📦 Core" sectionClass="section-core" titleClass="title-core">
-          <NavButton to="/levels" label="Level Rewards" img="/images/level-rewards.png" className="glow-core" />
-          <NavButton to="/inventory" label="Inventory" img="/images/inventory.png" className="glow-core" />
-          <NavButton to="/leaderboard" label="Leaderboard" img="/images/leaderboard.png" className="glow-core" />
-          <NavButton onClick={() => setShowFriends(true)} label="Friends" img="/images/friends.png" className="glow-core" />
-          {/* New Information button */}
-          <NavButton to="/game-ideas" label="Information" img="/images/information.png" className="glow-core" />
-        </Section>
+ {/* Core Section - Light Blue */}
+<Section title="📦 Core" sectionClass="section-core" titleClass="title-core">
+    <NavButton to="/inventory" label="Inventory" img="/images/inventory.png" className="glow-core" />
+
+  <NavButton to="/levels" label="Level Rewards" img="/images/level-rewards.png" className="glow-core" />
+  <NavButton to="/sets" label="Sets" img="/images/sets.png" className="glow-core" />
+    <NavButton to="/achievements" label="Achievements" img="/images/achievements.png" className="glow-core" />
+
+</Section>
+
+
+
+
 
         {/* Games Section - Dark Purple */}
         <Section title="🎮 Games" sectionClass="section-games" titleClass="title-games">
@@ -30,14 +34,23 @@ export default function WelcomePage({ username, setShowFriends, resetCrate, rese
           <NavButton to="/wheel" label="Wheels" img="/images/wheels.png" className="glow-cases" onClick={resetWheel} />
           <NavButton to="/blackjack" label="Blackjack" img="/images/blackjack.png" className="glow-cases" />
           <NavButton to="/bombgame" label="Daily Grid" img="/images/daily-grid.png" className="glow-cases" />
+            <NavButton to="/slots-panel" label="Slots" img="/images/slots.png" className="glow-cases" />
+<NavButton to="/horse-race" label="Horse Race" img="/images/horse.png" className="glow-cases" />
+
         </Section>
 
-        {/* Opals Section - Light Pink */}
-        <Section title="💠 Opals" sectionClass="section-opals" titleClass="title-opals">
-          <NavButton to="/avatars" label="Avatars" img="/images/avatars.png" className="glow-avatars" />
-          <NavButton to="/sets" label="Sets" img="/images/sets.png" className="glow-sets" />
-          <NavButton to="/workers" label="Workers" img="/images/workers.png" className="glow-workers" />
-        </Section>
+        {/* Store Section - Light Pink (using old Opals styles) */}
+<Section title="🛒 Store" sectionClass="section-opals" titleClass="title-opals">
+  <NavButton to="/avatars" label="Avatars" img="/images/avatars.png" className="glow-avatars" />
+  <NavButton to="/workers" label="Workers" img="/images/workers.png" className="glow-workers" />
+</Section>
+
+        {/* Social Section - Cyan */}
+<Section title="🌐 Social" sectionClass="section-social" titleClass="title-social">
+  <NavButton to="/leaderboard" label="Leaderboard" img="/images/leaderboard.png" className="glow-social" />
+  <NavButton onClick={() => setShowFriends(true)} label="Friends" img="/images/friends.png" className="glow-social" />
+  <NavButton to="/game-ideas" label="Information" img="/images/information.png" className="glow-social" />
+</Section>
       </div>
     </div>
   );

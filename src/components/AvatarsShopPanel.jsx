@@ -11,8 +11,14 @@ export default function AvatarsShopPanel({ ownedAvatars, equippedAvatar, opals, 
   .filter((avatar) => {
   const isLocked = avatar.lockedLevel && !ownedAvatars.includes(avatar.name);
   const isGridOnly = avatar.gridUnlock && !ownedAvatars.includes(avatar.name);
-  return !isLocked && !isGridOnly;
+  const isAchievementOnly = avatar.cost === 0 &&
+    !avatar.lockedLevel &&
+    !avatar.gridUnlock &&
+    !ownedAvatars.includes(avatar.name);
+
+  return !isLocked && !isGridOnly && !isAchievementOnly;
 })
+
 
 
   .sort((a, b) => a.cost - b.cost)

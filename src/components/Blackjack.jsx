@@ -44,7 +44,29 @@ const suitIcons = {
 };
 
 
-const Blackjack = ({ balance, setBalance, saveUserData }) => {
+const Blackjack = ({
+  balance,
+  setBalance,
+  saveUserData,
+  blackjackWins,
+  setBlackjackWins,
+  opals,
+  ownedAvatars,
+  equippedAvatar,
+  ownedWorkers,
+  completedSets,
+  xp,
+  level,
+  claimedRewards,
+  userBadges,
+  topBarButtons,
+  claimedAchievements,
+  wheelsSpun,
+  casesOpened,
+  dailyGrids,
+  horseRaces,
+  slotsSpun
+}) => {
   const [deck, setDeck] = useState([]);
   const [playerHand, setPlayerHand] = useState([]);
   const [dealerHand, setDealerHand] = useState([]);
@@ -207,12 +229,41 @@ setTimeout(() => {
   setShowDealerTotal(true);
 
   if (dealerTotal > 21 || playerTotal > dealerTotal) {
-    setMessage("🎉 You win!");
-    setBalance((prev) => {
-      const newBalance = prev + bet * 2;
-      saveUserData(newBalance, []);
-      return newBalance;
-    });
+  const newBalance = balance + bet * 2;
+  let newWins = blackjackWins;
+
+  // Only track a "21" win for the achievement
+  if (playerTotal === 21) {
+    newWins += 1;
+    setBlackjackWins(newWins);
+  }
+
+  setMessage("🎉 You win!");
+  setBalance(newBalance);
+  saveUserData(
+  newBalance,
+  [],             // inventory
+  opals,
+  ownedAvatars,
+  equippedAvatar,
+  ownedWorkers,
+  completedSets,
+  xp,
+  level,
+  claimedRewards,
+  userBadges,
+  topBarButtons,
+  claimedAchievements,
+  wheelsSpun,
+  casesOpened,
+  dailyGrids,
+  newWins,
+  horseRaces,     // ✅ Add this
+  slotsSpun       // ✅ And this
+);
+
+
+
   } else if (dealerTotal === playerTotal) {
     setMessage("🤝 It's a tie!");
     setBalance((prev) => {
@@ -302,7 +353,8 @@ setTimeout(() => {
 
 <button
   onClick={startGame}
-  disabled={balance < bet || bet > 25000}
+  disabled={bet < 1 || balance < bet || bet > 25000}
+
   className={`px-6 py-2 rounded-full text-lg font-semibold transition-transform drop-shadow-glow ${
     balance < bet || bet > 25000
       ? "bg-gray-600 cursor-not-allowed opacity-50"
@@ -324,41 +376,44 @@ setTimeout(() => {
 
   <div className="flex justify-center gap-3">
     {dealerHand.map((card, i) => (
+  <div
+    key={i}
+    className="relative w-28 h-40 sm:w-32 sm:h-48 perspective"
+  >
+    <div
+      className={`w-full h-full transition-transform duration-1000 transform-style-preserve-3d ${
+        card.hidden && !revealDealerCard ? "" : "rotate-y-180"
+      }`}
+    >
+      {/* Back of card (shows when hidden) */}
+      <div className="absolute inset-0 backface-hidden rounded-xl bg-gray-700 border-2 border-gray-500 shadow-inner" />
+
+      {/* Front of card (shows when flipped) */}
       <div
-        key={i}
-        className="opacity-0 animate-fade-in-up"
-        style={{ animationDelay: `${i * 400}ms`, animationFillMode: "forwards" }}
+        className={`absolute inset-0 backface-hidden rotate-y-180 rounded-2xl border-2 shadow-md bg-gradient-to-br from-gray-900 to-gray-800 flex flex-col justify-between p-2 font-serif ${
+          card.suit === "♥" || card.suit === "♦"
+            ? "text-pink-400 border-pink-500 shadow-[0_0_12px_rgba(244,114,182,0.6)]"
+            : "text-cyan-300 border-cyan-500 shadow-[0_0_12px_rgba(34,211,238,0.6)]"
+        }`}
       >
-        <div className="relative w-28 h-40 sm:w-32 sm:h-48 perspective card-hover-zoom">
-          <div
-            className={`w-full h-full transition-transform duration-1000 transform-style-preserve-3d ${
-              card.hidden && !revealDealerCard ? "" : "rotate-y-180"
-            }`}
-          >
-            {/* Back of card */}
-            <div className="absolute inset-0 backface-hidden rounded-xl bg-gray-700 border-2 border-gray-500 shadow-inner" />
-            {/* Front of card */}
-            <div className={`absolute inset-0 backface-hidden rotate-y-180 rounded-2xl border-2 shadow-md bg-gradient-to-br from-gray-900 to-gray-800 flex flex-col justify-between p-2 font-serif ${
-              card.suit === "♥" || card.suit === "♦"
-                ? "text-pink-400 border-pink-500 shadow-[0_0_12px_rgba(244,114,182,0.6)]"
-                : "text-cyan-300 border-cyan-500 shadow-[0_0_12px_rgba(34,211,238,0.6)]"
-            }`}>
-              <div className="absolute top-1 left-2 text-xs sm:text-sm font-bold drop-shadow-[0_0_4px_rgba(255,255,255,0.4)]">
-                {card.value}
-                <div>{suitIcons[card.suit]}</div>
-              </div>
-              <div className="absolute bottom-1 right-2 text-xs sm:text-sm font-bold rotate-180 drop-shadow-[0_0_4px_rgba(255,255,255,0.4)]">
-                {card.value}
-                <div>{suitIcons[card.suit]}</div>
-              </div>
-              <div className="flex-grow flex items-center justify-center text-3xl drop-shadow-[0_0_6px_rgba(255,255,255,0.4)]">
-                {suitIcons[card.suit]}
-              </div>
-            </div>
-          </div>
+        <div className="absolute top-1 left-2 text-xs sm:text-sm font-bold drop-shadow-[0_0_4px_rgba(255,255,255,0.4)]">
+          {card.value}
+          <div>{card.suit}</div>
+        </div>
+        <div className="absolute bottom-1 right-2 text-xs sm:text-sm font-bold rotate-180 drop-shadow-[0_0_4px_rgba(255,255,255,0.4)]">
+          {card.value}
+          <div>{card.suit}</div>
+        </div>
+        <div className="flex-grow flex items-center justify-center text-3xl drop-shadow-[0_0_6px_rgba(255,255,255,0.4)]">
+          {card.suit}
         </div>
       </div>
-    ))}
+    </div>
+  </div>
+))}
+
+
+
   </div>
 </div>
 
@@ -369,32 +424,39 @@ Your Hand ({displayedHandValue})
 
   <div className="flex justify-center gap-3">
     {playerHand.map((card, i) => (
+  <div
+    key={i}
+    className="relative w-28 h-40 sm:w-32 sm:h-48 perspective"
+    style={{ animationDelay: `${i * 400}ms`, animationFillMode: "forwards" }}
+  >
+    <div className="w-full h-full rotate-y-180 transform-style-preserve-3d transition-transform duration-1000">
+      {/* Back of card */}
+      <div className="absolute inset-0 backface-hidden rounded-xl bg-gray-700 border-2 border-gray-500 shadow-inner" />
+
+      {/* Front of card */}
       <div
-        key={i}
-        className="opacity-0 animate-fade-in-up"
-        style={{ animationDelay: `${i * 400}ms`, animationFillMode: "forwards" }}
+        className={`absolute inset-0 backface-hidden rotate-y-180 rounded-2xl border-2 shadow-md bg-gradient-to-br from-gray-900 to-gray-800 flex flex-col justify-between p-2 font-serif ${
+          card.suit === "♥" || card.suit === "♦"
+            ? "text-pink-400 border-pink-500 shadow-[0_0_12px_rgba(244,114,182,0.6)]"
+            : "text-cyan-300 border-cyan-500 shadow-[0_0_12px_rgba(34,211,238,0.6)]"
+        }`}
       >
-        <div
-          className={`w-28 h-40 sm:w-32 sm:h-48 rounded-2xl border-2 shadow-[0_0_12px_rgba(255,255,255,0.2)] bg-gradient-to-br from-gray-900 to-gray-800 flex flex-col justify-between p-2 font-serif relative card-hover-zoom ${
-            card.suit === "♥" || card.suit === "♦"
-              ? "text-pink-400 border-pink-500 shadow-[0_0_12px_rgba(244,114,182,0.6)]"
-              : "text-cyan-300 border-cyan-500 shadow-[0_0_12px_rgba(34,211,238,0.6)]"
-          }`}
-        >
-          <div className="absolute top-1 left-2 text-xs sm:text-sm font-bold drop-shadow-[0_0_4px_rgba(255,255,255,0.4)]">
-            {card.value}
-            <div>{suitIcons[card.suit]}</div>
-          </div>
-          <div className="absolute bottom-1 right-2 text-xs sm:text-sm font-bold rotate-180 drop-shadow-[0_0_4px_rgba(255,255,255,0.4)]">
-            {card.value}
-            <div>{suitIcons[card.suit]}</div>
-          </div>
-          <div className="flex-grow flex items-center justify-center text-3xl drop-shadow-[0_0_6px_rgba(255,255,255,0.4)]">
-            {suitIcons[card.suit]}
-          </div>
+        <div className="absolute top-1 left-2 text-xs sm:text-sm font-bold drop-shadow-[0_0_4px_rgba(255,255,255,0.4)]">
+          {card.value}
+          <div>{card.suit}</div>
+        </div>
+        <div className="absolute bottom-1 right-2 text-xs sm:text-sm font-bold rotate-180 drop-shadow-[0_0_4px_rgba(255,255,255,0.4)]">
+          {card.value}
+          <div>{card.suit}</div>
+        </div>
+        <div className="flex-grow flex items-center justify-center text-3xl drop-shadow-[0_0_6px_rgba(255,255,255,0.4)]">
+          {card.suit}
         </div>
       </div>
-    ))}
+    </div>
+  </div>
+))}
+
   </div>
 
 

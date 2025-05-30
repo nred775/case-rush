@@ -150,6 +150,34 @@ const avatars = [
   description: "unlocked by surviving explosions.",
   gridUnlock: true // 🔥 Add this flag
 },
+{
+  name: "Wheel Master",
+  cost: 0,
+  image: "/avatars/wheel_master.png",
+  headshot: "/avatars/wheel_master_head.png",
+  description: "Spun beyond sanity.",
+},
+{
+  name: "Case Crusher",
+  cost: 0,
+  image: "/avatars/case_crusher.png",
+  headshot: "/avatars/case_crusher_head.png",
+  description: "Opened everything.",
+},
+{
+  name: "Blackjack Boss",
+  cost: 0,
+  image: "/avatars/blackjack_boss.png",
+  headshot: "/avatars/blackjack_boss_head.png",
+  description: "21 times 100.",
+},
+{
+  name: "Racing Legend",
+  cost: 0,
+  image: "/avatars/racing_legend.png",
+  headshot: "/avatars/racing_legend_head.png",
+  description: "unstoppable on the track.",
+},
 
 
 ];

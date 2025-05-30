@@ -14,6 +14,7 @@ export default function NotificationsPanel({ notifications, onClose, setNotifica
             ✖
           </button>
         </div>
+
         {notifications.length === 0 ? (
           <p className="text-gray-400 text-sm italic">No new notifications.</p>
         ) : (
@@ -21,57 +22,64 @@ export default function NotificationsPanel({ notifications, onClose, setNotifica
             {notifications.map((note, index) => (
               <li key={index} className="bg-gray-800 p-4 rounded-lg flex flex-col gap-2">
                 <p>{note.message}</p>
-                <div className="flex gap-3">
-  {note.type === "friend_request" && (
-    <>
-      <button
-        className="bg-green-600 hover:bg-green-700 px-4 py-1 rounded font-semibold text-sm"
-        onClick={() => {
-          note.onAccept?.();
-          setNotifications((prev) => prev.filter((_, i) => i !== index));
-        }}
-      >
-        ✅ Accept
-      </button>
-      <button
-        className="bg-red-600 hover:bg-red-700 px-4 py-1 rounded font-semibold text-sm"
-        onClick={() => {
-          note.onDecline?.();
-          setNotifications((prev) => prev.filter((_, i) => i !== index));
-        }}
-      >
-        ❌ Decline
-      </button>
-    </>
-  )}
+                <div className="flex gap-3 flex-wrap">
+                  {note.type === "friend_request" && (
+                    <>
+                      <button
+                        className="bg-green-600 hover:bg-green-700 px-4 py-1 rounded font-semibold text-sm"
+                        onClick={() => {
+                          note.onAccept?.();
+                          setNotifications((prev) => prev.filter((_, i) => i !== index));
+                        }}
+                      >
+                        ✅ Accept
+                      </button>
+                      <button
+                        className="bg-red-600 hover:bg-red-700 px-4 py-1 rounded font-semibold text-sm"
+                        onClick={() => {
+                          note.onDecline?.();
+                          setNotifications((prev) => prev.filter((_, i) => i !== index));
+                        }}
+                      >
+                        ❌ Decline
+                      </button>
+                    </>
+                  )}
 
-  {note.type === "chat" && (
-    <>
-      <button
-        className="bg-blue-600 hover:bg-blue-700 px-4 py-1 rounded font-semibold text-sm"
-        onClick={() => {
-          note.onAccept?.();
-          setNotifications((prev) => prev.filter((_, i) => i !== index));
-        }}
-      >
-        💬 Open
-      </button>
-    </>
-  )}
+                  {note.type === "chat" && (
+                    <button
+                      className="bg-blue-600 hover:bg-blue-700 px-4 py-1 rounded font-semibold text-sm"
+                      onClick={() => {
+                        note.onAccept?.();
+                        setNotifications((prev) => prev.filter((_, i) => i !== index));
+                      }}
+                    >
+                      💬 Open
+                    </button>
+                  )}
 
-  {/* 🧼 Clear only for non-friend requests */}
-  {note.type !== "friend_request" && (
-    <button
-      className="bg-gray-600 hover:bg-gray-700 px-4 py-1 rounded font-semibold text-sm"
-      onClick={() =>
-        setNotifications((prev) => prev.filter((_, i) => i !== index))
-      }
-    >
-      🧼 Clear
-    </button>
-  )}
-</div>
+                  {note.type === "achievement" && (
+                    <button
+                      className="bg-green-600 hover:bg-green-700 px-4 py-1 rounded font-semibold text-sm"
+                      onClick={() =>
+                        setNotifications((prev) => prev.filter((_, i) => i !== index))
+                      }
+                    >
+                      🎉 Got it
+                    </button>
+                  )}
 
+                  {note.type !== "friend_request" && note.type !== "achievement" && (
+                    <button
+                      className="bg-gray-600 hover:bg-gray-700 px-4 py-1 rounded font-semibold text-sm"
+                      onClick={() =>
+                        setNotifications((prev) => prev.filter((_, i) => i !== index))
+                      }
+                    >
+                      🧼 Clear
+                    </button>
+                  )}
+                </div>
               </li>
             ))}
           </ul>

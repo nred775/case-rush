@@ -2,16 +2,21 @@
 module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   safelist: [
-    {
-      pattern: /bg-(gray|orange|purple|yellow|fuchsia)-(400|500)/,
-    },
-    {
-      pattern: /text-(gray|orange|purple|yellow|fuchsia)-(100|400)/,
-    },
-    {
-      pattern: /border-(gray|orange|purple|yellow|fuchsia)-400/,
-    }
-  ],
+  "rotate-y-180",
+  "perspective",
+  "transform-style-preserve-3d",
+  "backface-hidden",
+  {
+    pattern: /bg-(gray|orange|purple|yellow|fuchsia)-(400|500)/,
+  },
+  {
+    pattern: /text-(gray|orange|purple|yellow|fuchsia)-(100|400)/,
+  },
+  {
+    pattern: /border-(gray|orange|purple|yellow|fuchsia)-400/,
+  }
+],
+
   theme: {
     extend: {
   keyframes: {
@@ -38,4 +43,22 @@ module.exports = {
 
   },
   plugins: [],
+}
+// tailwind.config.js
+module.exports = {
+  content: ["./src/**/*.{js,jsx}"],
+  theme: {
+    extend: {
+      keyframes: {
+        shakeX: {
+          '0%, 100%': { transform: 'translateX(0)' },
+          '25%': { transform: 'translateX(-2px)' },
+          '75%': { transform: 'translateX(2px)' },
+        }
+      },
+      animation: {
+        shakeX: 'shakeX 0.3s infinite',
+      }
+    }
+  }
 }

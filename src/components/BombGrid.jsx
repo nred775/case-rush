@@ -44,7 +44,7 @@ if (!window?.currentUserHasBoomBuddy && Math.random() < 1 / 1000) {
 };
 
 
-const BombGrid = ({ user, balance, opals, setBalance, setOpals }) => {
+const BombGrid = ({ user, balance, opals, setBalance, setOpals, dailyGrids, setDailyGrids, saveUserData }) => {
   const [grid, setGrid] = useState(null);
   const [collected, setCollected] = useState({ money: 0, opals: 0 });
   const [claimedRewards, setClaimedRewards] = useState(null);
@@ -148,30 +148,54 @@ await setDoc(doc(db, "users", user.uid), {
 
 
   const handleStop = async () => {
-    if (cooldown || claimed) return;
-    setClaimed(true);
+  if (cooldown || claimed) return;
+  setClaimed(true);
 
-    const now = Date.now();
-    const newBalance = balance + collected.money;
-    const newOpals = opals + collected.opals;
+  const now = Date.now();
+  const newBalance = balance + collected.money;
+  const newOpals = opals + collected.opals;
+  const newDailyGrids = dailyGrids + 1;
 
-    setClaimedRewards({ ...collected });
+  setClaimedRewards({ ...collected });
 
-    setBalance(newBalance);
-    setOpals(newOpals);
+  setBalance(newBalance);
+  setOpals(newOpals);
+  setDailyGrids(newDailyGrids);
 
-    await setDoc(doc(db, "users", user.uid), {
-      lastBombGameTime: Timestamp.fromMillis(now),
-      balance: newBalance,
-      opals: newOpals,
-    }, { merge: true });
+  await saveUserData(
+  newBalance,
+  [], // inventory
+  newOpals,
+  undefined, // ownedAvatars
+  undefined, // equippedAvatar
+  undefined, // ownedWorkers
+  undefined, // completedSets
+  undefined, // xp
+  undefined, // level
+  undefined, // claimedRewards
+  undefined, // userBadges
+  undefined, // topBarButtons
+  undefined, // claimedAchievements
+  undefined, // wheelsSpun
+  undefined, // casesOpened
+  newDailyGrids,
+  undefined, // blackjackWins
+  undefined, // horseRaces
+  undefined  // slotsSpun
+);
 
-    setTimeout(() => {
-      setCooldown(true);
-      setShowCooldownMessage(true);
-      setTimeLeft("24h 0m");
-    }, 100);
-  };
+
+  await setDoc(doc(db, "users", user.uid), {
+    lastBombGameTime: Timestamp.fromMillis(now),
+  }, { merge: true });
+
+  setTimeout(() => {
+    setCooldown(true);
+    setShowCooldownMessage(true);
+    setTimeLeft("24h 0m");
+  }, 100);
+};
+
 
   useEffect(() => {
     checkCooldown();
