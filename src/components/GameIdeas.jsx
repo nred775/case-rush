@@ -2,14 +2,28 @@ import React from "react";
 
 const GameIdeas = () => {
   return (
-    <div className="w-full px-4 sm:px-8 py-10 text-white space-y-6 bg-gradient-to-b from-black via-gray-900 to-black min-h-screen">
-      {/* Header */}
-      <div className="w-full max-w-3xl mx-auto p-6 rounded-xl bg-black/40 border border-white/10 shadow-2xl text-center animate-fade-in">
-        <h1 className="text-4xl sm:text-6xl font-extrabold bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-500 bg-clip-text text-transparent tracking-tight">
-          🎮 stackedodds.net
-        </h1>
-        <p className="mt-2 text-white/60 text-lg">Explore all the ways to play and win!</p>
-      </div>
+    <div className="w-full px-4 sm:px-8 py-10 text-white space-y-6 from-black via-gray-900 to-black min-h-screen">
+<div className="w-full max-w-3xl mx-auto p-6 rounded-xl bg-black/40 border border-white/10 shadow-2xl text-center animate-fade-in">
+  <h1 className="text-4xl sm:text-6xl font-extrabold bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-500 bg-clip-text text-transparent tracking-tight">
+    🎮 stackedodds.net
+  </h1>
+  <p className="mt-2 text-white/60 text-lg">Explore all the ways to play and win!</p>
+  
+  <p className="mt-2 text-pink-400 text-lg font-semibold">
+  Follow us on Instagram{" "}
+  <a
+    href="https://instagram.com/stackedodds_net"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="underline hover:text-pink-600"
+  >
+    @stackedodds_net
+  </a>{" "}
+  for the latest updates!
+</p>
+
+</div>
+
 
       {/* Content Sections */}
       <div className="w-full max-w-3xl mx-auto space-y-6">
