@@ -42,7 +42,7 @@ export default function HorseRace({
   const [speeds, setSpeeds] = useState(horses.map(() => 0));
   const [elapsedTimes, setElapsedTimes] = useState(horses.map(() => 0));
   const [horseIntervals, setHorseIntervals] = useState([]);
-const [betAmount, setBetAmount] = useState("1000"); // default bet
+const [betAmount, setBetAmount] = useState("1"); // default bet
 const [raceCompleted, setRaceCompleted] = useState(false);
 
 
@@ -288,7 +288,7 @@ setHorseIntervals([]);    }
       </button>
 
       <div className="flex flex-col">
-        <label className="text-sm mb-1">Bet Amount ($1–$25,000):</label>
+        <label className="text-sm mb-1">Bet Amount (Max = $25,000):</label>
         <input
           type="number"
           value={betAmount}
