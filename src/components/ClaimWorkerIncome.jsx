@@ -7,6 +7,7 @@ export default function ClaimWorkerIncome({ userId, ownedWorkers, setBalance }) 
   const [message, setMessage] = useState("");
   const [canClaim, setCanClaim] = useState(false);
   const [timeLeft, setTimeLeft] = useState("");
+  const [isClaiming, setIsClaiming] = useState(false); // 🚫 Prevent rapid clicks
 
   const totalDaily = workers
     .filter((w) => ownedWorkers.includes(w.name))
@@ -38,23 +39,30 @@ export default function ClaimWorkerIncome({ userId, ownedWorkers, setBalance }) 
   }, [userId]);
 
   const claimDailyIncome = async () => {
-    if (!userId || !canClaim) return;
+    if (!userId || !canClaim || isClaiming) return;
 
-    const userRef = doc(db, "users", userId);
-    const userSnap = await getDoc(userRef);
-    const data = userSnap.data();
+    setIsClaiming(true); // 🚫 Lock button immediately
 
-    const now = Date.now();
+    try {
+      const userRef = doc(db, "users", userId);
+      const userSnap = await getDoc(userRef);
+      const data = userSnap.data();
+      const now = Date.now();
 
-    await updateDoc(userRef, {
-      balance: (data.balance || 0) + totalDaily,
-      lastDailyClaim: now,
-    });
+      await updateDoc(userRef, {
+        balance: (data.balance || 0) + totalDaily,
+        lastDailyClaim: now,
+      });
 
-    setBalance((prev) => prev + totalDaily);
-    setMessage(`✅ Claimed $${totalDaily.toLocaleString()} from your workers!`);
-    setCanClaim(false);
-    setTimeLeft("24h");
+      setBalance((prev) => prev + totalDaily);
+      setMessage(`✅ Claimed $${totalDaily.toLocaleString()} from your workers!`);
+      setCanClaim(false);
+      setTimeLeft("24h");
+    } catch (err) {
+      console.error("Claim error:", err);
+    } finally {
+      setIsClaiming(false); // 🔓 Unlock only if needed again later
+    }
   };
 
   return (
@@ -75,14 +83,14 @@ export default function ClaimWorkerIncome({ userId, ownedWorkers, setBalance }) 
 
       <button
         onClick={claimDailyIncome}
-        disabled={!canClaim}
+        disabled={!canClaim || isClaiming}
         className={`px-4 py-2 rounded text-white font-medium transition-transform ${
-          canClaim
+          canClaim && !isClaiming
             ? "bg-emerald-600 hover:bg-emerald-700 hover:scale-105"
             : "bg-gray-600 cursor-not-allowed opacity-50"
         }`}
       >
-        🎁 Claim Daily Worker Bonus
+        {isClaiming ? "Claiming..." : "🎁 Claim Daily Worker Bonus"}
       </button>
 
       {message && <p className="mt-2 text-sm text-gray-300">{message}</p>}

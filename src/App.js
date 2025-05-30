@@ -19,7 +19,6 @@ import {
 } from "firebase/firestore";
 import { ref, onDisconnect, onValue, set as rtdbSet, remove as rtdbRemove } from "firebase/database";
 import { rtdb } from "./firebase"; // ✅ pull configured instance
-
 import { useState, useEffect, useRef } from "react";
 import SetsPanel from "./components/SetsPanel";
 import WorkersPanel from "./components/WorkersPanel"; // 👈 add this
@@ -59,39 +58,24 @@ import Achievements from "./components/Achievements"; // Add at the top
 import Slots from "./components/Slots";
 import SlotsPanel from "./components/SlotsPanel";
 import HorseRace from "./components/HorseRace"; // ✅ Add this import
-
-
-
-
-
-
-
-
-
-
 const enforceUsageLimit = async (type) => {
   const usageRef = doc(db, "usage", "global");
   const usageSnap = await getDoc(usageRef);
   const now = new Date();
   const today = now.toISOString().split("T")[0];
-
   const fieldMap = {
     write: "writeCount",
     read: "readCount",
     delete: "deleteCount"
   };
-
   const limitMap = {
     write: "writeLimit",
     read: "readLimit",
     delete: "deleteLimit"
   };
-
   const countKey = fieldMap[type];
   const limitKey = limitMap[type];
-
   let data = usageSnap.exists() ? usageSnap.data() : null;
-
   if (!data || data.date !== today) {
     // Reset for new day
     await setDoc(usageRef, {
@@ -105,21 +89,16 @@ const enforceUsageLimit = async (type) => {
     });
     return true;
   }
-
   if (data[countKey] >= data[limitKey]) {
     alert(`⚠️ ${type} limit reached. Operation blocked.`);
     return false;
   }
-
   await setDoc(usageRef, {
     ...data,
     [countKey]: (data[countKey] || 0) + 1
   });
-
   return true;
 };
-
-
 const allMilestoneDefs = [
   { key: "wheelsSpun", milestones: [10, 100, 10000, 1000000] },
   { key: "casesOpened", milestones: [10, 100, 10000, 1000000] },
@@ -131,10 +110,6 @@ const allMilestoneDefs = [
   { key: "slotsSpun", milestones: [1, 5, 10, 25] },          // 👈 Add this
   { key: "horseRaces", milestones: [10, 100, 10000, 1000000] }, // 👈 And this
 ];
-
-
-
-
 const getLevelColorClass = (level) => {
   const index = Math.floor(level / 10);
   switch (index) {
@@ -169,20 +144,12 @@ const getLevelBorderClass = (level) => {
     default: return "border-red-800 shadow-[0_0_6px_rgba(255,0,0,1)]";
   }
 };
-
-
-
-
-
-
-
 function App() {
   const [user, setUser] = useState(null);
   const [balance, setBalance] = useState(0);
 const [inventory, setInventory] = useState([]);
 const [opals, setOpals] = useState(0);
 const [ownedWorkers, setOwnedWorkers] = useState([]);
-
 const [selectedCrate, setSelectedCrate] = useState(null);
   const [selectedWheel, setSelectedWheel] = useState(null);
   const [username, setUsername] = useState("");
@@ -229,8 +196,6 @@ const [macroThreshold, setMacroThreshold] = useState(() => {
   const stored = localStorage.getItem("macroThreshold");
   return stored ? parseInt(stored, 10) : Math.floor(Math.random() * 11) + 25;
 });
-
-
 const [macroButtonPos, setMacroButtonPos] = useState({ top: "50%", left: "50%" });
 const [isUILocked, setIsUILocked] = useState(false); // 👈 NEW
 const [loginBlocked, setLoginBlocked] = useState(false);
@@ -244,40 +209,27 @@ const [blackjackWins, setBlackjackWins] = useState(0);
 const [claimedAchievements, setClaimedAchievements] = useState([]);
 const [slotsSpun, setSlotsSpun] = useState(0);
 const [horseRaces, setHorseRaces] = useState(0);
-
-
-
-
-
   const bgmRef = useRef(null);
 const sensors = useSensors(useSensor(PointerSensor));
-
-
-
   const navigationLocked = !!selectedCrate || !!selectedWheel;
 useEffect(() => {
   if (!user || user.isAnonymous || !user.uid) return;
-
   const userStatusRef = ref(rtdb, `status/${user.uid}`);
   const userDocRef = doc(db, "users", user.uid);
   const connectedRef = ref(rtdb, ".info/connected");
-
   const isOfflineForFirestore = {
     online: false,
     lastOffline: Date.now(),
   };
-
   const isOnlineForFirestore = {
     online: true,
     lastOnline: Date.now(),
   };
-
   const handleConnected = onValue(connectedRef, (snap) => {
     const connected = snap.val();
     if (connected === false) {
       return;
     }
-
     // Only set onDisconnect after confirming connection
     onDisconnect(userStatusRef)
       .set({ state: "offline", lastChanged: Date.now() })
@@ -286,23 +238,17 @@ useEffect(() => {
           state: "online",
           lastChanged: Date.now(),
         });
-
         // NOW set online in Firestore
       });
   });
-
-  
-
   return () => {
     handleConnected(); // unsubscribe from .info/connected
     rtdbRemove(userStatusRef).catch(console.error);
   };
 }, [user]);
-
   // Inside App component
 useEffect(() => {
   const refreshRef = ref(rtdb, "global/refreshVersion");
-
   // 👇 Initialize local storage if missing
   if (!localStorage.getItem("refreshVersion")) {
     get(refreshRef).then((snap) => {
@@ -311,38 +257,28 @@ useEffect(() => {
       }
     });
   }
-
   const unsub = onValue(refreshRef, (snap) => {
     const version = snap.val();
     if (!version) return;
-
     const storedVersion = localStorage.getItem("refreshVersion");
     if (version !== storedVersion) {
       localStorage.setItem("refreshVersion", version);
       window.location.reload(); // 🔄 Refresh the app
     }
   });
-
   return () => unsub();
 }, []);
-
 useEffect(() => {
   const hasNewAchievement = notifications.some(n => n.type === "achievement");
   if (hasNewAchievement) {
     setShowNotifications(true);
   }
 }, [notifications]);
-
-
-
-
 useEffect(() => {
   const completedKeys = JSON.parse(localStorage.getItem("completedAchievements") || "[]");
   const newCompleted = [...completedKeys];
-
   allMilestoneDefs.forEach(({ key, milestones }) => {
     let stat = 0;
-
     if (key === "avatarsOwned") {
   stat = ownedAvatars.filter(name =>
     ![
@@ -372,10 +308,7 @@ useEffect(() => {
     default: return 0;
   }
 })();
-
 }
-
-
     milestones.forEach((target) => {
       const uniqueKey = `${key}_${target}`;
       if (stat >= target && !completedKeys.includes(uniqueKey)) {
@@ -383,7 +316,6 @@ useEffect(() => {
       }
     });
   });
-
   if (newCompleted.length > completedKeys.length) {
     localStorage.setItem("completedAchievements", JSON.stringify(newCompleted));
   }
@@ -396,27 +328,19 @@ useEffect(() => {
   ownedWorkers,
   completedSets,
 ]);
-
-
-
-
 function SortableButton({ id, children }) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
-
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     cursor: 'grab'
   };
-
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="pointer-events-auto">
       {children}
     </div>
   );
 }
-
-
 const labelMap = {
   levels: "Level Rewards",
   inventory: "Inventory",
@@ -429,17 +353,12 @@ const labelMap = {
   sets: "Sets",
   workers: "Workers",
 };
-
 const reorder = (list, startIndex, endIndex) => {
   const result = Array.from(list);
   const [removed] = result.splice(startIndex, 1);
   result.splice(endIndex, 0, removed);
   return result;
 };
-
-
-
-
 const topBarButtonMap = {
   levels: (
     <Link to="/levels" className="bg-yellow-500 hover:bg-yellow-600 text-black h-10 px-4 py-2 font-semibold rounded-md flex items-center justify-center">
@@ -492,56 +411,39 @@ const topBarButtonMap = {
     </Link>
   ),
 };
-
-
-
-
 useEffect(() => {
   const tryStartMusic = () => {
     if (bgmRef.current) return;
-
     const audio = new Audio("/sounds/background.mp3");
     audio.loop = true;
-
     // Set volume right away based on current mute/volume states
     audio.volume = isMuted ? 0 : bgmVolume * overallVolume;
-
     audio.play().then(() => {
       bgmRef.current = audio;
     }).catch((e) => {
       console.warn("Autoplay blocked:", e);
     });
-
     document.removeEventListener("click", tryStartMusic);
   };
-
   document.addEventListener("click", tryStartMusic);
-
   return () => document.removeEventListener("click", tryStartMusic);
 }, []);
-
 // 💥 One effect to sync audio changes
 useEffect(() => {
   const audio = bgmRef.current;
   if (!audio) return;
-
   audio.volume = isMuted ? 0 : bgmVolume * overallVolume;
-
   if (isMuted) {
     audio.pause();
   } else {
     audio.play().catch((e) => console.warn("Play failed:", e));
   }
 }, [isMuted, bgmVolume, overallVolume]);
-
 useEffect(() => {
   if (!user || user.isAnonymous) return;
-
   const ref = collection(db, "users", user.uid, "friendRequests");
-
   const unsub = onSnapshot(ref, (snap) => {
     const newNotifs = [];
-
     snap.forEach((reqDoc) => {
       const data = reqDoc.data();
       if (data && data.from) {
@@ -554,11 +456,9 @@ useEffect(() => {
     const receiverUsername = receiverSnap.data()?.username || "Unnamed";
     const receiverAvatar = receiverSnap.data()?.equippedAvatar || "";
     const receiverLevel = receiverSnap.data()?.level || 1;
-
     const senderSnap = await getDoc(doc(db, "users", data.fromUid));
     const senderAvatar = senderSnap.data()?.equippedAvatar || "";
     const senderLevel = senderSnap.data()?.level || 1;
-
     await setDoc(doc(db, "users", user.uid, "friends", data.fromUid), {
       uid: data.fromUid,
       username: data.from,
@@ -572,7 +472,6 @@ useEffect(() => {
       profileWorkers: senderSnap.data()?.profileWorkers || [],
       addedAt: Date.now(),
     });
-
     await setDoc(doc(db, "users", data.fromUid, "friends", user.uid), {
       uid: user.uid,
       username: receiverUsername,
@@ -586,12 +485,10 @@ useEffect(() => {
       profileWorkers: receiverSnap.data()?.profileWorkers || [],
       addedAt: Date.now(),
     });
-
     // ✅ Only add to state now
     setFriends((prev) => {
       const alreadyExists = prev.some(friend => friend.uid === data.fromUid);
       if (alreadyExists) return prev;
-
       return [
         ...prev,
         {
@@ -612,14 +509,12 @@ useEffect(() => {
 const ok = await enforceUsageLimit("delete");
 if (!ok) return;
     await deleteDoc(doc(db, "users", user.uid, "friendRequests", reqDoc.id));
-
     console.log(`✅ Friend added: ${data.from}`);
   } catch (err) {
     console.error("Error accepting friend request:", err);
     alert("Something went wrong accepting the request.");
   }
 },
-
           onDecline: async () => {
             await deleteDoc(doc(db, "users", user.uid, "friendRequests", reqDoc.id));
             console.log(`Declined ${data.from}`);
@@ -627,23 +522,17 @@ if (!ok) return;
         });
       }
     });
-
 setNotifications((prev) => [...prev, ...newNotifs]);
   });
-
   return () => unsub();
 }, [user]);
 useEffect(() => {
   if (!user || user.isAnonymous) return;
-
   const notifRef = collection(db, "users", user.uid, "notifications");
-
   const unsub = onSnapshot(notifRef, (snap) => {
     const newNotifs = [];
-
     snap.forEach((docSnap) => {
       const data = docSnap.data();
-
       if (data.type === "chat" && data.from) {
         newNotifs.push({
           type: "chat",
@@ -659,59 +548,39 @@ setChatUser({ uid: data.fromUid, username: data.from });
         });
       }
     });
-
     setNotifications((prev) => [...prev, ...newNotifs]);
   });
-
   return () => unsub();
 }, [user]);
-
-
-
-
-
-
 useEffect(() => {
   document.title = "Stacked Odds"; // or whatever you want the tab to say
 }, []);
-
-
 useEffect(() => {
   logEVs();
 }, []);
-
-
 useEffect(() => {
   if (!user || user.isAnonymous) return;
-
   let friendRefs = {};
-
   const unsub = onSnapshot(collection(db, "users", user.uid, "friends"), (snap) => {
     // 🔒 Only show friends already in state — block new auto-adds
     const newFriendUIDs = new Set(snap.docs.map(doc => doc.id));
     setFriends(prev =>
       prev.filter(friend => newFriendUIDs.has(friend.uid))
     );
-
     // 🧼 Clear old listeners
     Object.values(friendRefs).forEach((unsubFn) => unsubFn());
     friendRefs = {};
-
     // 🔄 Resubscribe to status for existing friends only
     snap.docs.forEach((friendDoc) => {
       const f = friendDoc.data();
       if (!f.uid) return;
-
       const friendRef = doc(db, "users", f.uid);
-
       const unsubFriend = onSnapshot(friendRef, (snap) => {
         if (!snap.exists()) return;
         const full = snap.data();
-
         setFriends((prev) => {
   const index = prev.findIndex(friend => friend.uid === f.uid);
   if (index === -1) return prev; // ❌ Don’t add them if they weren’t already accepted
-
   const updated = [...prev];
   updated[index] = {
     uid: f.uid,
@@ -726,27 +595,17 @@ useEffect(() => {
     profileWorkers: full.profileWorkers,
 online: false, // temp default, we’ll subscribe below
   };
-
   return updated;
 });
-
       });
-
       friendRefs[f.uid] = unsubFriend;
     });
   });
-
   return () => {
     unsub();
     Object.values(friendRefs).forEach((unsubFn) => unsubFn());
   };
 }, [user]);
-
-
-
-
-
-
   useEffect(() => {
   const unsub = onAuthStateChanged(auth, async (currentUser) => {
   if (currentUser) {
@@ -758,8 +617,6 @@ if (isOnline) {
   await signOut(auth);
   return;
 }
-
-
     // Full reset
     setBalance(0);
     setInventory([]);
@@ -772,38 +629,28 @@ if (isOnline) {
     setLevel(1);
     setClaimedRewards([]);
     setProfileWorkers([]);
-
     if (!currentUser.isAnonymous) {
       await loadUserData(currentUser);
     }
-
     setUser(currentUser); // ⬅️ AFTER loadUserData
   } else {
     setUser(null);
   }
 });
-
   return () => unsub();
 }, []);
-
 useEffect(() => {
   const loadFriendsOnce = async () => {
     if (!user || user.isAnonymous) return;
-
 const friendsRef = collection(db, "users", user.uid, "friends");
 const snap = await getDocs(friendsRef);
-
     const results = [];
-
     for (const docSnap of snap.docs) {
       const data = docSnap.data();
       if (!data?.uid) continue;
-
       const fullSnap = await getDoc(doc(db, "users", data.uid));
       if (!fullSnap.exists()) continue;
-
       const full = fullSnap.data();
-
       results.push({
         uid: data.uid,
         username: full.username,
@@ -818,7 +665,6 @@ const snap = await getDocs(friendsRef);
 online: false, // temp default, we’ll subscribe below
       });
     }
-
     setFriends(results);
     results.forEach(friend => {
   const statusRef = ref(rtdb, `status/${friend.uid}`);
@@ -831,44 +677,32 @@ online: false, // temp default, we’ll subscribe below
     );
   });
 });
-
   };
-
   loadFriendsOnce();
 }, [user]);
-
-
   useEffect(() => {
     if (!user || user.isAnonymous) return; // 🛑 don’t start interval for guest or null users
-  
     const interval = setInterval(() => {
       if (ownedWorkers.length === 0) return;
-  
       const totalIncome = workersData
         .filter((w) => ownedWorkers.includes(w.name))
         .reduce((sum, w) => sum + w.incomePerSecond, 0);
-  
       if (totalIncome > 0) {
         const newBalance = balance + totalIncome;
         setBalance(newBalance);
         saveUserData(newBalance, inventory, opals, ownedAvatars, equippedAvatar, ownedWorkers);
       }
     }, 60000);
-  
     return () => clearInterval(interval);
   }, [user, ownedWorkers, balance, inventory, opals, ownedAvatars, equippedAvatar]);  
-
-
 const loadUserData = async (user) => {
   if (!user || user.isAnonymous) return;
-
   try {
     const okRead = await enforceUsageLimit("read");
 if (!okRead) return;
     const snap = await getDoc(doc(db, "users", user.uid));
     if (snap.exists()) {
       const data = snap.data();
-
       setBalance(data.balance || 0);
       setInventory(data.inventory || []);
       setOpals(data.opals || 0);
@@ -889,10 +723,6 @@ setDailyGrids(data.dailyGrids || 0);
 setBlackjackWins(data.blackjackWins || 0);
 setSlotsSpun(data.slotsSpun || 0);       // ✅
 setHorseRaces(data.horseRaces || 0);     // ✅
-
-
-
-
       if ("username" in data && typeof data.username === "string" && data.username.trim() !== "") {
   setUsername(data.username);
   setNeedsUsername(false);
@@ -900,7 +730,6 @@ setHorseRaces(data.horseRaces || 0);     // ✅
   setUsername("");
   setNeedsUsername(true);
 }
-
     } else {
       // brand new user with no doc
       setNeedsUsername(true);
@@ -909,7 +738,6 @@ setHorseRaces(data.horseRaces || 0);     // ✅
     console.error("loadUserData error:", err.message);
   }
 };
-
 const getXpFromRarity = (rarity) => {
   switch (rarity) {
     case "common": return 5;
@@ -920,11 +748,8 @@ const getXpFromRarity = (rarity) => {
     default: return 0;
   }
 };
-
 const MAX_LEVEL = 120;
-
 const levelXpRequired = (lvl) => 25 * lvl * lvl;
-
 const getLevelFromXp = (xp) => {
   let total = 0;
   for (let lvl = 1; lvl <= MAX_LEVEL; lvl++) {
@@ -933,12 +758,6 @@ const getLevelFromXp = (xp) => {
   }
   return MAX_LEVEL;
 };
-
-
-
-
-
-
     const saveUserData = async (
   newBalance,
   newInventory,
@@ -959,14 +778,10 @@ newDailyGrids = dailyGrids,
 newBlackjackWins = blackjackWins,
 newHorseRaces = horseRaces,     // ✅ move horseRaces here
 newSlotsSpun = slotsSpun        // ✅ move slotsSpun to last
-
-
 ) => {
   if (!user || user.isAnonymous) return;
-
   const okWrite = await enforceUsageLimit("write");
   if (!okWrite) return;
-
   const data = {
     balance: newBalance,
     inventory: newInventory,
@@ -989,26 +804,16 @@ newSlotsSpun = slotsSpun        // ✅ move slotsSpun to last
      slotsSpun: newSlotsSpun,        // ✅ Add to Firestore
     horseRaces: newHorseRaces      // ✅ Add to Firestore
   };
-
   // ✅ Remove any fields with undefined values
   const filteredData = Object.fromEntries(
     Object.entries(data).filter(([_, v]) => v !== undefined)
   );
-
   await setDoc(doc(db, "users", user.uid), filteredData, { merge: true });
 };
-
-
-
-
-
-
-
   const handleSpend = (amount) => {
     const newBalance = balance - amount;
     setBalance(newBalance);
     saveUserData(newBalance, inventory, opals);
-
   };
 const triggerMacroCheck = () => {
 setMacroBlocked(true);
@@ -1021,12 +826,8 @@ localStorage.setItem("macroBlocked", "true");
     left: `${Math.random() * 70 + 10}%`,
   });
 };
-
-
-
   const handleOpenCrate = (crate) => {
   if (macroBlocked) return;
-
   setOpenCount((prev) => {
   const next = prev + 1;
   localStorage.setItem("openCount", next);
@@ -1035,9 +836,6 @@ localStorage.setItem("macroBlocked", "true");
   }
   return next;
 });
-
-
-
   if (balance >= crate.cost) {
     const newCasesOpened = casesOpened + 1;
 setCasesOpened(newCasesOpened);
@@ -1045,11 +843,9 @@ setCasesOpened(newCasesOpened);
     const gainedXp = getXpFromRarity(rarity);
     const newXp = xp + gainedXp;
     const newLevel = getLevelFromXp(newXp);
-
     handleSpend(crate.cost);
     setXp(newXp);
     setLevel(newLevel);
-
 saveUserData(
   balance - crate.cost,
   inventory,
@@ -1069,15 +865,12 @@ saveUserData(
   dailyGrids,
   blackjackWins
 );
-
     setSelectedCrate(crate);
   }
 };
-
 const handleBuyWheel = (wheelCost) => {
   const currentBlocked = localStorage.getItem("macroBlocked") === "true";
   if (currentBlocked || macroBlocked) return;
-
   setOpenCount((prev) => {
     const next = prev + 1;
     localStorage.setItem("openCount", next);
@@ -1086,21 +879,16 @@ const handleBuyWheel = (wheelCost) => {
     }
     return next;
   });
-
   const rarity = getRarity(wheelCost);
   const gainedXp = getXpFromRarity(rarity);
   const newXp = xp + gainedXp;
   const newLevel = getLevelFromXp(newXp);
-
   const newBalance = balance - wheelCost;
   setBalance(newBalance);
   setXp(newXp);
   setLevel(newLevel);
-
   const newWheelsSpun = wheelsSpun + 1;
 setWheelsSpun(newWheelsSpun);
-
-
 saveUserData(
   newBalance,
   inventory,
@@ -1121,21 +909,14 @@ saveUserData(
   blackjackWins
 );
 };
-
-
-
-
   const handleDrawnItem = () => {};
-
   const handleSell = (amount) => {
     const newBalance = balance + amount;
     setBalance(newBalance);
     saveUserData(newBalance, inventory, opals);
-
     resetCrate();
     resetWheel();
   };
-
   const getRarity = (cost) => {
   if (cost >= 500000) return "mythic";
   if (cost >= 30000) return "legendary";
@@ -1143,16 +924,12 @@ saveUserData(
   if (cost >= 1000) return "rare";
   return "common";
 };
-
-
 const handleAddToInventory = (item) => {
   if (!item) return;
-
   const rarity = getRarity(item.value);
   const gainedXp = getXpFromRarity(rarity);
   const newXp = xp + gainedXp;
-  const newLevel = getLevelFromXp(newXp);
-
+  const newLevel = getLevelFromXp(newXp)
   const updatedInventory = [
     ...inventory,
     {
@@ -1163,18 +940,13 @@ const handleAddToInventory = (item) => {
   addedAt: new Date().toISOString(),
 },
   ];
-
   setXp(newXp);
   setLevel(newLevel);
   setInventory(updatedInventory);
-
   saveUserData(balance, updatedInventory, opals, ownedAvatars, equippedAvatar, ownedWorkers, completedSets, newXp, newLevel);
   resetCrate();
   resetWheel();
 };
-
-
-
   const handleSellFromInventory = (itemToSell) => {
   const updatedInventory = inventory.filter(
     (item) => item.addedAt !== itemToSell.addedAt
@@ -1184,22 +956,15 @@ const handleAddToInventory = (item) => {
   setBalance(newBalance);
   saveUserData(newBalance, updatedInventory, opals);
 };
-
-
-    
   const handleSellAll = () => {
   const totalSellValue = inventory.reduce((sum, item) => sum + item.value, 0);
   const newBalance = balance + totalSellValue;
   setInventory([]);
   setBalance(newBalance);
   saveUserData(newBalance, [], opals);
-
 };
-
-
   const resetCrate = () => setSelectedCrate(null);
   const resetWheel = () => setSelectedWheel(null);
-
 if (!user) return (
   <AuthPage
     onLogin={setUser}
@@ -1210,7 +975,6 @@ if (!user) return (
     loginBlocked={loginBlocked}
   />
 );
-
   return (
   <Router>
     <>
@@ -1219,9 +983,6 @@ if (!user) return (
           <>
 <div className="fixed top-4 left-0 right-0 z-10 px-2 scrollbar-hide flex sm:justify-center">
 <div className="flex items-center gap-2 bg-gray-900 px-2 py-2 sm:px-4 rounded-xl shadow-xl border border-gray-700 w-full sm:w-max overflow-x-auto sm:overflow-visible max-w-full scrollbar-hide">
-
-
-                
                 {/* Avatar + Username + Level */}
                 <div className="flex items-center gap-4">
                   {navigationLocked ? (
@@ -1257,16 +1018,12 @@ if (!user) return (
     View Profile
   </span>
 </div>
-
                   )}
-
                   <div className={`flex flex-col sm:flex-row sm:items-center sm:gap-1 text-[10px] sm:text-sm md:text-base lg:text-lg xl:text-xl leading-tight ${getLevelColorClass(level)}`}>
   <span>[{level}]</span>
   <span className="font-bold break-words whitespace-normal">{user.isAnonymous ? "Guest" : username}</span>
 </div>
-
                 </div>
-
                 {!navigationLocked ? (
   <>
     {/* 🏠 Home */}
@@ -1281,7 +1038,6 @@ if (!user) return (
         Home
       </span>
     </div>
-
     <DragDropContext
       onDragEnd={(result) => {
         if (!result.destination) return;
@@ -1334,7 +1090,6 @@ if (!user) return (
         )}
       </Droppable>
     </DragDropContext>
-
     {/* 🔔 Notifications */}
     <div className="relative group">
       <button
@@ -1352,7 +1107,6 @@ if (!user) return (
         Notifications
       </span>
     </div>
-
     {/* ⚙️ Settings */}
     <div className="relative group">
       <button
@@ -1365,8 +1119,6 @@ if (!user) return (
         Settings
       </span>
     </div>
-
-
     {/* 🚪 Log Out */}
     <div className="relative group">
       <button
@@ -1417,14 +1169,10 @@ if (!user) return (
     </button>
   </>
 )}
-
-
               </div>
             </div>
-
             {/* Spacer below fixed top bar */}
 <div className="mt-24 mb-4 h-[5px]" />
-
 {/* 💰 Balance + 💠 Opals (moved below spacer) */}
 <div className="flex justify-center w-full mb-4 z-0 relative">
   <div className="flex items-center gap-3">
@@ -1435,7 +1183,6 @@ if (!user) return (
         ${Number(balance).toLocaleString()}
       </span>
     </div>
-
     {/* Opals */}
     <div className="flex items-center gap-1 px-3 py-2 bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-500 border-2 border-purple-300 rounded-full shadow-[0_0_12px_rgba(168,85,247,0.9)] text-sm sm:text-lg h-12 sm:h-14">
       💠
@@ -1445,35 +1192,11 @@ if (!user) return (
     </div>
   </div>
 </div>
-
           </>
         )}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         <div className="mb-4 flex flex-wrap justify-center items-center gap-3 sm:gap-6">
-  
-
- 
-
 </div>
-
-
-
         <Routes>
-
 <Route
   path="/"
   element={
@@ -1502,7 +1225,6 @@ if (!user) return (
   level={level}
   setLevel={setLevel}
 />
-
 } />
 <Route path="/slots-panel" element={<SlotsPanel />} />
 <Route path="/achievements" element={
@@ -1528,7 +1250,6 @@ if (!user) return (
   ).length,
   setsCompleted: completedSets.length,
 }}
-
     opals={opals}
     setOpals={setOpals}
     claimedAchievements={claimedAchievements}
@@ -1551,14 +1272,8 @@ if (!user) return (
     dailyGrids={dailyGrids}
     blackjackWins={blackjackWins}
     setNotifications={setNotifications}
-
   />
 } />
-
-
-
-
-
           <Route path="/home" element={
   !selectedCrate ? (
     <CrateShop
@@ -1580,7 +1295,6 @@ if (!user) return (
     />
   )
 } />
-
 <Route path="/horse-race" element={
   <HorseRace
   balance={balance}
@@ -1594,13 +1308,9 @@ if (!user) return (
   dailyGrids={dailyGrids}
   blackjackWins={blackjackWins}
 />
-
 } />
-
-
              
           <Route path="/game-ideas" element={<GameIdeas />} />
-
           <Route
             path="/inventory"
             element={
@@ -1610,9 +1320,6 @@ if (!user) return (
     onSellAll={handleSellAll}
   />
 }
-
-
-
           />
 <Route path="/levels" element={
   <LevelsPanel
@@ -1668,8 +1375,6 @@ if (!user) return (
     />
   }
 />
-
-
 <Route path="/blackjack" element={
   <Blackjack
     balance={balance}
@@ -1693,10 +1398,6 @@ if (!user) return (
     dailyGrids={dailyGrids}
   />
 } />
-
-
-
-
 <Route path="/leaderboard" element={<Leaderboard setToastMessage={setToastMessage} />} />
 <Route
   path="/sets"
@@ -1708,7 +1409,6 @@ if (!user) return (
   setTrackedSet={setTrackedSet}
       onTurnInSet={(set) => {
   let newInventory = [...inventory];
-
   if (set.requiredItems) {
     newInventory = inventory.filter(
       (item) => !set.requiredItems.some(req => req.name === item.item)
@@ -1723,9 +1423,7 @@ if (!user) return (
       return true;
     });
   }
-
   const updatedCompletedSets = [...completedSets, set.name];
-
   // 🎯 Badge vs Opal reward
   if (set.badge && !userBadges.includes(set.badge)) {
     const updatedBadges = [...userBadges, set.badge];
@@ -1733,7 +1431,6 @@ if (!user) return (
     setCompletedSets(updatedCompletedSets);
     setInventory(newInventory);
     setToastMessage(`🏅 New Badge Unlocked: ${set.badge}`);
-
     saveUserData(
       balance,
       newInventory,
@@ -1751,7 +1448,6 @@ if (!user) return (
     setOpals(newOpals);
     setCompletedSets(updatedCompletedSets);
     setInventory(newInventory);
-
     saveUserData(
       balance,
       newInventory,
@@ -1766,11 +1462,9 @@ if (!user) return (
     );
   }
 }}
-
     />
   }
 />
-
 <Route
   path="/workers"
   element={
@@ -1790,11 +1484,6 @@ if (!user) return (
     />
   }
 />
-
-
-
-
-
 <Route
   path="/avatars"
   element={
@@ -1819,22 +1508,17 @@ if (!user) return (
     />
   }
 />
-
 <Route
   path="/wheel"
   element={
-
               !selectedWheel ? (
                 <WheelSpin
                   balance={balance}
                   onPick={(wheel) => setSelectedWheel(wheel)}
                     isUILocked={isUILocked} // ✅ pass this in
                       trackedSet={trackedSet}
-
-
 onSpend={handleBuyWheel}
         macroBlocked={macroBlocked} // 👈 add this
-
                 />
               ) : (
                 <WheelOpening
@@ -1849,19 +1533,16 @@ onSpend={handleBuyWheel}
   overallVolume={overallVolume}
   trackedSet={trackedSet}
 />
-
               )
             }
           />
         </Routes>
-
         {((needsUsername || showUsernameEditor) && user && !user.isAnonymous) && (
   <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 px-4">
     <div className="bg-gray-900 border border-blue-500 rounded-2xl shadow-[0_0_20px_rgba(59,130,246,0.5)] p-6 w-full max-w-sm text-white text-center">
       <h2 className="text-xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-500 drop-shadow-[0_0_8px_rgba(255,255,255,0.6)]">
         ✏️ Choose a Username
       </h2>
-
       <input
         type="text"
         className="w-full px-4 py-2 text-white bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2 placeholder-gray-400"
@@ -1872,45 +1553,35 @@ onSpend={handleBuyWheel}
           setUsernameError("");
         }}
       />
-
       {usernameError && (
         <p className="text-red-400 text-sm mb-3">{usernameError}</p>
       )}
-
       <button
         className="w-full py-2 mt-2 bg-blue-600 hover:bg-blue-700 font-semibold rounded-md transition-transform hover:scale-105"
         onClick={async () => {
           const lower = tempUsername.trim().toLowerCase();
-
           if (!lower || lower.length < 3 || lower.length > 20) {
             setUsernameError("Username must be 3–20 characters.");
             return;
           }
-
           if (bannedUsernames.some((bad) => lower.includes(bad.toLowerCase()))) {
   setUsernameError("That username is not allowed.");
   return;
 }
-
-
-
           const existing = await getDoc(doc(db, "usernames", lower));
           if (existing.exists() && existing.data().uid !== user.uid) {
             setUsernameError("That username is already taken.");
             return;
           }
-
           const userSnap = await getDoc(doc(db, "users", user.uid));
           const prevUsername = userSnap.data()?.username?.toLowerCase();
           if (prevUsername && prevUsername !== lower) {
             await deleteDoc(doc(db, "usernames", prevUsername));
           }
-
           await Promise.all([
             setDoc(doc(db, "users", user.uid), { username: tempUsername }, { merge: true }),
             setDoc(doc(db, "usernames", lower), { uid: user.uid }),
           ]);
-
           const updatedSnap = await getDoc(doc(db, "users", user.uid));
           setUsername(updatedSnap.data()?.username || "");
           setNeedsUsername(false);
@@ -1919,7 +1590,6 @@ onSpend={handleBuyWheel}
       >
         💾 Save Username
       </button>
-
       {!needsUsername && (
         <button
           onClick={() => setShowUsernameEditor(false)}
@@ -1931,11 +1601,6 @@ onSpend={handleBuyWheel}
     </div>
   </div>
 )}
-
-
-        
-
-
 {showSettings && (
   <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 px-4">
     <div className="bg-gray-900 p-6 rounded-lg shadow-xl w-full max-w-sm text-white">
@@ -1953,7 +1618,6 @@ onSpend={handleBuyWheel}
     <div className="bg-gray-900 p-6 rounded-lg shadow-xl w-full max-w-sm text-white text-center">
       <h2 className="text-xl font-bold mb-4 text-red-400">⚠️ Delete Account</h2>
       <p className="mb-6 text-sm">This will permanently delete your account and all data. This action cannot be undone.</p>
-      
       <div className="flex justify-center gap-4">
         <button
           onClick={async () => {
@@ -1982,8 +1646,6 @@ onSpend={handleBuyWheel}
     </div>
   </div>
 )}
-
-
       <h2 className="text-xl font-bold mb-4">Settings</h2>
       {/* Overall Volume */}
 <div className="mb-4">
@@ -2022,10 +1684,7 @@ className="text-sm px-2 py-1 rounded bg-gray-700 hover:bg-gray-600"
     className="w-full"
   />
 </div>
-
-
 </div>
-
 {/* Wheel Tick Volume */}
 <div className="mb-4">
   <label className="block mb-1 font-semibold">🌀 Wheel Tick Volume</label>
@@ -2040,7 +1699,6 @@ className="text-sm px-2 py-1 rounded bg-gray-700 hover:bg-gray-600"
   className="w-full"
 />
 </div>
-
 {/* Case Opening Volume */}
 <div className="mb-4">
 <label className="block mb-1 font-semibold">🎁 Prizes Volume</label>
@@ -2055,8 +1713,6 @@ className="text-sm px-2 py-1 rounded bg-gray-700 hover:bg-gray-600"
   className="w-full"
 />
 </div>
-
-
       {/* Username Editor */}
       {/* Change Username */}
       {!user?.isAnonymous && (
@@ -2073,7 +1729,6 @@ className="text-sm px-2 py-1 rounded bg-gray-700 hover:bg-gray-600"
     </button>
   </div>
 )}
-
 <button
   onClick={() => {
     setShowSettings(false);
@@ -2083,17 +1738,12 @@ className="text-sm px-2 py-1 rounded bg-gray-700 hover:bg-gray-600"
 >
   🧩 Customize Top Bar
 </button>
-
-
 <button
   onClick={() => setShowDeleteConfirm(true)}
   className="w-full py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded mt-2"
 >
   🗑️ Delete Account
 </button>
-
-
-
       
     </div>
   </div>
@@ -2110,7 +1760,6 @@ className="text-sm px-2 py-1 rounded bg-gray-700 hover:bg-gray-600"
           ✖
         </button>
       </div>
-
       {friends.length === 0 ? (
         <p className="text-gray-400 italic text-sm">No friends yet. Go send some requests! 🤝</p>
       ) : (
@@ -2127,7 +1776,6 @@ className="text-sm px-2 py-1 rounded bg-gray-700 hover:bg-gray-600"
   setSelectedProfileUser({ ...f, ...full, readOnly: true });
   setShowFriends(false);
 }}
-
     className="flex items-center gap-4"
   >
     {(f.avatar || f.equippedAvatar) ? (
@@ -2148,7 +1796,6 @@ className="text-sm px-2 py-1 rounded bg-gray-700 hover:bg-gray-600"
   [{f.level || 1}] <span className="font-bold">{f.username}</span>
     </span>
   </button>
-
   <button
   onClick={() => {
 setChatUser(f);
@@ -2158,20 +1805,16 @@ setChatUser(f);
 >
   💬 Message
 </button>
-
 <button
   onClick={() => setFriendToRemove(f)}
   className="text-sm bg-red-600 hover:bg-red-700 text-white font-semibold px-3 py-1 rounded"
 >
   ❌ Remove
 </button>
-
 </li>
-
           ))}
         </ul>
       )}
-
       <div className="mt-6">
   <div className="mt-6">
   <button
@@ -2184,27 +1827,22 @@ setChatUser(f);
   >
     📤 Invite Friends
   </button>
-
   {toastMessage && (
     <div className="mt-3 bg-gray-900 text-white px-4 py-2 rounded shadow-lg border border-blue-500 text-center">
       {toastMessage}
     </div>
   )}
 </div>
-
 </div>
-
     </div>
   </div>
 )}
-
 {showTopBarEditor && (
   <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 px-4">
     <div className="bg-gray-900 border border-purple-500 rounded-2xl shadow-[0_0_20px_rgba(168,85,247,0.5)] p-6 w-full max-w-sm text-white text-center">
       <h2 className="text-xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-500 drop-shadow-[0_0_8px_rgba(255,255,255,0.6)]">
         🧩 Customize Top Bar
       </h2>
-
       <div className="mb-6 text-left">
         {[
           { id: "levels", label: "Level Rewards" },
@@ -2233,7 +1871,6 @@ setChatUser(f);
           </label>
         ))}
       </div>
-
       {/* Live Preview */}
       <div className="mt-6">
   <h3 className="text-lg font-semibold mb-2 text-purple-300 drop-shadow">🔃 Reorder Buttons:</h3>
@@ -2265,10 +1902,6 @@ setChatUser(f);
     </SortableContext>
   </DndContext>
 </div>
-
-
-
-
       <button
         onClick={() => {
           saveUserData(
@@ -2291,15 +1924,9 @@ setChatUser(f);
       >
         💾 Close
       </button>
-
-      
     </div>
   </div>
 )}
-
-
-
-
 {showNotifications && (
   <NotificationsPanel
     notifications={notifications}
@@ -2307,7 +1934,6 @@ setChatUser(f);
     setNotifications={setNotifications}
   />
 )}
-
 {selectedProfileUser && (
   <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
     <div className="bg-gray-900 rounded-2xl max-w-3xl w-full relative overflow-y-auto max-h-[90vh] custom-scroll">
@@ -2334,8 +1960,6 @@ setChatUser(f);
     </div>
   </div>
 )}
-
-
 {chatUser && (
   <ChatBox
     currentUser={user}
@@ -2376,9 +2000,6 @@ setChatUser(f);
     </div>
   </div>
 )}
-
-
-
       </div>
 </>
 {macroCheckVisible && (
@@ -2395,10 +2016,6 @@ const newThreshold = Math.floor(Math.random() * 11) + 25;
   setOpenCount(0);
   setMacroThreshold(newThreshold);
 }}
-
-
-
-
     style={{
       position: "absolute",
       top: macroButtonPos.top,
@@ -2416,9 +2033,7 @@ const newThreshold = Math.floor(Math.random() * 11) + 25;
 Tap to Resume
   </button>
 )}
-
     </Router>
   );
 }
-
 export default App;
