@@ -120,9 +120,10 @@ export default function Achievements({
   { key: "workersOwned", target: 10 },
   { key: "avatarsOwned", target: 5 },
   { key: "setsCompleted", target: 25 },
-  { key: "slotsSpun", target: 25 },
+  { key: "slotsSpun", target: 100 }, // 🔧 was 25
   { key: "horseRaces", target: 1000000 },
 ];
+
 
 const claimedGoals = finalTiers
   .map(({ key, target }) => {
