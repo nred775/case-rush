@@ -76,16 +76,16 @@ export default function Achievements({
   };
 
   const rawGoals = [
-    ...milestoneGoals("wheelsSpun", [10, 100, 10000, 1000000], [5, 10, 50, { avatar: "Wheel Master" }]),
-    ...milestoneGoals("casesOpened", [10, 100, 10000, 1000000], [5, 10, 50, { avatar: "Case Crusher" }]),
-    ...milestoneGoals("dailyGrids", [1, 5, 10, 50, 100], [2, 5, 10, 25, 50]),
-    ...milestoneGoals("blackjackWins", [1, 10, 100], [5, 15, { avatar: "Blackjack Boss" }]),
-    ...milestoneGoals("workersOwned", [1, 5, 10], [10, 25, 50]),
-    ...milestoneGoals("avatarsOwned", [1, 5], [25, 100]),
-    ...milestoneGoals("setsCompleted", [1, 5, 10, 25], [10, 50, 100, 250]),
-     ...milestoneGoals("slotsSpun", [10, 25, 50, 100], [5, 10, 25, 50]),
-  ...milestoneGoals("horseRaces", [10, 100, 10000, 1000000], [5, 10, 50, { avatar: "Racing Legend" }]),
-  ];
+  ...milestoneGoals("wheelsSpun", [10, 100, 1000, 10000], [5, 10, 20, { avatar: "Wheel Master" }]),
+  ...milestoneGoals("casesOpened", [10, 100, 1000, 10000], [5, 10, 20, { avatar: "Case Crusher" }]),
+  ...milestoneGoals("dailyGrids", [1, 5, 10, 50, 100], [2, 5, 10, 25, 50]),
+  ...milestoneGoals("blackjackWins", [1, 10, 25], [5, 15, { avatar: "Blackjack Boss" }]),
+  ...milestoneGoals("workersOwned", [1, 5, 10], [10, 25, 50]),
+  ...milestoneGoals("avatarsOwned", [1, 5], [25, 100]),
+  ...milestoneGoals("setsCompleted", [1, 5, 10, 25], [10, 50, 100, 250]),
+  ...milestoneGoals("slotsSpun", [10, 25, 50, 100], [5, 10, 25, 50]),
+  ...milestoneGoals("horseRaces", [5, 10, 50, 100], [5, 10, 25, { avatar: "Racing Legend" }]),
+];
 
   const sortedGoals = rawGoals.sort((a, b) => {
   const aBase = a.key.split("_")[0];
@@ -113,16 +113,17 @@ export default function Achievements({
   });
 
   const finalTiers = [
-  { key: "wheelsSpun", target: 1000000 },
-  { key: "casesOpened", target: 1000000 },
+  { key: "wheelsSpun", target: 10000 },
+  { key: "casesOpened", target: 10000 },
   { key: "dailyGrids", target: 100 },
-  { key: "blackjackWins", target: 100 },
+  { key: "blackjackWins", target: 25 },
   { key: "workersOwned", target: 10 },
   { key: "avatarsOwned", target: 5 },
   { key: "setsCompleted", target: 25 },
-  { key: "slotsSpun", target: 100 }, // 🔧 was 25
-  { key: "horseRaces", target: 1000000 },
+  { key: "slotsSpun", target: 100 },
+  { key: "horseRaces", target: 100 },
 ];
+
 
 
 const claimedGoals = finalTiers
