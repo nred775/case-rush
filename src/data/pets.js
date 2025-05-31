@@ -13,7 +13,7 @@ const pets = [
     dailyReward: 15,
     image: "sparky.png",
     description: "Shocks enemies with cuteness.",
-    position: "botton-left",
+    position: "bottom-left",
   },
   {
     name: "Whiskers",
