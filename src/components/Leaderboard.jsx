@@ -219,19 +219,21 @@ className={`relative card-shine p-3 sm:p-4 rounded-lg flex flex-col sm:flex-row 
 
 
             <ProfilePage
-              currentUser={null}
-              username={selectedUser.username}
-              level={selectedUser.level}
-              xp={selectedUser.xp}
-              balance={selectedUser.balance}
-              opals={selectedUser.opals}
-              equippedAvatar={selectedUser.equippedAvatar}
-              ownedWorkers={selectedUser.ownedWorkers}
-              profileWorkers={selectedUser.profileWorkers}
-              setProfileWorkers={() => {}}
-              readOnly
-              badges={selectedUser.badges || []}
-            />
+  currentUser={null}
+  username={selectedUser.username}
+  level={selectedUser.level}
+  xp={selectedUser.xp}
+  balance={selectedUser.balance}
+  opals={selectedUser.opals}
+  equippedAvatar={selectedUser.equippedAvatar}
+  ownedWorkers={selectedUser.ownedWorkers}
+  profileWorkers={selectedUser.profileWorkers}
+  setProfileWorkers={() => {}}
+  readOnly
+  badges={selectedUser.badges || []}
+  activePet={selectedUser.activePet}
+/>
+
             {currentUser?.uid !== selectedUser?.id && (
               <div className="text-center p-4 space-y-2">
                 <button

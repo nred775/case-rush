@@ -3,7 +3,7 @@ import workers from "../data/workers";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import allBadges from "../data/badges";
-
+import pets from "../data/pets";
 
 const getTotalXpForLevel = (level) => {
   let total = 0;
@@ -14,7 +14,7 @@ const getTotalXpForLevel = (level) => {
 };
 
 const getLevelColorClass = (level) => {
-  if (level <= 0) return "text-white"; // force white for level 0 or below
+  if (level <= 0) return "text-white";
   const index = Math.floor(level / 10);
   switch (index) {
     case 0: return "text-white";
@@ -28,11 +28,9 @@ const getLevelColorClass = (level) => {
     case 8: return "text-purple-500 drop-shadow-[0_0_10px_rgba(168,85,247,1)]";
     case 9: return "text-yellow-500 drop-shadow-[0_0_10px_rgba(255,255,0,1)]";
     case 10: return "text-red-500 drop-shadow-[0_0_10px_rgba(255,80,80,1)]";
-    default: return "text-white"; // fallback to white instead of red
+    default: return "text-white";
   }
 };
-
-
 
 export default function ProfilePage({
   currentUser,
@@ -46,10 +44,9 @@ export default function ProfilePage({
   profileWorkers = [],
   setProfileWorkers = () => {},
   readOnly = false,
-  badges = [], // 👈 NEW
+  badges = [],
+  activePet
 }) {
-
-
   const [showModal, setShowModal] = useState(false);
   const [selected, setSelected] = useState(profileWorkers);
 
@@ -79,17 +76,16 @@ export default function ProfilePage({
         {/* Top Info */}
         <div className="text-center space-y-2">
           <div className="flex justify-center">
-  <div className="bg-black/70 px-4 py-2 rounded-xl flex items-center gap-3 drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
-    <span className="text-4xl">🎮</span>
-    <span className={`text-xl sm:text-2xl font-bold ${getLevelColorClass(level)}`}>
-        [{level}]
-    </span>
-    <span className={`text-2xl sm:text-3xl font-extrabold ${getLevelColorClass(level)}`}>
-      {username}'s Profile
-    </span>
-  </div>
-</div>
-
+            <div className="bg-black/70 px-4 py-2 rounded-xl flex items-center gap-3 drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
+              <span className="text-4xl">🎮</span>
+              <span className={`text-xl sm:text-2xl font-bold ${getLevelColorClass(level)}`}>
+                [{level}]
+              </span>
+              <span className={`text-2xl sm:text-3xl font-extrabold ${getLevelColorClass(level)}`}>
+                {username}'s Profile
+              </span>
+            </div>
+          </div>
 
           {/* XP Bar */}
           <div className="w-full max-w-sm mx-auto">
@@ -100,155 +96,106 @@ export default function ProfilePage({
               />
             </div>
             <p className="text-sm mt-1 text-center text-gray-300">
-  {isNaN(xpProgress) || isNaN(xpNeeded) || level <= 0
-    ? `0 / 25 XP to level 2`
-    : level >= 120
-    ? `${(xp - getTotalXpForLevel(120)).toLocaleString()} XP over level 120`
-    : `${xpProgress.toLocaleString()} / ${xpNeeded.toLocaleString()} XP to level ${level + 1}`}
-</p>
-
+              {isNaN(xpProgress) || isNaN(xpNeeded) || level <= 0
+                ? `0 / 25 XP to level 2`
+                : level >= 120
+                ? `${(xp - getTotalXpForLevel(120)).toLocaleString()} XP over level 120`
+                : `${xpProgress.toLocaleString()} / ${xpNeeded.toLocaleString()} XP to level ${level + 1}`}
+            </p>
           </div>
         </div>
-{badges.length > 0 && (
-  <div className="flex flex-wrap justify-center gap-2 mt-2">
-    {allBadges
-      .filter((b) => badges.includes(b.id))
-      .map((badge) => (
-        <div key={badge.id} className="relative group">
-          <div
-            className="bg-black/60 border border-white/20 rounded-full px-3 py-1 text-sm flex items-center gap-1 shadow-md cursor-default"
-          >
-            <span>{badge.icon}</span>
-            <span className="text-white font-medium">{badge.name}</span>
-          </div>
-          <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded shadow-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 whitespace-nowrap">
-            {badge.description}
-          </div>
-        </div>
-      ))}
-  </div>
-)}
 
-
-        {/* Avatar Display */}
-        {equippedAvatar ? (
-          <img
-            src={`/avatars/${equippedAvatar.toLowerCase().replace(/\s+/g, "_")}.png`}
-            alt="Player Avatar"
-            className="w-full max-w-md object-contain"
-          />
-        ) : (
-          <div className="w-full max-w-md h-60 flex items-center justify-center text-7xl text-white bg-gray-800 rounded-2xl">
-            👤
+        {/* Badges */}
+        {badges.length > 0 && (
+          <div className="flex flex-wrap justify-center gap-2 mt-2">
+            {allBadges
+              .filter((b) => badges.includes(b.id))
+              .map((badge) => (
+                <div key={badge.id} className="relative group">
+                  <div className="bg-black/60 border border-white/20 rounded-full px-3 py-1 text-sm flex items-center gap-1 shadow-md cursor-default">
+                    <span>{badge.icon}</span>
+                    <span className="text-white font-medium">{badge.name}</span>
+                  </div>
+                  <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded shadow-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 whitespace-nowrap">
+                    {badge.description}
+                  </div>
+                </div>
+              ))}
           </div>
         )}
+
+        {/* Avatar + Assigned Pet Display */}
+        <div className="relative w-full max-w-md flex justify-center items-center">
+          {equippedAvatar ? (
+            <img
+              src={`/avatars/${equippedAvatar.toLowerCase().replace(/\s+/g, "_")}.png`}
+              alt="Player Avatar"
+              className="w-full max-w-md object-contain"
+            />
+          ) : (
+            <div className="w-full max-w-md h-60 flex items-center justify-center text-7xl text-white bg-gray-800 rounded-2xl">
+              👤
+            </div>
+          )}
+
+          {/* Pet Placement */}
+          {activePet && (() => {
+            const pet = pets.find(p => p.name === activePet);
+            const position = pet?.position || "bottom-left";
+            const positionClasses = {
+              "top-left": "top-0 left-4",
+              "top-right": "top-0 right-4",
+              "bottom-left": "bottom-0 left-4",
+              "bottom-right": "bottom-0 right-4",
+            };
+            return (
+              <img
+                src={`/pets/${activePet.toLowerCase().replace(/\s+/g, "_")}.png`}
+                alt={activePet}
+                className={`absolute w-36 h-36 object-contain drop-shadow-[0_0_20px_rgba(255,192,203,0.8)] z-20 ${positionClasses[position]}`}
+              />
+            );
+          })()}
+        </div>
 
         {/* Worker Squad */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 px-4">
           {Array.from({ length: 4 }).map((_, index) => {
-  const worker = displayedWorkers[index];
-  return worker ? (
-    <div
-      key={index}
-      className="bg-black/80 p-3 rounded-2xl flex flex-col items-center shadow-[0_0_15px_rgba(0,255,255,0.25)]"
-    >
-      <img
-  src={`/workers/${worker.image}`}
-  alt={worker.name}
-  className="w-28 h-28 object-contain"
-/>
+            const worker = displayedWorkers[index];
+            return worker ? (
+              <div
+  key={index}
+  className="relative bg-gradient-to-br from-cyan-900 via-indigo-800 to-purple-900 p-2 rounded-2xl flex items-center justify-center shadow-[0_0_25px_rgba(0,255,255,0.3)] border border-cyan-400/40 hover:scale-105 transition-transform duration-300"
+>
+  <img
+    src={`/workers/${worker.image}`}
+    alt={worker.name}
+    className="w-32 h-32 sm:w-36 sm:h-36 object-contain drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]"
+  />
+</div>
 
-
-    </div>
-  ) : (
-    <div
-      key={index}
-      className="bg-black/40 p-3 rounded-2xl flex flex-col items-center border-2 border-dashed border-cyan-300/30"
-    >
-<div className="w-28 h-28 flex items-center justify-center text-6xl text-cyan-200/50">👤</div>
-      <p className="text-sm mt-2 font-medium text-cyan-200/30 text-center">Empty</p>
-    </div>
-  );
-})}
-
+            ) : (
+              <div key={index} className="bg-black/40 p-3 rounded-2xl flex flex-col items-center border-2 border-dashed border-cyan-300/30">
+                <div className="w-28 h-28 flex items-center justify-center text-6xl text-cyan-200/50">👤</div>
+                <p className="text-sm mt-2 font-medium text-cyan-200/30 text-center">Empty</p>
+              </div>
+            );
+          })}
         </div>
 
         {/* Balance + Opals */}
         <div className="flex justify-center flex-wrap gap-4 mt-2">
           <div className="flex items-center gap-2 px-4 py-2 bg-gray-900 border-2 border-green-500 rounded-full shadow-[0_0_10px_rgba(34,197,94,0.8)]">
             <span className="text-xl">💰</span>
-            <span className="font-mono text-green-300 text-xl font-extrabold">
-              ${Number(balance).toLocaleString()}
-            </span>
+            <span className="font-mono text-green-300 text-xl font-extrabold">${Number(balance).toLocaleString()}</span>
           </div>
           <div className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-500 border-2 border-purple-300 rounded-full shadow-[0_0_12px_rgba(168,85,247,0.9)]">
             💠
-            <span className="font-mono text-white text-xl font-bold">
-              {Number(opals).toLocaleString()}
-            </span>
+            <span className="font-mono text-white text-xl font-bold">{Number(opals).toLocaleString()}</span>
           </div>
         </div>
 
-        {/* Change Workers Button */}
-        {!readOnly && (
-  <button
-    onClick={() => {
-      setSelected(profileWorkers);
-      setShowModal(true);
-    }}
-    className="mt-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded font-semibold"
-  >
-    Change Workers
-  </button>
-)}
       </div>
-
-      {/* Worker Selector Modal */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 bg-black/70 flex justify-center items-center">
-          <div className="bg-zinc-900 p-6 rounded-xl max-w-lg w-full shadow-lg">
-            <h2 className="text-2xl font-bold mb-4">Pick up to 4 Workers</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              {allHiredWorkers.map((worker, index) => (
-                <div
-                  key={index}
-                  onClick={() => toggleSelect(worker.name)}
-                  className={`cursor-pointer rounded-xl p-2 border-2 transition-all ${
-                    selected.includes(worker.name)
-                      ? "border-cyan-400 bg-cyan-900/40"
-                      : "border-zinc-700"
-                  }`}
-                >
-                  <img
-                    src={`/workers/${worker.image}`}
-                    alt={worker.name}
-                    className="w-full h-20 object-contain"
-                  />
-                  <p className="text-sm mt-1">{worker.name}</p>
-                </div>
-              ))}
-            </div>
-            <div className="mt-4 flex justify-end">
-              <button
-                onClick={async () => {
-                  setProfileWorkers(selected);
-                  setShowModal(false);
-                  if (!currentUser) return;
-                  try {
-                    const ref = doc(db, "users", currentUser.uid);
-                    await updateDoc(ref, { profileWorkers: selected });
-                  } catch (err) {
-                    console.error("Failed to save profile workers:", err);
-                  }
-                }}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-sm text-white"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

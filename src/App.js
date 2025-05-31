@@ -58,6 +58,8 @@ import Achievements from "./components/Achievements"; // Add at the top
 import Slots from "./components/Slots";
 import SlotsPanel from "./components/SlotsPanel";
 import HorseRace from "./components/HorseRace"; // ✅ Add this import
+import PetShop from "./components/PetShop"; // ✅ Import the new pet shop
+import pets from "./data/pets";
 const enforceUsageLimit = async (type) => {
   const usageRef = doc(db, "usage", "global");
   const usageSnap = await getDoc(usageRef);
@@ -209,6 +211,8 @@ const [blackjackWins, setBlackjackWins] = useState(0);
 const [claimedAchievements, setClaimedAchievements] = useState([]);
 const [slotsSpun, setSlotsSpun] = useState(0);
 const [horseRaces, setHorseRaces] = useState(0);
+const [ownedPets, setOwnedPets] = useState([]);
+const [activePet, setActivePet] = useState("");
   const bgmRef = useRef(null);
 const sensors = useSensors(useSensor(PointerSensor));
   const navigationLocked = !!selectedCrate || !!selectedWheel;
@@ -699,7 +703,7 @@ const loadUserData = async (user) => {
   if (!user || user.isAnonymous) return;
   try {
     const okRead = await enforceUsageLimit("read");
-if (!okRead) return;
+    if (!okRead) return;
     const snap = await getDoc(doc(db, "users", user.uid));
     if (snap.exists()) {
       const data = snap.data();
@@ -715,21 +719,25 @@ if (!okRead) return;
       setClaimedRewards(data.claimedRewards || []);
       setProfileWorkers(data.profileWorkers || []);
       setUserBadges(data.badges || []);
-      setTopBarButtons(data.topBarButtons || ["home", "notifications"]);
-setClaimedAchievements(data.claimedAchievements || []);
-setWheelsSpun(data.wheelsSpun || 0);
-setCasesOpened(data.casesOpened || 0);
-setDailyGrids(data.dailyGrids || 0);
-setBlackjackWins(data.blackjackWins || 0);
-setSlotsSpun(data.slotsSpun || 0);       // ✅
-setHorseRaces(data.horseRaces || 0);     // ✅
+setTopBarButtons(
+  Array.isArray(data.topBarButtons) ? data.topBarButtons : ["home", "notifications"]
+);
+      setClaimedAchievements(data.claimedAchievements || []);
+      setWheelsSpun(data.wheelsSpun || 0);
+      setCasesOpened(data.casesOpened || 0);
+      setDailyGrids(data.dailyGrids || 0);
+      setBlackjackWins(data.blackjackWins || 0);
+      setSlotsSpun(data.slotsSpun || 0);       // ✅
+      setHorseRaces(data.horseRaces || 0);     // ✅
+      setOwnedPets(data.ownedPets || []);      // ✅ PETS
+      setActivePet(data.activePet || "");      // ✅ PETS
       if ("username" in data && typeof data.username === "string" && data.username.trim() !== "") {
-  setUsername(data.username);
-  setNeedsUsername(false);
-} else {
-  setUsername("");
-  setNeedsUsername(true);
-}
+        setUsername(data.username);
+        setNeedsUsername(false);
+      } else {
+        setUsername("");
+        setNeedsUsername(true);
+      }
     } else {
       // brand new user with no doc
       setNeedsUsername(true);
@@ -738,6 +746,7 @@ setHorseRaces(data.horseRaces || 0);     // ✅
     console.error("loadUserData error:", err.message);
   }
 };
+
 const getXpFromRarity = (rarity) => {
   switch (rarity) {
     case "common": return 5;
@@ -772,12 +781,14 @@ const getLevelFromXp = (xp) => {
   newBadges = userBadges, // 👈 add this as the 11th param
   newTopBarButtons = topBarButtons, // ✅ new param
   newClaimedAchievements = claimedAchievements,
-newWheelsSpun = wheelsSpun,
-newCasesOpened = casesOpened,
-newDailyGrids = dailyGrids,
-newBlackjackWins = blackjackWins,
-newHorseRaces = horseRaces,     // ✅ move horseRaces here
-newSlotsSpun = slotsSpun        // ✅ move slotsSpun to last
+  newWheelsSpun = wheelsSpun,
+  newCasesOpened = casesOpened,
+  newDailyGrids = dailyGrids,
+  newBlackjackWins = blackjackWins,
+  newHorseRaces = horseRaces,     // ✅ move horseRaces here
+  newSlotsSpun = slotsSpun,       // ✅ move slotsSpun to last
+  newOwnedPets = ownedPets,       // ✅ PETS added
+  newActivePet = activePet        // ✅ PETS added
 ) => {
   if (!user || user.isAnonymous) return;
   const okWrite = await enforceUsageLimit("write");
@@ -801,15 +812,17 @@ newSlotsSpun = slotsSpun        // ✅ move slotsSpun to last
     casesOpened: newCasesOpened,
     dailyGrids: newDailyGrids,
     blackjackWins: newBlackjackWins,
-     slotsSpun: newSlotsSpun,        // ✅ Add to Firestore
-    horseRaces: newHorseRaces      // ✅ Add to Firestore
+    slotsSpun: newSlotsSpun,         // ✅ Add to Firestore
+    horseRaces: newHorseRaces,      // ✅ Add to Firestore
+    ownedPets: newOwnedPets,        // ✅ Add pets
+    activePet: newActivePet         // ✅ Add pets
   };
-  // ✅ Remove any fields with undefined values
   const filteredData = Object.fromEntries(
     Object.entries(data).filter(([_, v]) => v !== undefined)
   );
   await setDoc(doc(db, "users", user.uid), filteredData, { merge: true });
 };
+
   const handleSpend = (amount) => {
     const newBalance = balance - amount;
     setBalance(newBalance);
@@ -982,7 +995,7 @@ if (!user) return (
         {!user ? null : (
           <>
 <div className="fixed top-4 left-0 right-0 z-10 px-2 scrollbar-hide flex sm:justify-center">
-<div className="flex items-center gap-2 bg-gray-900 px-2 py-2 sm:px-4 rounded-xl shadow-xl border border-gray-700 w-full sm:w-max overflow-x-auto sm:overflow-visible max-w-full scrollbar-hide">
+<div className="flex items-center gap-2 bg-gray-900 px-2 py-2 sm:px-4 rounded-xl shadow-xl border border-gray-700 w-full sm:w-max overflow-visible max-w-full">
                 {/* Avatar + Username + Level */}
                 <div className="flex items-center gap-4">
                   {navigationLocked ? (
@@ -1208,6 +1221,41 @@ if (!user) return (
     />
   }
 />
+<Route
+  path="/pet-shop"
+  element={
+    <PetShop
+      opals={opals}
+      setOpals={setOpals}
+      ownedPets={ownedPets}
+      setOwnedPets={setOwnedPets}
+      activePet={activePet}
+      setActivePet={setActivePet}
+      saveUserData={saveUserData}
+      balance={balance}
+      inventory={inventory}
+      ownedAvatars={ownedAvatars}
+      equippedAvatar={equippedAvatar}
+      ownedWorkers={ownedWorkers}
+      completedSets={completedSets}
+      xp={xp}
+      level={level}
+      claimedRewards={claimedRewards}
+      userBadges={userBadges}
+      topBarButtons={topBarButtons}
+      claimedAchievements={claimedAchievements}
+      wheelsSpun={wheelsSpun}
+      casesOpened={casesOpened}
+      dailyGrids={dailyGrids}
+      blackjackWins={blackjackWins}
+      horseRaces={horseRaces}
+      slotsSpun={slotsSpun}
+      currentUser={user}
+      userId={user?.uid} // ✅ Add this
+    />
+  }
+/>
+
 <Route path="/slots" element={<Slots
   opals={opals}
   setOpals={setOpals}
@@ -1372,6 +1420,8 @@ if (!user) return (
       profileWorkers={profileWorkers}
       setProfileWorkers={setProfileWorkers}
       badges={userBadges} // ✅ Add this line
+        activePet={activePet}
+
     />
   }
 />
@@ -1470,20 +1520,34 @@ if (!user) return (
   element={
     <WorkersPanel
       userId={user?.uid}
+      currentUser={user}
       balance={balance}
       setBalance={setBalance}
       opals={opals}
+      setOpals={setOpals}
       ownedWorkers={ownedWorkers}
+      setOwnedWorkers={setOwnedWorkers}
+      profileWorkers={profileWorkers}
+      setProfileWorkers={setProfileWorkers}
       onHire={(worker) => {
         const newOpals = opals - worker.cost;
         const newOwned = [...ownedWorkers, worker.name];
         setOpals(newOpals);
         setOwnedWorkers(newOwned);
-        saveUserData(balance, inventory, newOpals, ownedAvatars, equippedAvatar, newOwned);
+        saveUserData(
+          balance,
+          inventory,
+          newOpals,
+          ownedAvatars,
+          equippedAvatar,
+          newOwned
+        );
       }}
     />
   }
 />
+
+
 <Route
   path="/avatars"
   element={
@@ -1767,51 +1831,71 @@ className="text-sm px-2 py-1 rounded bg-gray-700 hover:bg-gray-600"
           {friends.map((f) => (
             <li
   key={f.uid}
-  className="bg-gray-800 border border-gray-700 rounded-xl p-4 flex items-center justify-between gap-4 transition hover:bg-gray-700"
+  className="bg-gradient-to-br from-cyan-900 via-indigo-800 to-purple-900 p-4 rounded-2xl flex flex-col sm:flex-row items-center sm:justify-between shadow-[0_0_25px_rgba(0,255,255,0.3)] border border-cyan-400/40 gap-4 hover:scale-[1.02] transition-transform duration-300"
 >
   <button
     onClick={async () => {
-  const snap = await getDoc(doc(db, "users", f.uid));
-  const full = snap.data();
-  setSelectedProfileUser({ ...f, ...full, readOnly: true });
-  setShowFriends(false);
-}}
-    className="flex items-center gap-4"
+      const snap = await getDoc(doc(db, "users", f.uid));
+      const full = snap.data();
+      setSelectedProfileUser({ ...f, ...full, readOnly: true });
+      setShowFriends(false);
+    }}
+    className="flex items-center gap-4 text-left"
   >
     {(f.avatar || f.equippedAvatar) ? (
-      <div className="relative">
+      <div className="relative w-16 h-16 sm:w-20 sm:h-20">
         <img
           src={`/avatars/${(f.avatar || f.equippedAvatar).toLowerCase().replace(/\s+/g, "_")}_head.png`}
           alt={f.avatar || f.equippedAvatar}
-          className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full border-4 bg-black/30 ${getLevelBorderClass(f.level || 1)}`}
+          className={`w-full h-full rounded-full border-4 bg-black/30 ${getLevelBorderClass(f.level || 1)}`}
         />
-        
+        {f.activePet && (() => {
+          const pet = pets.find((p) => p.name === f.activePet);
+          const pos = pet?.position || "bottom-left";
+          const posClasses = {
+            "top-left": "top-0 left-0",
+            "top-right": "top-0 right-0",
+            "bottom-left": "bottom-0 left-0",
+            "bottom-right": "bottom-0 right-0",
+          };
+          return (
+            <img
+              src={`/pets/${f.activePet.toLowerCase().replace(/\s+/g, "_")}.png`}
+              alt={f.activePet}
+              className={`absolute w-14 h-14 object-contain z-20 drop-shadow-[0_0_10px_rgba(255,192,203,0.6)] ${posClasses[pos]}`}
+            />
+          );
+        })()}
       </div>
     ) : (
       <div className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center text-xl rounded-full border-2 border-white bg-gray-700 shadow">
         👤
       </div>
     )}
-    <span className={`text-lg sm:text-xl ${getLevelColorClass(f.level || 1)}`}>
-  [{f.level || 1}] <span className="font-bold">{f.username}</span>
+    <span className={`text-lg sm:text-xl font-bold ${getLevelColorClass(f.level || 1)}`}>
+      [{f.level || 1}] {f.username}
     </span>
   </button>
-  <button
-  onClick={() => {
-setChatUser(f);
-    setShowFriends(false);
-  }}
-  className="text-sm bg-blue-600 hover:bg-blue-700 text-white font-semibold px-3 py-1 rounded"
->
-  💬 Message
-</button>
-<button
-  onClick={() => setFriendToRemove(f)}
-  className="text-sm bg-red-600 hover:bg-red-700 text-white font-semibold px-3 py-1 rounded"
->
-  ❌ Remove
-</button>
+
+  <div className="flex gap-2">
+    <button
+      onClick={() => {
+        setChatUser(f);
+        setShowFriends(false);
+      }}
+      className="text-sm bg-blue-600 hover:bg-blue-700 text-white font-semibold px-3 py-1 rounded"
+    >
+      💬 Message
+    </button>
+    <button
+      onClick={() => setFriendToRemove(f)}
+      className="text-sm bg-red-600 hover:bg-red-700 text-white font-semibold px-3 py-1 rounded"
+    >
+      ❌ Remove
+    </button>
+  </div>
 </li>
+
           ))}
         </ul>
       )}
@@ -1956,6 +2040,8 @@ setChatUser(f);
         setProfileWorkers={() => {}}
         readOnly
         badges={selectedProfileUser.badges || []}
+        activePet={selectedProfileUser.activePet}
+
       />
     </div>
   </div>

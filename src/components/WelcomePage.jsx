@@ -43,6 +43,8 @@ export default function WelcomePage({ username, setShowFriends, resetCrate, rese
 <Section title="🛒 Store" sectionClass="section-opals" titleClass="title-opals">
   <NavButton to="/avatars" label="Avatars" img="/images/avatars.png" className="glow-avatars" />
   <NavButton to="/workers" label="Workers" img="/images/workers.png" className="glow-workers" />
+  <NavButton to="/pet-shop" label="Pets" img="/images/pets.png" className="glow-workers" />
+
 </Section>
 
         {/* Social Section - Cyan */}

@@ -1,5 +1,5 @@
 // HorseRace.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { generateHorses } from "../data/horses";
 
 export default function HorseRace({
@@ -44,11 +44,18 @@ export default function HorseRace({
   const [horseIntervals, setHorseIntervals] = useState([]);
 const [betAmount, setBetAmount] = useState("1"); // default bet
 const [raceCompleted, setRaceCompleted] = useState(false);
+const [finishLinePx, setFinishLinePx] = useState(960);
+
+useEffect(() => {
+  if (typeof window !== "undefined") {
+    const screenWidth = window.innerWidth;
+    setFinishLinePx(screenWidth > 600 ? 960 : screenWidth - 100);
+  }
+}, []);
 
 
 
 
-  const finishLinePx = 960;
 
   function getRaceOutcome(horses) {
     const entries = horses.map(h => ({
@@ -100,11 +107,15 @@ saveUserData(balance - betAmount);
     setFinished(finishedFlags);
 
     const outcome = getRaceOutcome(horses);
-    const targetTimes = horses.map((_, i) => {
+    // Target race duration (in seconds) for the winner
+const baseRaceDuration = 15;
+
+const targetTimes = horses.map((_, i) => {
   const placeIndex = outcome.indexOf(horses[i].name);
-  const avgSpeed = 2 + (horses.length - placeIndex) * 0.1;
-  return finishLinePx / avgSpeed;
+  const placeMultiplier = 1 + (placeIndex * 0.05); // slower for lower-ranked horses
+  return baseRaceDuration * placeMultiplier;
 });
+
 
     setRankings(outcome);
 
@@ -117,71 +128,69 @@ saveUserData(balance - betAmount);
 
     const newIntervals = [];
 
+
+
 horses.forEach((horse, i) => {
   const placeIndex = outcome.indexOf(horse.name);
-  const baseSpeed = 2;
-  const speed = baseSpeed + (horses.length - placeIndex) * 0.1;
-
-  // Each horse gets a unique jump interval between 400ms–600ms
-const jumpInterval = 50 + Math.floor(Math.random() * 1501); // 300–800 ms
+  const targetTime = targetTimes[i]; // in seconds
+  const jumpInterval = 300 + Math.floor(Math.random() * 300); // 300–600ms
+  const jumpsPerSecond = 1000 / jumpInterval;
+  const totalJumps = targetTime * jumpsPerSecond;
+  const speed = finishLinePx / totalJumps; // px per jump
 
   const interval = setInterval(() => {
-  setPositions(prev => {
-    const updated = [...prev];
-    const updatedFinished = [...finishedFlags];
-
-    if (!updatedFinished[i]) {
-      const currentPos = prev[i];
-      const remaining = finishLinePx - currentPos;
-      const jumpDistance = speed * (jumpInterval / 50);
-const nextPos = currentPos + jumpDistance;
-
-if (nextPos >= finishLinePx) {
-  updated[i] = finishLinePx;
-  updatedFinished[i] = true;
-
-  // Force all horses to match exactly
-  setTimeout(() => {
     setPositions(prev => {
-      const finalPositions = [...prev];
-      finalPositions[i] = finishLinePx;
-      return finalPositions;
+      const updated = [...prev];
+      const updatedFinished = [...finishedFlags];
+
+      if (!updatedFinished[i]) {
+        const currentPos = prev[i];
+        const jumpDistance = speed;
+        const nextPos = currentPos + jumpDistance;
+
+        if (nextPos >= finishLinePx) {
+          updated[i] = finishLinePx;
+          updatedFinished[i] = true;
+
+          setTimeout(() => {
+            setPositions(prev => {
+              const finalPositions = [...prev];
+              finalPositions[i] = finishLinePx;
+              return finalPositions;
+            });
+          }, 0);
+
+          const finishNow = performance.now();
+          const seconds = ((finishNow - startTimestamp) / 1000).toFixed(1);
+
+          setFinishTimes(prev => ({
+            ...prev,
+            [horses[i].name]: seconds,
+          }));
+
+          clearInterval(interval);
+
+          if (updatedFinished.every(done => done)) {
+            clearInterval(timeInterval);
+            setTimerInterval(null);
+            setRaceInProgress(false);
+            finishRace(outcome[0]);
+          }
+        } else {
+          updated[i] = nextPos;
+        }
+      }
+
+      finishedFlags.splice(0, horses.length, ...updatedFinished);
+      setFinished([...updatedFinished]);
+
+      return updated;
     });
-  }, 0);
-
-
-  const finishNow = performance.now();
-  const seconds = ((finishNow - startTimestamp) / 1000).toFixed(1);
-
-  setFinishTimes(prev => ({
-    ...prev,
-    [horses[i].name]: seconds,
-  }));
-
-  clearInterval(interval);
-
-  if (updatedFinished.every(done => done)) {
-    clearInterval(timeInterval);
-    setTimerInterval(null);
-    setRaceInProgress(false);
-    finishRace(outcome[0]);
-  }
-} else {
-  updated[i] = nextPos;
-}
-
-    }
-
-    finishedFlags.splice(0, horses.length, ...updatedFinished);
-    setFinished([...updatedFinished]);
-
-    return updated;
-  });
-}, jumpInterval);
-
+  }, jumpInterval);
 
   newIntervals.push(interval);
 });
+
 
 setHorseIntervals(newIntervals);
 
@@ -256,10 +265,10 @@ setHorseIntervals([]);    }
 
   return (
 <div className="px-4 pt-6 text-white max-w-2xl mx-auto space-y-6">
-<h2 className="text-3xl font-bold text-center relative left-[-120px] sm:left-0">🐎 Horse Race</h2>
+<h2 className="text-3xl font-bold text-center relative sm:left-0">🐎 Horse Race</h2>
 
 
-<div className="transform scale-[0.65] sm:scale-100 origin-top">
+<div className="transform scale-90 sm:scale-100 origin-top">
 <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center justify-start sm:justify-center w-full">
     {/* Left column: race buttons and betting */}
     <div className="flex flex-col gap-4 w-full max-w-xs sm:w-[180px]">
@@ -273,8 +282,7 @@ setHorseIntervals([]);    }
           balance < Number(betAmount) ||
           raceCompleted
         }
-        className={`neon-spin-btn ${
-          !selectedHorse ||
+className={`neon-spin-btn text-sm sm:text-base py-2 sm:py-3 ${          !selectedHorse ||
           raceInProgress ||
           betAmount < 1 ||
           betAmount > 25000 ||
@@ -288,7 +296,7 @@ setHorseIntervals([]);    }
       </button>
 
       <div className="flex flex-col">
-        <label className="text-sm mb-1">Bet Amount (Max = $25,000):</label>
+        <label className="text-xs sm:text-sm mb-1">Bet Amount (Max = $25,000):</label>
         <input
           type="number"
           value={betAmount}
@@ -296,7 +304,7 @@ setHorseIntervals([]);    }
           max={25000}
           disabled={raceInProgress}
           onChange={(e) => setBetAmount(e.target.value)}
-          className="neon-input px-3 py-1.5 text-sm text-white bg-black border border-pink-300 rounded-md shadow-md placeholder-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-500 w-32"
+  className="neon-input px-4 py-2 text-base sm:text-sm text-white bg-black border border-pink-300 rounded-md shadow-md placeholder-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-500 w-full sm:w-32"
         />
       </div>
 
@@ -316,9 +324,10 @@ setHorseIntervals([]);    }
         <button
           key={i}
           onClick={() => !raceInProgress && setSelectedHorse(horse)}
-className={`glow-btn text-left !rounded-md px-4 py-2 sm:px-2 sm:py-1 text-base sm:text-sm ${
+className={`glow-btn text-left !rounded-md px-4 py-3 sm:px-2 sm:py-1 text-base sm:text-sm ${
   selectedHorse?.name === horse.name ? "glow-core" : ""
 }`}
+
 
         >
 <img src={horse.img} alt={horse.name} className="h-10 sm:h-8 w-auto" />
@@ -344,8 +353,9 @@ className={`glow-btn text-left !rounded-md px-4 py-2 sm:px-2 sm:py-1 text-base s
 
       {rankings.length > 0 && (
         <div className="p-3 rounded-lg border border-pink-300 shadow-lg animate-fade-in-fast w-full">
-          <h3 className="text-xl font-bold text-pink-300 mb-2 text-center">🏁 Results</h3>
-          <ol className="space-y-2 text-sm">
+          <h3 className="text-lg sm:text-xl font-bold text-pink-300 mb-2 text-center">🏁 Results</h3>
+<ol className="space-y-1 sm:space-y-2 text-xs sm:text-sm">
+
             {rankings.map((name, i) =>
               finishTimes[name] ? (
                 <li
@@ -377,13 +387,15 @@ className={`glow-btn text-left !rounded-md px-4 py-2 sm:px-2 sm:py-1 text-base s
 
 
 {/* Horizontally scrollable on mobile only */}
-<div className="w-full overflow-x-auto sm:overflow-x-visible">
-  <div className="flex flex-col items-center space-y-4 mt-4 min-w-[1250px] sm:min-w-0">
+<div className="w-full overflow-x-auto sm:overflow-x-visible scrollbar-hide">
+<div className="flex flex-col items-center space-y-4 mt-4 w-full sm:w-auto">
     {horses.map((horse, i) => (
       <div
-        key={i}
-        className="relative h-20 w-[1250px] bg-neon-pattern track-lane rounded overflow-hidden border border-white/20"
-      >
+  key={i}
+  className="relative h-20 bg-neon-pattern track-lane rounded overflow-hidden border border-white/20"
+  style={{ width: `${finishLinePx + 70}px` }} // +70 for padding past finish line
+>
+
         <div
           className="finish-line"
           style={{ left: `${finishLinePx + 50}px` }}

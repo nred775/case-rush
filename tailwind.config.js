@@ -42,7 +42,7 @@ module.exports = {
 }
 
   },
-  plugins: [],
+  plugins: [require('tailwind-scrollbar-hide'),],
 }
 // tailwind.config.js
 module.exports = {
@@ -62,3 +62,4 @@ module.exports = {
     }
   }
 }
+

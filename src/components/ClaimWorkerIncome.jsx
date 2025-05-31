@@ -3,14 +3,15 @@ import { db } from "../firebase";
 import workers from "../data/workers";
 import { useEffect, useState } from "react";
 
-export default function ClaimWorkerIncome({ userId, ownedWorkers, setBalance }) {
+export default function ClaimWorkerIncome({ userId, profileWorkers, setBalance }) {
   const [message, setMessage] = useState("");
   const [canClaim, setCanClaim] = useState(false);
   const [timeLeft, setTimeLeft] = useState("");
-  const [isClaiming, setIsClaiming] = useState(false); // 🚫 Prevent rapid clicks
+  const [isClaiming, setIsClaiming] = useState(false);
 
+  // 💰 Only equipped workers contribute
   const totalDaily = workers
-    .filter((w) => ownedWorkers.includes(w.name))
+    .filter((w) => profileWorkers.includes(w.name))
     .reduce((sum, w) => sum + (w.dailyReward || 0), 0);
 
   useEffect(() => {
@@ -41,7 +42,7 @@ export default function ClaimWorkerIncome({ userId, ownedWorkers, setBalance }) 
   const claimDailyIncome = async () => {
     if (!userId || !canClaim || isClaiming) return;
 
-    setIsClaiming(true); // 🚫 Lock button immediately
+    setIsClaiming(true);
 
     try {
       const userRef = doc(db, "users", userId);
@@ -61,14 +62,14 @@ export default function ClaimWorkerIncome({ userId, ownedWorkers, setBalance }) 
     } catch (err) {
       console.error("Claim error:", err);
     } finally {
-      setIsClaiming(false); // 🔓 Unlock only if needed again later
+      setIsClaiming(false);
     }
   };
 
   return (
     <div className="text-center mt-6">
       <p className="mb-2 text-blue-300 font-medium">
-        💰 You're earning ${totalDaily.toLocaleString()} per day from workers.
+        💰 Equipped workers are earning you ${totalDaily.toLocaleString()} per day.
       </p>
 
       {canClaim ? (
