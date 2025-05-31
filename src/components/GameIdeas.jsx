@@ -141,7 +141,14 @@ const sections = [
     icon: "🧍🛠️",
     borderColor: "border-emerald-400/30",
     color: "text-emerald-400",
-    description: "Customize your profile by equipping a unique avatar and selecting up to four workers to stand by your side. They don’t just look cool — workers also generate passive income. Click your avatar in the top bar to view or edit your profile and see how your team is stacked!"
+    description: "Customize your profile by equipping a unique avatar and selecting up to **four workers** to stand by your side. Workers generate passive income over time. You can assign and unassign workers anytime — but choose wisely!"
+  },
+  {
+    title: "Pets",
+    icon: "🐾",
+    borderColor: "border-pink-300/30",
+    color: "text-pink-300",
+    description: "Collect adorable pets from the Pet Shop using opals. You can only have **one active pet** at a time — it will generate daily income for you. Each pet has its own unique flair and personality. Choose your favorite and earn while you play!"
   },
   {
     title: "Make Friends",
@@ -151,5 +158,6 @@ const sections = [
     description: "Search up players on the leaderboard, click their profile, and hit Add Friend. Once you're connected, you can send messages and build your squad."
   }
 ];
+
 
 export default GameIdeas;
