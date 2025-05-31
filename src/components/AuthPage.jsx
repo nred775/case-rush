@@ -46,6 +46,34 @@ const AuthPage = ({ onLogin, setLoginBlocked, loginBlocked }) => {
   const [resetEmail, setResetEmail] = useState("");
   const [blockedMessage, setBlockedMessage] = useState("");
   const [showSupportBox, setShowSupportBox] = useState(false);
+const [deferredPrompt, setDeferredPrompt] = useState(null);
+const [isSafari, setIsSafari] = useState(false);
+
+useEffect(() => {
+  const userAgent = navigator.userAgent;
+  const isIOS = /iPhone|iPad|iPod/i.test(userAgent);
+  const isSafariBrowser = /^((?!chrome|android).)*safari/i.test(userAgent);
+  setIsSafari(isIOS && isSafariBrowser);
+}, []);
+
+
+useEffect(() => {
+  const handlePrompt = (e) => {
+    e.preventDefault();
+    setDeferredPrompt(e);
+  };
+  window.addEventListener('beforeinstallprompt', handlePrompt);
+  return () => window.removeEventListener('beforeinstallprompt', handlePrompt);
+}, []);
+
+const handleInstall = () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => {
+      setDeferredPrompt(null);
+    });
+  }
+};
 
 
 
@@ -143,6 +171,7 @@ onLogin(userCred.user);
 
   return (
     <div className="min-h-screen bg-black bg-neon-pattern flex items-center justify-center px-4 text-white">
+      
       <form
         onSubmit={handleAuth}
         className="bg-gray-900 bg-opacity-90 border border-fuchsia-500 shadow-[0_0_25px_rgba(255,0,255,0.3)] rounded-2xl p-6 w-full max-w-sm space-y-4 backdrop-blur-sm"
@@ -157,6 +186,24 @@ onLogin(userCred.user);
         <h2 className="text-3xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-yellow-400 drop-shadow">
           {isRegistering ? "Create Account" : "Welcome Back"}
         </h2>
+        {(deferredPrompt || isSafari) && (
+  <div className="text-center mt-2">
+    <button
+      onClick={() => {
+        if (deferredPrompt) {
+          handleInstall();
+        } else {
+          alert("To install this app:\n\n1. Tap the Share button (📤) at the bottom.\n2. Tap 'Add to Home Screen'.");
+        }
+      }}
+      className="bg-yellow-400 text-black font-bold px-4 py-2 rounded shadow hover:bg-yellow-500 transition"
+    >
+      📱 Get the App
+    </button>
+  </div>
+)}
+
+
         {error && <p className="text-red-400 text-sm text-center">{error}</p>}
         <input
           type="email"
