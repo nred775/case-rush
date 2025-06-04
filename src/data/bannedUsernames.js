@@ -417,6 +417,7 @@ const bannedUsernames = [
   "yiffy",
   "zoophilia",
   "fucker",
+  "nig"
 ];
 
 export default bannedUsernames;

@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import { db } from "../firebase";
+import { db, rtdb } from "../firebase";
 import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
+import { ref, onValue } from "firebase/database";
 
 
 export default function WelcomePage({ username, setShowFriends, resetCrate, resetWheel, setShowNotifications }) {
@@ -13,6 +14,8 @@ export default function WelcomePage({ username, setShowFriends, resetCrate, rese
   const [leaders, setLeaders] = useState([]);
 const [sortIndex, setSortIndex] = useState(0);
 const sortKeys = ["balance", "opals", "level"];
+const [onlineCount, setOnlineCount] = useState(0);
+
 
 useEffect(() => {
   const fetchLeaders = async () => {
@@ -30,6 +33,28 @@ useEffect(() => {
 
   return () => clearInterval(interval);
 }, [sortIndex]);
+useEffect(() => {
+  console.log("👀 Online count effect triggered");
+
+  if (!username) return; // wait for user to be loaded
+
+  const statusRef = ref(rtdb, "status");
+  const unsub = onValue(statusRef, (snapshot) => {
+    const allStatuses = snapshot.val();
+    console.log("All statuses in RTDB:", allStatuses); // 🐛 debug log
+
+    let count = 0;
+    snapshot.forEach((child) => {
+      const val = child.val();
+      if (val?.state === "online") count++;
+    });
+
+    console.log("✅ Online players counted:", count);
+    setOnlineCount(count);
+  });
+
+  return () => unsub();
+}, [username]);
 
 
   useEffect(() => {
@@ -49,13 +74,14 @@ useEffect(() => {
   <CoreSection key="core" />,
   <GamesSection key="games" resetCrate={resetCrate} resetWheel={resetWheel} />,
   <SocialSection
-    key="social"
-    setShowFriends={setShowFriends}
-    setShowNotifications={setShowNotifications}
-    leaders={leaders}
-    sortIndex={sortIndex}
-    sortKeys={sortKeys}
-  />,
+  key="social"
+  setShowFriends={setShowFriends}
+  setShowNotifications={setShowNotifications}
+  leaders={leaders}
+  sortIndex={sortIndex}
+  sortKeys={sortKeys}
+  onlineCount={onlineCount}
+/>,
   <PlaceholderSection key="online" />,
 ];
 
@@ -398,60 +424,77 @@ const GamesSection = ({ resetCrate, resetWheel }) => (
 );
 
 
-const SocialSection = ({ setShowFriends, setShowNotifications, leaders, sortIndex, sortKeys }) => (
+const SocialSection = ({ setShowFriends, setShowNotifications, leaders, sortIndex, sortKeys, onlineCount }) => (
   <Section
     title="🌐 Social"
     sectionClass="section-social social-bg-glow"
     titleClass="title-social animate-title-pulse"
+    
     topContent={
-      <Link
-        to="/leaderboard"
-  className="max-w-md mx-auto bg-black/60 rounded-2xl p-4 flex flex-col gap-3 hover:scale-[1.01] transition-transform border-2 border-white/20 shadow-xl mb-6"
-      >
-        <h3 className="text-xl font-bold text-center mb-2 text-white drop-shadow">
-          🏆 Top {sortKeys[sortIndex] === "balance" ? "Balances" : sortKeys[sortIndex] === "opals" ? "Opals" : "Levels"}
-        </h3>
-        {leaders.map((user, i) => (
-          <div
-            key={i}
-            className={`flex items-center justify-between px-3 py-2 rounded-lg ${
-              i === 0 ? "bg-yellow-800/40 border-yellow-400 border-2" :
-              i === 1 ? "bg-gray-700/40 border-gray-300 border-2" :
-              i === 2 ? "bg-orange-900/40 border-orange-300 border-2" :
-              "bg-gray-800/40 border border-white/10"
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 flex items-center justify-center rounded-full text-black font-extrabold bg-yellow-300 shadow">
-                {i === 0 ? "🥇" : i === 1 ? "🥈" : "🥉"}
-              </div>
+  <>
+   <div className="flex items-center justify-center mb-6">
+  <div className="bg-black/50 border border-white/20 backdrop-blur-lg px-6 py-3 rounded-xl shadow-xl flex items-center gap-3 animate-fadeIn">
+    <div className="relative w-4 h-4">
+      <div className="absolute inset-0 rounded-full bg-green-400 animate-ping opacity-75"></div>
+      <div className="relative w-4 h-4 rounded-full bg-green-500 shadow-lg"></div>
+    </div>
+    <div className="text-white text-lg font-bold drop-shadow tracking-wide">
+      {onlineCount} player{onlineCount !== 1 ? "s" : ""} online
+    </div>
+  </div>
+</div>
 
-              {user.equippedAvatar ? (
-                <img
-                  src={`/avatars/${user.equippedAvatar.toLowerCase().replace(/\s+/g, "_")}_head.png`}
-                  alt={user.username}
-                  className="w-10 h-10 rounded-full border-2 border-white shadow"
-                />
-              ) : (
-                <div className="w-10 h-10 rounded-full bg-gray-700 border-2 border-white flex items-center justify-center text-white">👤</div>
-              )}
 
-              <span className="text-white font-bold text-sm sm:text-base">
-                [{user.level || 1}] {user.username}
-              </span>
+    <Link
+      to="/leaderboard"
+      className="max-w-md mx-auto bg-black/60 rounded-2xl p-4 flex flex-col gap-3 hover:scale-[1.01] transition-transform border-2 border-white/20 shadow-xl mb-6"
+    >
+      <h3 className="text-xl font-bold text-center mb-2 text-white drop-shadow">
+        🏆 Top {sortKeys[sortIndex] === "balance" ? "Balances" : sortKeys[sortIndex] === "opals" ? "Opals" : "Levels"}
+      </h3>
+      {leaders.map((user, i) => (
+        <div
+          key={i}
+          className={`flex items-center justify-between px-3 py-2 rounded-lg ${
+            i === 0 ? "bg-yellow-800/40 border-yellow-400 border-2" :
+            i === 1 ? "bg-gray-700/40 border-gray-300 border-2" :
+            i === 2 ? "bg-orange-900/40 border-orange-300 border-2" :
+            "bg-gray-800/40 border border-white/10"
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 flex items-center justify-center rounded-full text-black font-extrabold bg-yellow-300 shadow">
+              {i === 0 ? "🥇" : i === 1 ? "🥈" : "🥉"}
             </div>
 
-            <div className="text-green-300 font-mono text-sm sm:text-base">
-              {sortKeys[sortIndex] === "balance"
-                ? `$${Number(user.balance || 0).toLocaleString()}`
-                : sortKeys[sortIndex] === "opals"
-                ? `💠${Number(user.opals || 0).toLocaleString()}`
-                : `Lv ${user.level || 1}`}
-            </div>
+            {user.equippedAvatar ? (
+              <img
+                src={`/avatars/${user.equippedAvatar.toLowerCase().replace(/\s+/g, "_")}_head.png`}
+                alt={user.username}
+                className="w-10 h-10 rounded-full border-2 border-white shadow"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-gray-700 border-2 border-white flex items-center justify-center text-white">👤</div>
+            )}
+
+            <span className="text-white font-bold text-sm sm:text-base">
+              [{user.level || 1}] {user.username}
+            </span>
           </div>
-        ))}
-      </Link>
-    }
+
+          <div className="text-green-300 font-mono text-sm sm:text-base">
+            {sortKeys[sortIndex] === "balance"
+              ? `$${Number(user.balance || 0).toLocaleString()}`
+              : sortKeys[sortIndex] === "opals"
+              ? `💠${Number(user.opals || 0).toLocaleString()}`
+              : `Lv ${user.level || 1}`}
+          </div>
+        </div>
+      ))}
+    </Link>
+  </>
+}
+
   >
     <NavButton
       label="Friends"
