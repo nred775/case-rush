@@ -1,4 +1,3 @@
-// src/components/NotificationsPanel.jsx
 import React from "react";
 
 export default function NotificationsPanel({ notifications, onClose, setNotifications }) {
@@ -20,7 +19,7 @@ export default function NotificationsPanel({ notifications, onClose, setNotifica
         ) : (
           <ul className="space-y-3 max-h-64 overflow-y-auto">
             {notifications.map((note, index) => (
-              <li key={index} className="bg-gray-800 p-4 rounded-lg flex flex-col gap-2">
+              <li key={note.key || index} className="bg-gray-800 p-4 rounded-lg flex flex-col gap-2">
                 <p>{note.message}</p>
                 <div className="flex gap-3 flex-wrap">
                   {note.type === "friend_request" && (
@@ -69,7 +68,8 @@ export default function NotificationsPanel({ notifications, onClose, setNotifica
                     </button>
                   )}
 
-                  {note.type !== "friend_request" && note.type !== "achievement" && (
+                  {/* Fallback for unknown notification types */}
+                  {!["friend_request", "achievement", "chat"].includes(note.type) && (
                     <button
                       className="bg-gray-600 hover:bg-gray-700 px-4 py-1 rounded font-semibold text-sm"
                       onClick={() =>

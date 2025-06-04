@@ -12,6 +12,8 @@ import {
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import ProfilePage from "./ProfilePage";
+import ContactSupportForm from "./ContactSupportForm";
+
 
 const getLevelColorClass = (level) => {
   const index = Math.floor(level / 10);
@@ -72,6 +74,9 @@ export default function Leaderboard() {
   const [toastMessage, setToastMessage] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("balance");
+const [showSupportForm, setShowSupportForm] = useState(false);
+const [reportedUser, setReportedUser] = useState("");
+
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (user) => {
@@ -242,12 +247,33 @@ className={`relative card-shine p-3 sm:p-4 rounded-lg flex flex-col sm:flex-row 
                 >
                   ➕ Add Friend
                 </button>
+                <button
+  onClick={() => {
+    setReportedUser(selectedUser.username);
+    setShowSupportForm(true);
+  }}
+  className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded font-semibold"
+>
+  🚩 Report Player
+</button>
+
+{showSupportForm && (
+  <ContactSupportForm
+    onClose={() => setShowSupportForm(false)}
+    type="report"
+    reportedUser={reportedUser}
+  />
+)}
+
+
                 {toastMessage && (
                   <div className="text-green-300 text-sm font-medium animate-pulse">
                     {toastMessage}
                   </div>
+                  
                 )}
               </div>
+              
             )}
           </div>
         </div>

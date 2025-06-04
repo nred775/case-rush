@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export default function Slots({
   opals,
@@ -27,16 +27,16 @@ export default function Slots({
   userBadges,
   topBarButtons
 }) {
-  const [params] = useSearchParams();
-  const navigate = useNavigate();
+    const navigate = useNavigate();
 
-  const bet = parseInt(params.get("bet")) || 1;
-  const machineName = params.get("name") || "Opal Slots";
-  const urlSymbols = params.get("symbols") || "🍒💎7️⃣🍋🔔⭐🍇";
-  const symbols = [...urlSymbols];
+  const location = useLocation();
+const { bet = 1, name: machineName = "Opal Slots", symbols: rawSymbols = "🍒💎7️⃣🍋🔔⭐🍇" } = location.state || {};
+const symbols = [...rawSymbols];
+
 
   const [reels, setReels] = useState(["❔", "❔", "❔"]);
-  const [reelStrips, setReelStrips] = useState([[], [], []]);
+const placeholderStrip = Array(20).fill("❔");
+const [reelStrips, setReelStrips] = useState([placeholderStrip, placeholderStrip, placeholderStrip]);
   const [spinning, setSpinning] = useState(false);
   const [message, setMessage] = useState("");
   const [spinId, setSpinId] = useState(null);
@@ -96,7 +96,7 @@ export default function Slots({
 
     const finalResult = Array(3).fill(null).map(() => symbols[Math.floor(Math.random() * symbols.length)]);
 
-    const stripLength = 200;
+    const stripLength = 60;
     const newReelStrips = finalResult.map((symbol) => {
       const strip = Array(stripLength).fill(null).map(() => symbols[Math.floor(Math.random() * symbols.length)]);
       strip.push(symbol);
@@ -104,6 +104,9 @@ export default function Slots({
     });
 
     setReelStrips(newReelStrips);
+    requestAnimationFrame(() => {
+  setSpinId(Date.now()); // triggers the animation on next frame
+});
 
     setTimeout(() => {
       setReels(finalResult);
@@ -184,28 +187,36 @@ export default function Slots({
             key={i}
             className="reel-window shadow-inner rounded-lg overflow-hidden w-16 h-24 bg-black bg-opacity-30 border-pink-400"
           >
-            {spinning ? (
-              <div
-                key={`reel-${i}-${spinId}`}
-                className="reel-strip"
-                style={{
-                  animation: `reel-spin ${2 + i * 1}s cubic-bezier(0.1, 0.9, 0.3, 1) forwards`,
-                }}
-              >
-                {strip.map((symbol, j) => (
-                  <div
-                    key={j}
-                    className="reel-symbol text-pink-300 drop-shadow-glow glow-neon-emoji text-3xl"
-                  >
-                    {symbol}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="reel-symbol text-pink-300 drop-shadow-glow glow-neon-emoji text-5xl flex items-center justify-center h-full">
-                {reels[i]}
-              </div>
-            )}
+            {spinning && strip.length > 0 ? (
+  <>
+    {console.log("Rendering reel", i, "with", strip.length, "symbols")}
+    <div
+  key={`reel-${i}-${spinId}`}
+  className="reel-strip will-change-transform"
+  style={{
+    animation: `reel-spin ${2 + i * 1}s cubic-bezier(0.1, 0.9, 0.3, 1) forwards`,
+    backfaceVisibility: "hidden",
+    transform: "translateZ(0)",
+    minHeight: "240rem", // fixes early black flicker on phones
+  }}
+>
+
+      {strip.map((symbol, j) => (
+        <div
+          key={j}
+          className="reel-symbol text-pink-300 drop-shadow-glow glow-neon-emoji text-3xl"
+        >
+          {symbol}
+        </div>
+      ))}
+    </div>
+  </>
+) : (
+  <div className="reel-symbol text-pink-300 drop-shadow-glow glow-neon-emoji text-5xl flex items-center justify-center h-full">
+    {reels[i]}
+  </div>
+)}
+
           </div>
         ))}
       </div>

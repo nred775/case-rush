@@ -60,6 +60,10 @@ import SlotsPanel from "./components/SlotsPanel";
 import HorseRace from "./components/HorseRace"; // ✅ Add this import
 import PetShop from "./components/PetShop"; // ✅ Import the new pet shop
 import pets from "./data/pets";
+import GlobalChat from "./components/GlobalChat"; // at the top
+import ResetPassword from "./components/ResetPassword";
+
+
 const enforceUsageLimit = async (type) => {
   const usageRef = doc(db, "usage", "global");
   const usageSnap = await getDoc(usageRef);
@@ -532,30 +536,32 @@ setNotifications((prev) => [...prev, ...newNotifs]);
 }, [user]);
 useEffect(() => {
   if (!user || user.isAnonymous) return;
-  const notifRef = collection(db, "users", user.uid, "notifications");
-  const unsub = onSnapshot(notifRef, (snap) => {
-    const newNotifs = [];
-    snap.forEach((docSnap) => {
-      const data = docSnap.data();
-      if (data.type === "chat" && data.from) {
-        newNotifs.push({
-          type: "chat",
-          message: `💬 New chat from ${data.from}`,
-          onAccept: () => {
-setChatUser({ uid: data.fromUid, username: data.from });
-            deleteDoc(doc(notifRef, docSnap.id));
-            setShowNotifications(false);
-          },
-          onDecline: async () => {
-            await deleteDoc(doc(notifRef, docSnap.id));
-          }
-        });
-      }
-    });
+
+  const notifRef = ref(rtdb, `notifications/${user.uid}`);
+  const unsub = onValue(notifRef, (snapshot) => {
+    const data = snapshot.val();
+    if (!data) return;
+
+    const entries = Object.entries(data);
+    const newNotifs = entries.map(([key, val]) => ({
+      ...val,
+      key,
+      onAccept: () => {
+        if (val.type === "chat") {
+          setChatUser({ uid: val.fromUid, username: val.from });
+          rtdbRemove(ref(rtdb, `notifications/${user.uid}/${key}`));
+          setShowNotifications(false);
+        }
+      },
+      onDecline: () => rtdbRemove(ref(rtdb, `notifications/${user.uid}/${key}`)),
+    }));
+
     setNotifications((prev) => [...prev, ...newNotifs]);
   });
+
   return () => unsub();
 }, [user]);
+
 useEffect(() => {
   document.title = "Stacked Odds"; // or whatever you want the tab to say
 }, []);
@@ -992,235 +998,144 @@ if (!user) return (
   <Router>
     <>
 <div className="min-h-screen text-white flex flex-col items-center relative z-0 overflow-x-hidden touch-manipulation bg-neon-pattern" style={{ overflowY: 'clip' }}>
-        {!user ? null : (
-          <>
-<div className="fixed top-4 left-0 right-0 z-10 px-2 scrollbar-hide flex sm:justify-center">
-<div className="flex items-center gap-2 bg-gray-900 px-2 py-2 sm:px-4 rounded-xl shadow-xl border border-gray-700 w-full sm:w-max overflow-visible max-w-full">
-                {/* Avatar + Username + Level */}
-                <div className="flex items-center gap-4">
-                  {navigationLocked ? (
-                    <div className="cursor-not-allowed">
-                      {equippedAvatar ? (
-                        <img
-                          src={`/avatars/${equippedAvatar.toLowerCase().replace(/\s+/g, "_")}_head.png`}
-                          alt={equippedAvatar}
-                          className="w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white shadow transition-transform"
-                        />
-                      ) : (
-                        <div className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center text-xl rounded-full border-2 border-white bg-gray-700 shadow">
-                          👤
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="relative group">
-  <Link to="/profile">
-    {equippedAvatar ? (
-      <img
-        src={`/avatars/${equippedAvatar.toLowerCase().replace(/\s+/g, "_")}_head.png`}
-        alt={equippedAvatar}
-        className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 bg-black/30 transition-transform shrink-0 ${getLevelBorderClass(level)}`}
-      />
-    ) : (
-      <div className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center text-xl rounded-full border-2 border-white bg-gray-700 shadow">
-        👤
-      </div>
-    )}
-  </Link>
-  <span className="absolute top-full mt-1 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] sm:text-xs font-semibold text-white bg-black bg-opacity-80 px-2 py-1 rounded hidden group-hover:inline-block z-50 shadow-lg">
-    View Profile
-  </span>
-</div>
-                  )}
-                  <div className={`flex flex-col sm:flex-row sm:items-center sm:gap-1 text-[10px] sm:text-sm md:text-base lg:text-lg xl:text-xl leading-tight ${getLevelColorClass(level)}`}>
-  <span>[{level}]</span>
-  <span className="font-bold break-words whitespace-normal">{user.isAnonymous ? "Guest" : username}</span>
-</div>
-                </div>
-                {!navigationLocked ? (
+        {user && (
   <>
-    {/* 🏠 Home */}
-    <div className="relative group">
-      <Link
-        to="/"
-        className="bg-gray-800 hover:bg-gray-700 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md transition-transform hover:scale-105"
-      >
-        🏠
-      </Link>
-      <span className="absolute top-full mt-1 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] sm:text-xs font-semibold text-white bg-black bg-opacity-80 px-2 py-1 rounded hidden group-hover:inline-block z-50 shadow-lg">
-        Home
-      </span>
-    </div>
-    <DragDropContext
-      onDragEnd={(result) => {
-        if (!result.destination) return;
-        const items = reorder(topBarButtons, result.source.index, result.destination.index);
-        setTopBarButtons(items);
-        saveUserData(
-          balance,
-          inventory,
-          opals,
-          ownedAvatars,
-          equippedAvatar,
-          ownedWorkers,
-          completedSets,
-          xp,
-          level,
-          claimedRewards,
-          userBadges,
-          items
-        );
-      }}
+    <div
+      className={`fixed top-4 left-0 right-0 z-10 px-2 scrollbar-hide flex justify-center transition-all duration-300 ${
+        navigationLocked ? "opacity-40 scale-95 pointer-events-none" : "opacity-100 scale-100"
+      }`}
     >
-      <Droppable droppableId="topBarButtons" direction="horizontal">
-        {(provided) => (
-          <div
-            className="flex flex-row gap-2 flex-nowrap min-w-0"
-            {...provided.droppableProps}
-            ref={provided.innerRef}
-          >
-            {topBarButtons.map((btnKey, index) => (
-              <Draggable key={btnKey} draggableId={btnKey} index={index}>
-                {(provided) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.draggableProps}
-                    {...provided.dragHandleProps}
-                    className="flex-shrink-0"
-                  >
-                    <div className="relative group">
-                      {topBarButtonMap[btnKey]}
-                      <span className="absolute top-full mt-1 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] sm:text-xs font-semibold text-white bg-black bg-opacity-80 px-2 py-1 rounded hidden group-hover:inline-block z-50 shadow-lg">
-                        {labelMap[btnKey] || btnKey}
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </Draggable>
-            ))}
-            {provided.placeholder}
-          </div>
-        )}
-      </Droppable>
-    </DragDropContext>
-    {/* 🔔 Notifications */}
-    <div className="relative group">
-      <button
-        onClick={() => setShowNotifications(true)}
-        className="bg-indigo-500 hover:bg-indigo-600 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md transition-transform hover:scale-105 relative"
-      >
-        🔔
-        {notifications.length > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold shadow-lg">
-            {notifications.length}
-          </span>
-        )}
-      </button>
-      <span className="absolute top-full mt-1 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] sm:text-xs font-semibold text-white bg-black bg-opacity-80 px-2 py-1 rounded hidden group-hover:inline-block z-50 shadow-lg">
-        Notifications
-      </span>
-    </div>
-    {/* ⚙️ Settings */}
-    <div className="relative group">
-      <button
-        onClick={() => setShowSettings(true)}
-        className="bg-gray-700 hover:bg-gray-800 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md transition-transform hover:scale-105"
-      >
-        ⚙️
-      </button>
-      <span className="absolute top-full mt-1 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] sm:text-xs font-semibold text-white bg-black bg-opacity-80 px-2 py-1 rounded hidden group-hover:inline-block z-50 shadow-lg">
-        Settings
-      </span>
-    </div>
-    {/* 🚪 Log Out */}
-    <div className="relative group">
-      <button
-        onClick={async () => {
-          if (user && !user.isAnonymous) {
-            await rtdbSet(ref(rtdb, `status/${user.uid}`), {
-              state: "offline",
-              lastChanged: Date.now(),
-            });
-          }
-          await signOut(auth);
-          window.location.reload();
-        }}
-        className="bg-red-600 hover:bg-red-700 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md transition-transform hover:scale-105"
-      >
-        🚪
-      </button>
-      <span className="absolute top-full mt-1 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] sm:text-xs font-semibold text-white bg-black bg-opacity-80 px-2 py-1 rounded hidden group-hover:inline-block z-50 shadow-lg">
-        Log Out
-      </span>
-    </div>
-  </>
-) : (
-  <>
-    <button
-      disabled
-      className="bg-gray-800 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md opacity-50 cursor-not-allowed"
-    >
-      🏠
-    </button>
-    <button
-      disabled
-      className="bg-indigo-500 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md opacity-50 cursor-not-allowed"
-    >
-      🔔
-    </button>
-    <button
-      disabled
-      className="bg-gray-700 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md opacity-50 cursor-not-allowed"
-    >
-      ⚙️
-    </button>
-    <button
-      disabled
-      className="bg-red-600 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md opacity-50 cursor-not-allowed"
-    >
-      🚪
-    </button>
-  </>
-)}
-              </div>
+      <div className="flex items-center gap-2 bg-gray-900 px-2 py-2 sm:px-4 rounded-xl shadow-xl border border-gray-700 w-max overflow-visible max-w-full">
+        {/* Avatar + Username + Level */}
+        <div className="flex items-center gap-4">
+          {equippedAvatar ? (
+            <div className="relative group">
+              <Link to="/profile">
+                <img
+                  src={`/avatars/${equippedAvatar.toLowerCase().replace(/\s+/g, "_")}_head.png`}
+                  alt={equippedAvatar}
+                  className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 bg-black/30 transition-transform shrink-0 ${getLevelBorderClass(level)}`}
+                />
+              </Link>
+              <span className="absolute top-full mt-1 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] sm:text-xs font-semibold text-white bg-black bg-opacity-80 px-2 py-1 rounded hidden group-hover:inline-block z-50 shadow-lg">
+                View Profile
+              </span>
             </div>
-            {/* Spacer below fixed top bar */}
-<div className="mt-24 mb-4 h-[5px]" />
-{/* 💰 Balance + 💠 Opals (moved below spacer) */}
-<div className="flex justify-center w-full mb-4 z-0 relative">
-  <div className="flex items-center gap-3">
-    {/* Balance */}
-    <div className="flex items-center gap-1 px-4 py-2 bg-gray-900 border-2 border-green-500 rounded-full shadow-[0_0_10px_rgba(34,197,94,0.8)] h-12 sm:h-14">
-      <span className="text-2xl sm:text-3xl">💰</span>
-      <span className="ml-1 font-mono text-green-300 text-2xl sm:text-3xl font-extrabold drop-shadow-[0_0_6px_rgba(34,197,94,0.7)]">
-        ${Number(balance).toLocaleString()}
-      </span>
-    </div>
-    {/* Opals */}
-    <div className="flex items-center gap-1 px-3 py-2 bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-500 border-2 border-purple-300 rounded-full shadow-[0_0_12px_rgba(168,85,247,0.9)] text-sm sm:text-lg h-12 sm:h-14">
-      💠
-      <span className="font-mono text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.6)] text-base sm:text-xl font-bold">
-        {Number(opals).toLocaleString()}
-      </span>
-    </div>
-  </div>
-</div>
+          ) : (
+            <div className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center text-xl rounded-full border-2 border-white bg-gray-700 shadow">
+              👤
+            </div>
+          )}
+          <div className={`flex flex-row items-center gap-1 text-sm sm:text-lg md:text-xl lg:text-2xl xl:text-3xl leading-tight ${getLevelColorClass(level)}`}>
+            <span>[{level}]</span>
+            <span className="font-bold break-words whitespace-normal">{user.isAnonymous ? "Guest" : username}</span>
+          </div>
+        </div>
+
+        {!navigationLocked ? (
+          <>
+            <div className="relative group">
+              <Link
+                to="/home"
+                className="bg-gray-700 hover:bg-gray-800 text-white h-12 text-base sm:text-lg px-4 py-2 font-semibold rounded-md transition-transform hover:scale-105 inline-flex items-center justify-center"
+              >
+                🏠
+              </Link>
+              <span className="absolute top-full mt-1 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] sm:text-xs font-semibold text-white bg-black bg-opacity-80 px-2 py-1 rounded hidden group-hover:inline-block z-50 shadow-lg">
+                Home
+              </span>
+            </div>
+
+            <div className="relative group">
+              <button
+                onClick={() => setShowSettings(true)}
+                className="bg-gray-700 hover:bg-gray-800 text-white h-12 text-base sm:text-lg px-4 py-2 font-semibold rounded-md transition-transform hover:scale-105"
+              >
+                ⚙️
+              </button>
+              <span className="absolute top-full mt-1 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] sm:text-xs font-semibold text-white bg-black bg-opacity-80 px-2 py-1 rounded hidden group-hover:inline-block z-50 shadow-lg">
+                Settings
+              </span>
+            </div>
+          </>
+        ) : (
+          <>
+            <button
+              disabled
+              className="bg-gray-800 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md opacity-50 cursor-not-allowed"
+            >
+              🏠
+            </button>
+            <button
+              disabled
+              className="bg-indigo-500 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md opacity-50 cursor-not-allowed"
+            >
+              🔔
+            </button>
+            <button
+              disabled
+              className="bg-gray-700 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md opacity-50 cursor-not-allowed"
+            >
+              ⚙️
+            </button>
+            <button
+              disabled
+              className="bg-red-600 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md opacity-50 cursor-not-allowed"
+            >
+              🚪
+            </button>
           </>
         )}
+      </div>
+    </div>
+
+    {/* Spacer below fixed top bar */}
+    <div className="mt-24 mb-4 h-[5px]" />
+
+    {/* 💰 Balance + 💠 Opals (moved below spacer) */}
+    <div className="flex justify-center w-full mb-4 z-0 relative">
+      <div className="flex items-center gap-3">
+        {/* Balance */}
+        <div className="flex items-center gap-1 px-4 py-2 bg-gray-900 border-2 border-green-500 rounded-full shadow-[0_0_10px_rgba(34,197,94,0.8)] h-12 sm:h-14">
+          <span className="text-2xl sm:text-3xl">💰</span>
+          <span className="ml-1 font-mono text-green-300 text-2xl sm:text-3xl font-extrabold drop-shadow-[0_0_6px_rgba(34,197,94,0.7)]">
+            ${Number(balance).toLocaleString()}
+          </span>
+        </div>
+        {/* Opals */}
+        <div className="flex items-center gap-1 px-3 py-2 bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-500 border-2 border-purple-300 rounded-full shadow-[0_0_12px_rgba(168,85,247,0.9)] text-sm sm:text-lg h-12 sm:h-14">
+          💠
+          <span className="font-mono text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.6)] text-base sm:text-xl font-bold">
+            {Number(opals).toLocaleString()}
+          </span>
+        </div>
+      </div>
+    </div>
+  </>
+)}
+
         <div className="mb-4 flex flex-wrap justify-center items-center gap-3 sm:gap-6">
 </div>
         <Routes>
+          <Route path="/reset-password" element={<ResetPassword />} />
+
+          <Route
+  path="/global-chat"
+  element={<GlobalChat user={user} username={username} />}
+/>
 <Route
-  path="/"
+  path="/home"
   element={
     <WelcomePage
       username={username}
       setShowFriends={setShowFriends}
       resetCrate={resetCrate}
       resetWheel={resetWheel}
+      setShowNotifications={setShowNotifications}
     />
   }
 />
+
 <Route
   path="/pet-shop"
   element={
@@ -1322,27 +1237,34 @@ if (!user) return (
     setNotifications={setNotifications}
   />
 } />
-          <Route path="/home" element={
-  !selectedCrate ? (
-    <CrateShop
-      balance={balance}
-      onOpenCrate={handleOpenCrate}
-      trackedSet={trackedSet}
-    />
-  ) : (
-    <CrateOpening
-      crate={selectedCrate}
-      value={null}
-      onSell={handleSell}
-      onAdd={handleAddToInventory}
-      onBack={resetCrate}
-      caseVolume={caseVolume}
-      isMuted={isMuted}
-      overallVolume={overallVolume}
-      trackedSet={trackedSet}
-    />
-  )
-} />
+          <Route
+  path="/cases"
+  element={
+    <>
+      <CrateShop
+        balance={balance}
+        onOpenCrate={handleOpenCrate}
+        trackedSet={trackedSet}
+      />
+      {selectedCrate && (
+        <div className="absolute inset-0 z-50 bg-black bg-opacity-90">
+          <CrateOpening
+            crate={selectedCrate}
+            value={null}
+            onSell={handleSell}
+            onAdd={handleAddToInventory}
+            onBack={resetCrate}
+            caseVolume={caseVolume}
+            isMuted={isMuted}
+            overallVolume={overallVolume}
+            trackedSet={trackedSet}
+          />
+        </div>
+      )}
+    </>
+  }
+/>
+
 <Route path="/horse-race" element={
   <HorseRace
   balance={balance}
@@ -1358,7 +1280,7 @@ if (!user) return (
 />
 } />
              
-          <Route path="/game-ideas" element={<GameIdeas />} />
+<Route path="/" element={<GameIdeas />} />
           <Route
             path="/inventory"
             element={
@@ -1575,31 +1497,35 @@ if (!user) return (
 <Route
   path="/wheel"
   element={
-              !selectedWheel ? (
-                <WheelSpin
-                  balance={balance}
-                  onPick={(wheel) => setSelectedWheel(wheel)}
-                    isUILocked={isUILocked} // ✅ pass this in
-                      trackedSet={trackedSet}
-onSpend={handleBuyWheel}
-        macroBlocked={macroBlocked} // 👈 add this
-                />
-              ) : (
-                <WheelOpening
-  wheel={selectedWheel}
-  onSell={handleSell}
-  onAdd={handleAddToInventory}
-  onSpend={handleSpend}
-  onBack={resetWheel}
-  tickVolume={tickVolume}
-  caseVolume={caseVolume}
-  isMuted={isMuted}
-  overallVolume={overallVolume}
-  trackedSet={trackedSet}
-/>
-              )
-            }
+    <>
+      <WheelSpin
+        balance={balance}
+        onPick={(wheel) => setSelectedWheel(wheel)}
+        isUILocked={isUILocked}
+        trackedSet={trackedSet}
+        onSpend={handleBuyWheel}
+        macroBlocked={macroBlocked}
+      />
+      {selectedWheel && (
+        <div className="absolute inset-0 z-50 bg-black bg-opacity-90">
+          <WheelOpening
+            wheel={selectedWheel}
+            onSell={handleSell}
+            onAdd={handleAddToInventory}
+            onSpend={handleSpend}
+            onBack={resetWheel}
+            tickVolume={tickVolume}
+            caseVolume={caseVolume}
+            isMuted={isMuted}
+            overallVolume={overallVolume}
+            trackedSet={trackedSet}
           />
+        </div>
+      )}
+    </>
+  }
+/>
+
         </Routes>
         {((needsUsername || showUsernameEditor) && user && !user.isAnonymous) && (
   <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 px-4">
@@ -1780,7 +1706,7 @@ className="text-sm px-2 py-1 rounded bg-gray-700 hover:bg-gray-600"
       {/* Username Editor */}
       {/* Change Username */}
       {!user?.isAnonymous && (
-  <div className="mb-4">
+  <div className="mb-2">
     <button
       onClick={() => {
         setTempUsername(username); // preload current username
@@ -1793,15 +1719,25 @@ className="text-sm px-2 py-1 rounded bg-gray-700 hover:bg-gray-600"
     </button>
   </div>
 )}
-<button
-  onClick={() => {
-    setShowSettings(false);
-    setShowTopBarEditor(true);
-  }}
-  className="w-full py-2 bg-purple-500 hover:bg-purple-600 text-white font-semibold rounded"
->
-  🧩 Customize Top Bar
-</button>
+{user && (
+  <button
+    onClick={async () => {
+      if (user && !user.isAnonymous) {
+        await rtdbSet(ref(rtdb, `status/${user.uid}`), {
+          state: "offline",
+          lastChanged: Date.now(),
+        });
+      }
+      await signOut(auth);
+      window.location.reload();
+    }}
+  className="w-full py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded"
+  >
+    🚪 Log Out
+  </button>
+)}
+
+
 <button
   onClick={() => setShowDeleteConfirm(true)}
   className="w-full py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded mt-2"
@@ -1844,11 +1780,17 @@ className="text-sm px-2 py-1 rounded bg-gray-700 hover:bg-gray-600"
   >
     {(f.avatar || f.equippedAvatar) ? (
       <div className="relative w-16 h-16 sm:w-20 sm:h-20">
-        <img
-          src={`/avatars/${(f.avatar || f.equippedAvatar).toLowerCase().replace(/\s+/g, "_")}_head.png`}
-          alt={f.avatar || f.equippedAvatar}
-          className={`w-full h-full rounded-full border-4 bg-black/30 ${getLevelBorderClass(f.level || 1)}`}
-        />
+        <div className="relative w-16 h-16 sm:w-20 sm:h-20">
+  <img
+    src={`/avatars/${(f.avatar || f.equippedAvatar).toLowerCase().replace(/\s+/g, "_")}_head.png`}
+    alt={f.avatar || f.equippedAvatar}
+    className={`w-full h-full rounded-full border-4 bg-black/30 ${getLevelBorderClass(f.level || 1)}`}
+  />
+  {f.online && (
+    <span className="absolute bottom-0 right-0 w-4 h-4 bg-green-400 border-2 border-black rounded-full shadow-[0_0_4px_rgba(0,255,0,0.8)]"></span>
+  )}
+</div>
+
         {f.activePet && (() => {
           const pet = pets.find((p) => p.name === f.activePet);
           const pos = pet?.position || "bottom-left";

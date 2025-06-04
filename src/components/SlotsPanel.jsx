@@ -16,12 +16,12 @@ const slotMachines = [
     symbols: ["🔥", "💰", "🎲", "🧨", "💎", "💵", "💳", "💣"],
   },
   {
-    name: "👑 Triple Crown",
-    bet: 10,
-    emoji: "👑",
-    bg: "from-purple-700 to-pink-600",
-    symbols: ["👑", "💎", "🪙", "🎖️", "💼", "🏆", "💸", "🎯"],
-  },
+  name: "👑 Triple Crown",
+  bet: 10,
+  emoji: "👑",
+  bg: "from-purple-700 to-pink-600",
+  symbols: ["👑", "💍", "👠", "🪞", "👗", "👜", "💄", "💎"],
+},
 ];
 
 export default function SlotsPanel() {
@@ -37,11 +37,13 @@ export default function SlotsPanel() {
             key={i}
   className={`bg-gradient-to-br ${machine.bg} rounded-2xl p-8 shadow-xl transform transition-all duration-300 hover:scale-105 hover:shadow-neon card-hover-zoom cursor-pointer shimmer-effect`}
             onClick={() =>
-              navigate(
-                `/slots?bet=${machine.bet}&name=${encodeURIComponent(
-                  machine.name
-                )}&symbols=${encodeURIComponent(machine.symbols.join(""))}`
-              )
+              navigate("/slots", {
+  state: {
+    bet: machine.bet,
+    name: machine.name,
+    symbols: machine.symbols.join(""),
+  },
+})
             }
           >
             <div className="text-center text-white space-y-4">

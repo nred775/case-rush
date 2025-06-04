@@ -85,7 +85,7 @@ const pets = [
     dailyReward: 85,
     image: "cinder.png",
     description: "Smoldering with wealth potential.",
-    position: "top-right",
+    position: "bottom-left",
   },
   {
   name: "Skyhawk",

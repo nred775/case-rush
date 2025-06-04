@@ -13,6 +13,7 @@ import { doc, setDoc, getDoc } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 import { db } from "../firebase";
 import { browserSessionPersistence, setPersistence } from "firebase/auth";
+import emailjs from "@emailjs/browser"; // Make sure it's imported
 
 
 
@@ -48,6 +49,10 @@ const AuthPage = ({ onLogin, setLoginBlocked, loginBlocked }) => {
   const [showSupportBox, setShowSupportBox] = useState(false);
 const [deferredPrompt, setDeferredPrompt] = useState(null);
 const [isSafari, setIsSafari] = useState(false);
+const [isAuthenticating, setIsAuthenticating] = useState(false);
+const [supportName, setSupportName] = useState("");
+const [supportMessage, setSupportMessage] = useState("");
+const [supportSent, setSupportSent] = useState(false);
 
 useEffect(() => {
   const userAgent = navigator.userAgent;
@@ -88,38 +93,35 @@ useEffect(() => {
 const handleAuth = async (e) => {
   e.preventDefault();
   setError("");
+  setIsAuthenticating(true); // ✅ mark auth in progress
 
   try {
     await setPersistence(auth, browserSessionPersistence);
-const userCred = isRegistering
-  ? await createUserWithEmailAndPassword(auth, email, password)
-  : await signInWithEmailAndPassword(auth, email, password);
+    const userCred = isRegistering
+      ? await createUserWithEmailAndPassword(auth, email, password)
+      : await signInWithEmailAndPassword(auth, email, password);
+
     const tempUid = userCred.user.uid;
 
     try {
       const userDocRef = doc(db, "users", tempUid);
       const userDocSnap = await getDoc(userDocRef);
-
       const userData = userDocSnap.data();
 
       if (userData?.online) {
-  await signOut(auth);
-  setLoginBlocked(); // 🧼 Tell App.js: ignore this login attempt
-setBlockedMessage("You are already logged in elsewhere.");
-  return;
-}
-
+        await signOut(auth);
+        setLoginBlocked();
+        setBlockedMessage("You are already logged in elsewhere.");
+        return;
+      }
     } catch (docErr) {
-  console.error("❌ Failed to read user doc:", docErr);
-  if (loginBlockedRef.current) return; // ✅ Stop if already blocked
-  await signOut(auth);
-  setError("Could not verify account status. Try again.");
-  return;
-}
+      console.error("❌ Failed to read user doc:", docErr);
+      if (loginBlockedRef.current) return;
+      await signOut(auth);
+      setError("Could not verify account status. Try again.");
+      return;
+    }
 
-
-
-    // ✅ If registering, create user doc
     if (isRegistering) {
       await setDoc(doc(db, "users", tempUid), {
         createdAt: Date.now(),
@@ -134,13 +136,14 @@ setBlockedMessage("You are already logged in elsewhere.");
       });
     }
 
-onLogin(userCred.user); // ✅ match the prop
-
+    onLogin(userCred.user);
   } catch (err) {
     console.error("🔥 Firebase login error:", err);
     if (!auth.currentUser) {
       setError(getFriendlyAuthError(err));
     }
+  } finally {
+    setIsAuthenticating(false); // ✅ mark auth complete
   }
 };
 
@@ -186,7 +189,7 @@ onLogin(userCred.user);
         <h2 className="text-3xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-yellow-400 drop-shadow">
           {isRegistering ? "Create Account" : "Welcome Back"}
         </h2>
-        {(deferredPrompt || isSafari) && (
+{(deferredPrompt || (isSafari && !isAuthenticating)) && (
   <div className="text-center mt-2">
     <button
       onClick={() => {
@@ -311,28 +314,61 @@ onLogin(userCred.user);
       )}
 
       {showSupportBox && (
-  <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
-    <div className="bg-gray-900 p-6 rounded-xl shadow-xl w-full max-w-sm text-white relative">
-      <button
-        onClick={() => setShowSupportBox(false)}
-        className="absolute top-2 right-2 text-red-400 hover:text-red-600 text-lg"
-      >
-        ✖
-      </button>
-      <h2 className="text-xl font-bold mb-4 text-center text-yellow-300">
-        📧 Contact Support
-      </h2>
-      <p className="text-sm text-center mb-4 break-words">Email: <span className="font-mono">stackedodds.net@gmail.com</span></p>
-      <button
-        onClick={() => {
-          navigator.clipboard.writeText("stackedodds.net@gmail.com");
-        }}
-        className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 rounded transition"
-      >
-        📋 Copy to Clipboard
-      </button>
-    </div>
-  </div>
+  <form
+  onSubmit={(e) => {
+    e.preventDefault();
+    const now = new Date();
+    const formattedTime = now.toLocaleString();
+
+    emailjs
+      .send(
+        "service_r4o74bq", // ✅ your service ID
+        "template_883lbh8", // ✅ your template ID
+        {
+          name: supportName,
+          message: supportMessage,
+          time: formattedTime,
+        },
+        "SAVtnr90_VmEX-7XA" // ✅ your public key
+      )
+      .then(() => {
+        setSupportSent(true);
+        setSupportName("");
+        setSupportMessage("");
+      })
+      .catch((err) => {
+        console.error("❌ EmailJS error:", err);
+        setError("Failed to send support message.");
+      });
+  }}
+>
+  <input
+    type="text"
+    placeholder="Your name"
+    value={supportName}
+    onChange={(e) => setSupportName(e.target.value)}
+    className="w-full p-2 rounded bg-black border border-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 mb-2"
+    required
+  />
+  <textarea
+    placeholder="Your message"
+    value={supportMessage}
+    onChange={(e) => setSupportMessage(e.target.value)}
+    className="w-full p-2 rounded bg-black border border-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 mb-4"
+    rows={4}
+    required
+  />
+  <button
+    type="submit"
+    className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 rounded transition"
+  >
+    📨 Send Message
+  </button>
+  {supportSent && (
+    <p className="text-green-400 text-center mt-2 font-semibold">Message sent!</p>
+  )}
+</form>
+
 )}
 
     </div>
