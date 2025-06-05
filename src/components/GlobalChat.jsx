@@ -1,10 +1,23 @@
 import React, { useEffect, useState, useRef } from "react";
 import { ref, push, onValue } from "firebase/database";
-import { doc, getDoc } from "firebase/firestore";
 import { rtdb, db } from "../firebase";
 import bannedUsernames from "../data/bannedUsernames";
 import ProfilePage from "./ProfilePage";
 import ContactSupportForm from "./ContactSupportForm";
+import { auth } from "../firebase";
+import { onAuthStateChanged } from "firebase/auth";
+import { collection, doc, getDoc, addDoc } from "firebase/firestore";
+
+const formatTimestamp = (ts) => {
+  const date = new Date(ts);
+  return date.toLocaleString([], {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  }); // Example: "Jun 5, 1:45 PM"
+};
 
 
 const getLevelColorClass = (level) => {
@@ -32,6 +45,15 @@ export default function GlobalChat({ user, username }) {
   const [selectedUser, setSelectedUser] = useState(null);
 const [showSupportForm, setShowSupportForm] = useState(false);
 const [reportedUser, setReportedUser] = useState("");
+const [toastMessage, setToastMessage] = useState("");
+
+const [currentUser, setCurrentUser] = useState(null);
+useEffect(() => {
+  const unsub = onAuthStateChanged(auth, (user) => {
+    setCurrentUser(user);
+  });
+  return () => unsub();
+}, []);
 
   const messagesEndRef = useRef(null);
 
@@ -67,6 +89,32 @@ const [reportedUser, setReportedUser] = useState("");
     const lower = text.toLowerCase();
     return bannedUsernames.some((bad) => lower.includes(bad));
   };
+const sendFriendRequest = async () => {
+  if (!currentUser || !currentUser.uid || !selectedUser?.username) {
+    alert("You must be logged in and viewing a valid user.");
+    return;
+  }
+
+  const senderSnap = await getDoc(doc(db, "users", currentUser.uid));
+  const senderUsername = senderSnap.data()?.username || "Anonymous";
+
+  const receiverSnap = await getDoc(doc(db, "usernames", selectedUser.username.toLowerCase()));
+  if (!receiverSnap.exists()) {
+    alert("User not found.");
+    return;
+  }
+
+  const receiverUid = receiverSnap.data().uid;
+
+  await addDoc(collection(db, "users", receiverUid, "friendRequests"), {
+    from: senderUsername,
+    fromUid: currentUser.uid,
+    sentAt: Date.now(),
+  });
+
+setToastMessage("✅ Friend request sent!");
+setTimeout(() => setToastMessage(""), 3000);
+};
 
   const sendMessage = () => {
     const trimmed = newMsg.trim();
@@ -88,7 +136,7 @@ const [reportedUser, setReportedUser] = useState("");
 
   return (
     <div className="w-full max-w-2xl mx-auto bg-black bg-opacity-70 p-4 rounded-xl shadow-lg flex flex-col gap-2">
-      <div className="overflow-y-auto max-h-80 px-2 space-y-2">
+<div className="overflow-y-auto max-h-80 px-2 space-y-2 custom-scroll pr-1">
         {messages.map((msg) => {
           const info = userInfoCache[msg.uid] || {};
           const level = info.level || 1;
@@ -108,7 +156,9 @@ const [reportedUser, setReportedUser] = useState("");
                   [{level}] {msg.from}
                 </span>
               </button>
-              <span className="text-white">{msg.text}</span>
+<span className="text-gray-400 text-xs ml-1">[{formatTimestamp(msg.timestamp)}]</span>
+<span className="text-white ml-2">{msg.text}</span>
+
             </div>
           );
         })}
@@ -159,7 +209,7 @@ const [reportedUser, setReportedUser] = useState("");
 
             <div className="text-center p-4 space-y-2">
               <button
-                onClick={() => alert("Friend request feature here.")}
+onClick={sendFriendRequest}
                 className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded font-semibold"
               >
                 ➕ Add Friend
@@ -173,6 +223,11 @@ const [reportedUser, setReportedUser] = useState("");
 >
   🚩 Report Player
 </button>
+{toastMessage && (
+  <div className="text-green-300 text-sm font-medium animate-pulse">
+    {toastMessage}
+  </div>
+)}
 
 {showSupportForm && (
   <ContactSupportForm

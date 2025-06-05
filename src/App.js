@@ -62,6 +62,7 @@ import PetShop from "./components/PetShop"; // ✅ Import the new pet shop
 import pets from "./data/pets";
 import GlobalChat from "./components/GlobalChat"; // at the top
 import ResetPassword from "./components/ResetPassword";
+import ParticlesBg from "particles-bg";
 
 
 const enforceUsageLimit = async (type) => {

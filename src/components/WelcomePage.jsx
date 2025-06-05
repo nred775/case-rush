@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { db, rtdb } from "../firebase";
 import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
 import { ref, onValue } from "firebase/database";
+import { getLevelColorClass } from "../utils/levelStyles";
 
 
 export default function WelcomePage({ username, setShowFriends, resetCrate, resetWheel, setShowNotifications }) {
@@ -231,7 +232,7 @@ function StoreNavButton({ to, onClick, label, imgList, className }) {
       indexRef.current = (indexRef.current + 1) % imgList.length;
       setCurrentImg(imgList[indexRef.current]);
       setAnimKey((prev) => prev + 1); // forces re-animation
-    }, 2500);
+    }, 1500);
     return () => clearInterval(interval);
   }, [imgList]);
 
@@ -446,12 +447,21 @@ const SocialSection = ({ setShowFriends, setShowNotifications, leaders, sortInde
 
 
     <Link
-      to="/leaderboard"
-      className="max-w-md mx-auto bg-black/60 rounded-2xl p-4 flex flex-col gap-3 hover:scale-[1.01] transition-transform border-2 border-white/20 shadow-xl mb-6"
+  to="/leaderboard"
+  className="max-w-md mx-auto bg-black/60 rounded-2xl p-4 flex flex-col gap-3 hover:scale-[1.01] transition-transform border-2 border-white/20 shadow-xl mb-6"
+>
+  <h3 className="text-xl font-bold text-center mb-2 text-white drop-shadow">
+    🏆 Top {sortKeys[sortIndex] === "balance" ? "Balances" : sortKeys[sortIndex] === "opals" ? "Opals" : "Levels"}
+  </h3>
+
+  <AnimatePresence mode="wait">
+    <motion.div
+      key={sortIndex}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.4, ease: "easeInOut" }}
     >
-      <h3 className="text-xl font-bold text-center mb-2 text-white drop-shadow">
-        🏆 Top {sortKeys[sortIndex] === "balance" ? "Balances" : sortKeys[sortIndex] === "opals" ? "Opals" : "Levels"}
-      </h3>
       {leaders.map((user, i) => (
         <div
           key={i}
@@ -477,7 +487,7 @@ const SocialSection = ({ setShowFriends, setShowNotifications, leaders, sortInde
               <div className="w-10 h-10 rounded-full bg-gray-700 border-2 border-white flex items-center justify-center text-white">👤</div>
             )}
 
-            <span className="text-white font-bold text-sm sm:text-base">
+            <span className={`font-bold text-sm sm:text-base ${getLevelColorClass(user.level || 1)}`}>
               [{user.level || 1}] {user.username}
             </span>
           </div>
@@ -491,7 +501,10 @@ const SocialSection = ({ setShowFriends, setShowNotifications, leaders, sortInde
           </div>
         </div>
       ))}
-    </Link>
+    </motion.div>
+  </AnimatePresence>
+</Link>
+
   </>
 }
 
