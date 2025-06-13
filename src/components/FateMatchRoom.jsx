@@ -149,53 +149,11 @@ console.log(`[CHOICE] ${card.name} resolved against ${opponentCard?.name} to`, r
 const handleReadyNextRound = async () => {
   if (!roomId || !playerRole || !room) return;
 
-  // Mark this player as ready
   await update(ref(rtdb), {
     [`temptRooms/${roomId}/${playerRole}Ready`]: true,
   });
 
   setReadyNext(true);
-
-  // Only proceed when both players are ready
-  const opponentReady = playerRole === "player1" ? room.player2Ready : room.player1Ready;
-  if (opponentReady) {
-    // End game if round 8 is complete
-    if (roundNumber >= 8) {
-      setGameOver(true);
-      return;
-    }
-
-    // Reset UI state for new round
-setCanPlayChoiceCards(true); // ✅ Enable choice cards at start of round
-
-    setPlayerCard(null);
-    setOpponentCard(null);
-    setOpponentCardRevealed(false);
-    setRoundWinner(null);
-    setReadyNext(false);
-    setOpponentReadyNext(false);
-    setRoundResolved(false);
-    hasHandledOpponentDrawStart.current = false; // ✅ Reset for new round
-
-    setRoundNumber((prev) => prev + 1);
-
-    // Flip drawer for next round
-    const nextDrawer = room.firstDrawer === "player1" ? "player2" : "player1";
-
-    // Clear cards, readiness, and draw flags
-    const updates = {
-      [`temptRooms/${roomId}/player1Card`]: null,
-      [`temptRooms/${roomId}/player2Card`]: null,
-      [`temptRooms/${roomId}/player1Ready`]: null,
-      [`temptRooms/${roomId}/player2Ready`]: null,
-      [`temptRooms/${roomId}/drawTurn`]: nextDrawer,
-      [`temptRooms/${roomId}/firstDrawer`]: nextDrawer,
-      [`temptRooms/${roomId}/player1DrawStarted`]: null,
-      [`temptRooms/${roomId}/player2DrawStarted`]: null,
-    };
-
-    await update(ref(rtdb), updates);
-  }
 };
 
 useEffect(() => {
@@ -207,6 +165,8 @@ const unsub = onValue(roomRef, (snap) => {
   if (!roomData) return;
 
   setRoom(roomData);
+  if (roomData.roundNumber) setRoundNumber(roomData.roundNumber);
+
     if (roomData.gameOver && !gameOver) {
     setGameOver(true);
   }
@@ -224,7 +184,10 @@ if (roomData.drawTurn !== undefined) {
 
   if (roomData.player1 && roomData.player2 && countdown === null) {
     setCountdown(5);
+      setCanPlayChoiceCards(true); // ✅ unlock choice cards at round 1 start
+
   }
+
     // 🔁 Sync scores
    // 🔁 Sync scores (but wait until playerRole is definitely set)
   const role = roomData.player1?.uid === user.uid ? "player1" : "player2";
@@ -518,46 +481,48 @@ useEffect(() => {
 
 useEffect(() => {
   if (readyNext && opponentReadyNext && room && roomId) {
-    if (roundNumber >= 8) {
+    if (room.roundNumber >= 8) {
       setGameOver(true);
       return;
     }
 
-    // ✅ Reset opponent draw animation states
-    setOpponentShuffling(false);
-    setOpponentJustDrewCard(false);
-    setOpponentCardRevealed(false);
-    hasHandledOpponentDrawStart.current = false;
+    const newRound = (room.roundNumber || 1) + 1;
+    setRoundNumber(newRound);
 
-    // ✅ Reset self
-setCanPlayChoiceCards(true); // ✅ Enable choice cards at start of round
-
+    // Reset UI state
+    setCanPlayChoiceCards(true);
     setPlayerCard(null);
     setOpponentCard(null);
+    setOpponentCardRevealed(false);
     setRoundWinner(null);
-    setReadyNext(false);
-    setOpponentReadyNext(false);
-    setRoundResolved(false);
-
-
-  const nextFirstDrawer = room.firstDrawer === "player1" ? "player2" : "player1";
-
-  const updates = {
-  [`temptRooms/${roomId}/player1Card`]: null,
-  [`temptRooms/${roomId}/player2Card`]: null,
+setReadyNext(false);
+setOpponentReadyNext(false);
+update(ref(rtdb), {
   [`temptRooms/${roomId}/player1Ready`]: null,
   [`temptRooms/${roomId}/player2Ready`]: null,
-  [`temptRooms/${roomId}/drawTurn`]: nextFirstDrawer,
-  [`temptRooms/${roomId}/firstDrawer`]: nextFirstDrawer,
-  [`temptRooms/${roomId}/player1DrawStarted`]: null,
-  [`temptRooms/${roomId}/player2DrawStarted`]: null,
-};
+});
 
+    setRoundResolved(false);
+    hasHandledOpponentDrawStart.current = false;
 
-  update(ref(rtdb), updates);
-}
+    const nextDrawer = room.firstDrawer === "player1" ? "player2" : "player1";
 
+    const updates = {
+      [`temptRooms/${roomId}/roundNumber`]: newRound,
+      [`temptRooms/${roomId}/player1Card`]: null,
+      [`temptRooms/${roomId}/player2Card`]: null,
+      [`temptRooms/${roomId}/player1Ready`]: null,
+      [`temptRooms/${roomId}/player2Ready`]: null,
+      [`temptRooms/${roomId}/drawTurn`]: nextDrawer,
+      [`temptRooms/${roomId}/firstDrawer`]: nextDrawer,
+      [`temptRooms/${roomId}/player1DrawStarted`]: null,
+      [`temptRooms/${roomId}/player2DrawStarted`]: null,
+    };
+
+    update(ref(rtdb), updates);
+  }
 }, [readyNext, opponentReadyNext, room, roomId]);
+
 
 
 
