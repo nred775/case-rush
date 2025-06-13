@@ -62,7 +62,13 @@ import PetShop from "./components/PetShop"; // ✅ Import the new pet shop
 import pets from "./data/pets";
 import GlobalChat from "./components/GlobalChat"; // at the top
 import ResetPassword from "./components/ResetPassword";
-import ParticlesBg from "particles-bg";
+import FateDeckPage from "./components/FateDeckPage";
+import FateShopPage from "./components/FateShopPage";
+import TemptLadyFatePage from "./components/TemptLadyFatePage";
+import FateMatchWaitingRoom from "./components/FateMatchWaitingRoom";
+import FateMatchRoom from "./components/FateMatchRoom";
+import FateLeaderboard from "./components/FateLeaderboard";
+import CardChecker from "./components/CardChecker"; // adjust path if needed
 
 
 const enforceUsageLimit = async (type) => {
@@ -188,6 +194,11 @@ const [chatUser, setChatUser] = useState(null);
 const [userBadges, setUserBadges] = useState([]);
 const [toastMessage, setToastMessage] = useState("");
 const [friendToRemove, setFriendToRemove] = useState(null);
+const [ownedFateSpecials, setOwnedFateSpecials] = useState([]);
+const [ownedFatePassives, setOwnedFatePassives] = useState([]);
+const [equippedFateSpecials, setEquippedFateSpecials] = useState([]);
+const [equippedFatePassives, setEquippedFatePassives] = useState([]);
+
 const [macroCheckVisible, setMacroCheckVisible] = useState(() => {
   const stored = localStorage.getItem("macroCheckVisible");
   return stored === "true";
@@ -220,7 +231,7 @@ const [ownedPets, setOwnedPets] = useState([]);
 const [activePet, setActivePet] = useState("");
   const bgmRef = useRef(null);
 const sensors = useSensors(useSensor(PointerSensor));
-  const navigationLocked = !!selectedCrate || !!selectedWheel;
+const navigationLocked = !!selectedCrate || !!selectedWheel || isUILocked;
 useEffect(() => {
   if (!user || user.isAnonymous || !user.uid) return;
   const userStatusRef = ref(rtdb, `status/${user.uid}`);
@@ -277,6 +288,7 @@ useEffect(() => {
   });
   return () => unsub();
 }, []);
+
 useEffect(() => {
   const hasNewAchievement = notifications.some(n => n.type === "achievement");
   if (hasNewAchievement) {
@@ -1067,24 +1079,14 @@ if (!user) return (
             >
               🏠
             </button>
-            <button
-              disabled
-              className="bg-indigo-500 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md opacity-50 cursor-not-allowed"
-            >
-              🔔
-            </button>
+
             <button
               disabled
               className="bg-gray-700 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md opacity-50 cursor-not-allowed"
             >
               ⚙️
             </button>
-            <button
-              disabled
-              className="bg-red-600 text-white h-10 text-sm sm:text-base px-4 py-2 font-semibold rounded-md opacity-50 cursor-not-allowed"
-            >
-              🚪
-            </button>
+
           </>
         )}
       </div>
@@ -1118,6 +1120,13 @@ if (!user) return (
         <div className="mb-4 flex flex-wrap justify-center items-center gap-3 sm:gap-6">
 </div>
         <Routes>
+<Route path="/temptladyfate" element={<TemptLadyFatePage user={user} />} />
+<Route path="/temptladyfate/waiting" element={<FateMatchWaitingRoom user={user} setIsUILocked={setIsUILocked} />} />
+<Route path="/temptladyfate/match/:roomId" element={<FateMatchRoom user={user} setIsUILocked={setIsUILocked} />} />
+<Route path="/fate-leaderboard" element={<FateLeaderboard />} />
+<Route path="/card-checker" element={<CardChecker />} />
+
+
           <Route path="/reset-password" element={<ResetPassword />} />
 
           <Route
@@ -1526,6 +1535,38 @@ if (!user) return (
     </>
   }
 />
+<Route
+  path="/fate-deck"
+  element={
+    <FateDeckPage
+      user={user}
+      balance={balance}
+      setBalance={setBalance}
+      saveUserData={saveUserData}
+      ownedSpecials={ownedFateSpecials}
+      ownedPassives={ownedFatePassives}
+      setOwnedSpecials={setOwnedFateSpecials}
+      setOwnedPassives={setOwnedFatePassives}
+      equippedSpecials={equippedFateSpecials}
+      equippedPassives={equippedFatePassives}
+      setEquippedSpecials={setEquippedFateSpecials}
+      setEquippedPassives={setEquippedFatePassives}
+    />
+  }
+/>
+
+<Route
+  path="/fate-shop"
+  element={
+    <FateShopPage
+      user={user}
+      opals={opals}
+      setOpals={setOpals}
+      saveUserData={saveUserData}
+    />
+  }
+/>
+
 
         </Routes>
         {((needsUsername || showUsernameEditor) && user && !user.isAnonymous) && (

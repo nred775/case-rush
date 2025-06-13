@@ -107,7 +107,7 @@ const isTrackedItem = (itemName) => {
 
 
   return (
-<div className="min-h-screen bg-transparent text-white flex flex-col items-center justify-center relative overflow-hidden">
+<div className="fixed inset-0 z-50 bg-black/70 text-white flex flex-col items-center justify-center p-6">
 <style>
         {`
         @keyframes goldPulse {

@@ -107,7 +107,7 @@ const isTrackedItem = (itemName) => {
   const topPrizeValue = Math.max(...wheel.items.map((i) => i.value));
 
   return (
-<div className="min-h-screen bg-transparent text-white flex flex-col items-center justify-center relative overflow-visible">
+<div className="fixed inset-0 z-50 bg-black/70 text-white flex flex-col items-center justify-center p-6">
 {showConfetti && (
         <div className="fixed inset-0 z-50 pointer-events-none">
           <Confetti width={width} height={height} numberOfPieces={200} gravity={0.4} />
@@ -128,7 +128,7 @@ const isTrackedItem = (itemName) => {
       <div className="relative mb-4" style={{ width: WHEEL_SIZE, height: WHEEL_SIZE }}>
         <div
   className="absolute top-0 left-0 w-full flex justify-center z-30 pointer-events-none"
-style={{ transform: "translateX(5.5px)" }}
+style={{ transform: "translateX(-2.2px)" }}
 >
 
   <div
@@ -149,10 +149,12 @@ style={{ transform: "translateX(5.5px)" }}
     width: WHEEL_SIZE,
     height: WHEEL_SIZE,
     background: "radial-gradient(circle at center, #111827, #000000)",
+    willChange: "transform", // ✅ optimization hint
   }}
   animate={{ rotate: rotation }}
   transition={{ duration: 4.5, ease: [0.1, 1, 0.2, 1] }}
 >
+
 
           <svg width={WHEEL_SIZE} height={WHEEL_SIZE} viewBox={`0 0 ${WHEEL_SIZE} ${WHEEL_SIZE}`}>
             <g transform={`translate(${WHEEL_SIZE / 2}, ${WHEEL_SIZE / 2}) rotate(-90)`}>
@@ -181,22 +183,21 @@ style={{ transform: "translateX(5.5px)" }}
 
                 return (
                   <motion.g
-                    key={i}
-                    animate={resultIndex === i ? { scale: 1.12 } : { scale: 1 }}
-                    transition={{ duration: 0.4 }}
-                  >
+  key={i}
+  animate={!spinning && resultIndex === i ? { scale: 1.12 } : { scale: 1 }}
+  transition={{ duration: 0.4 }}
+>
+
                     <path
   d={pathData}
   fill={getSegmentColor(item.value)}
   stroke={isTrackedItem(item.name) ? "#000000" : "#ffffff"}
   strokeWidth="0.75"
   style={{
-    filter:
-      item.value === topPrizeValue
-        ? "drop-shadow(0 0 8px #fff8dc) drop-shadow(0 0 16px #ffef9f) drop-shadow(0 0 32px #fff5b1)"
-        : "none",
-    transition: "filter 0.3s ease",
-  }}
+  filter:
+    item.value === topPrizeValue ? "drop-shadow(0 0 6px #fff8dc)" : "none",
+}}
+
 />
 
 

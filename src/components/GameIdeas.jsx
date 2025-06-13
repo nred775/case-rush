@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const GameIdeas = () => {
   return (
@@ -8,7 +9,13 @@ const GameIdeas = () => {
     🎮 stackedodds.net
   </h1>
   <p className="mt-2 text-white/60 text-lg">Explore all the ways to play and win!</p>
-  
+  <Link to="/home">
+  <button className="mt-5 px-10 py-4 text-2xl font-bold text-white bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 rounded-full shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-[0_0_25px_rgba(255,255,255,0.6)]">
+    ▶️ Play Now
+  </button>
+</Link>
+
+
   <p className="mt-2 text-pink-400 text-lg font-semibold">
   Follow us on Instagram{" "}
   <a
@@ -96,6 +103,54 @@ const sections = [
     description: "Play the 5x5 bomb grid every day for a shot at free money, opals and maybe even an avatar! Just don’t get greedy, there is one bomb per grid."
   },
   {
+  title: "Tempt Lady Fate",
+  icon: "🃏",
+  borderColor: "border-pink-400/30",
+  color: "text-pink-300",
+  description: "Build your deck, collect powerful cards, and outwit your opponent in this high-stakes card duel. From drawing fate to claiming victory, every choice matters.",
+  list: [
+    {
+      label: "Deck Building:",
+      details: [
+        "Main Deck: Choose 18 cards from your collection. Basic numbered cards, face cards, and aces.",
+        "Power Cards (5 max): Special cards like 'Ten of Might' or 'Risky Joker' with unique effects.",
+        "Choice Cards (3 max): Strategic options you can play instead of drawing. Examples: 'Desperation Draw', 'Heart Breaker'."
+      ]
+    },
+    {
+      label: "Packs & Rarity:",
+      details: [
+        "Open Fate Packs in the shop using Opals.",
+        "Cards come in rarity tiers: Basic, Sturdy, Noble, Mythic, and special Power/Choice types.",
+        "Duplicates are converted into bonus Opals."
+      ]
+    },
+    {
+      label: "Gameplay Overview:",
+      details: [
+        "Play 8 rounds against an opponent. Each player draws or plays a choice card per round.",
+        "Winner of each round gains 1 point (or more with special effects). Highest score after 8 rounds wins.",
+      ]
+    },
+    {
+      label: "Ladies Currency:",
+      details: [
+        "Win a match to earn +3 to +7 💃 Ladies.",
+        "Lose a match and you’ll lose -3 to -7 Ladies.",
+        "Your total Ladies are shown only at the match end screen and tracked on the leaderboard."
+      ]
+    },
+    {
+      label: "Card Checker:",
+      details: [
+        "Use the in-game Fate Card Checker to preview how any two cards would resolve.",
+        "Supports power vs power, power vs choice, and full match logic matching in-game results.",
+        "Great for learning card interactions and testing strategy."
+      ]
+    }
+  ]
+},
+  {
     title: "Slot Machines",
     icon: "🎰",
     borderColor: "border-green-400/30",
@@ -157,6 +212,7 @@ const sections = [
     color: "text-pink-400",
     description: "Search up players on the leaderboard, click their profile, and hit Add Friend. Once you're connected, you can send messages and build your squad."
   }
+  
 ];
 
 

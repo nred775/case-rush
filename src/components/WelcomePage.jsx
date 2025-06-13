@@ -8,7 +8,7 @@ import { getLevelColorClass } from "../utils/levelStyles";
 
 
 export default function WelcomePage({ username, setShowFriends, resetCrate, resetWheel, setShowNotifications }) {
-  const pages = ["store", "core", "games", "social", "online"];
+  const pages = ["store", "core", "games", "social", "fate"];
   const [page, setPage] = useState(2);
   const prevPageRef = useRef(0);
   const direction = page > prevPageRef.current ? 1 : -1;
@@ -75,16 +75,18 @@ useEffect(() => {
   <CoreSection key="core" />,
   <GamesSection key="games" resetCrate={resetCrate} resetWheel={resetWheel} />,
   <SocialSection
-  key="social"
-  setShowFriends={setShowFriends}
-  setShowNotifications={setShowNotifications}
-  leaders={leaders}
-  sortIndex={sortIndex}
-  sortKeys={sortKeys}
-  onlineCount={onlineCount}
-/>,
-  <PlaceholderSection key="online" />,
+    key="social"
+    setShowFriends={setShowFriends}
+    setShowNotifications={setShowNotifications}
+    leaders={leaders}
+    sortIndex={sortIndex}
+    sortKeys={sortKeys}
+    onlineCount={onlineCount}
+  />,
+  <FateSection key="temptladyfate" />,
 ];
+
+
 
 
   return (
@@ -94,29 +96,24 @@ useEffect(() => {
           <motion.div
   key={page}
   className="w-full"
-  custom={direction}
-  initial={{ x: direction > 0 ? 100 : -100, opacity: 0 }}
-  animate={{ x: 0, opacity: 1 }}
-  exit={{ x: direction > 0 ? -100 : 100, opacity: 0 }}
-  transition={{
-    type: "tween",
-    ease: "easeInOut",
-    duration: 0.2,
+  animate={{ opacity: 1 }}
+  initial={{ opacity: 0 }}
+  exit={{ opacity: 0 }}
+  transition={{ duration: 0.15 }}
+  drag="x"
+  dragConstraints={{ left: 0, right: 0 }}
+  onDragEnd={(e, { offset, velocity }) => {
+    const swipe = swipePower(offset.x, velocity.x);
+    if (swipe < -swipeConfidenceThreshold && page < pages.length - 1) {
+      setPage((prev) => prev + 1);
+    } else if (swipe > swipeConfidenceThreshold && page > 0) {
+      setPage((prev) => prev - 1);
+    }
   }}
+>
+  <PageWrapper>{pageComponents[page]}</PageWrapper>
+</motion.div>
 
-            drag="x"
-            dragConstraints={{ left: 0, right: 0 }}
-            onDragEnd={(e, { offset, velocity }) => {
-              const swipe = swipePower(offset.x, velocity.x);
-              if (swipe < -swipeConfidenceThreshold && page < pages.length - 1) {
-                setPage((prev) => prev + 1);
-              } else if (swipe > swipeConfidenceThreshold && page > 0) {
-                setPage((prev) => prev - 1);
-              }
-            }}
-          >
-            <PageWrapper>{pageComponents[page]}</PageWrapper>
-          </motion.div>
         </AnimatePresence>
       </div>
 
@@ -281,13 +278,6 @@ className={`relative flex flex-col justify-end items-center h-56 w-72 rounded-3x
   );
 }
 
-
-
-
-
-
-
-
 const StoreSection = () => (
   <Section
     title="🛒 Store"
@@ -368,6 +358,13 @@ const StoreSection = () => (
       ]}
       className="store-button w-48"
     />
+    <StoreNavButton
+  to="/fate-shop"
+  label="Fate Shop"
+  imgList={["images/fate-shop.png"]} // just one image = no cycling
+  className="store-button w-48"
+/>
+
   </Section>
 );
 
@@ -404,8 +401,15 @@ const CoreSection = () => (
       img="/images/achievements.png"
       className="core-button-local"
     />
+    <NavButton
+      to="/fate-deck"
+      label="Fate Deck"
+      img="/images/fate-deck.png"
+      className="core-button-local"
+    />
   </Section>
 );
+
 
 
 const GamesSection = ({ resetCrate, resetWheel }) => (
@@ -509,6 +513,12 @@ const SocialSection = ({ setShowFriends, setShowNotifications, leaders, sortInde
 }
 
   >
+  <NavButton
+  to="/fate-leaderboard"
+  label="Fate Leaderboard"
+  img="/images/leaderboard.png" // change path if needed
+  className="social-button-rect"
+/>
     <NavButton
       label="Friends"
       img="/images/friends.png"
@@ -533,16 +543,33 @@ const SocialSection = ({ setShowFriends, setShowNotifications, leaders, sortInde
       img="/images/information.png"
       className="social-button-rect"
     />
+    
+
+  </Section>
+);
+const FateSection = () => (
+  <Section
+    title="♠️ Tempt Lady Fate"
+    sectionClass="section-fate fate-bg-glow"
+    titleClass="text-pink-300 animate-title-pulse"
+  >
+    <Link to="/temptladyfate">
+      <NavButton label="Play" img="/images/fate-play.png" className="core-button-local" />
+    </Link>
+<Link to="/fate-leaderboard">
+      <NavButton label="Leaderboard" img="/images/leaderboard.png" className="core-button-local" />
+    </Link>
+    <Link to="/fate-deck">
+      <NavButton label="Deck" img="/images/fate-deck.png" className="core-button-local" />
+    </Link>
+
+    <Link to="/fate-shop">
+      <NavButton label="Packs" img="/images/fate-shop.png" className="core-button-local" />
+    </Link>
+    <Link to="/card-checker">
+  <NavButton label="Card Checker" img="/images/fate-check.png" className="core-button-local" />
+</Link>
+
   </Section>
 );
 
-
-
-
-
-
-
-const PlaceholderSection = () => (
-  <Section title="🔹 Online (Coming Soon)" sectionClass="section-core" titleClass="title-core">
-  </Section>
-);

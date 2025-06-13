@@ -86,7 +86,7 @@ window.currentUserHasBoomBuddy = ownedAvatars.includes("Boom Buddy");
   };
 
 const handleReveal = async (index) => {
-  if (!grid || grid[index].revealed || cooldown || claimed) return;
+if (!grid || grid[index].revealed === true || grid[index].revealed === "flipping" || cooldown || claimed) return;
 
   // Flip visual first
   const newGrid = [...grid];
@@ -226,6 +226,8 @@ await setDoc(doc(db, "users", user.uid), {
           <button
   key={i}
   onClick={() => handleReveal(i)}
+    onTouchStart={() => handleReveal(i)} // Add this line
+
   className={`w-16 h-16 sm:w-20 sm:h-20 rounded-lg font-bold text-lg sm:text-xl 
     transition-transform duration-500 transform-gpu 
     ${tile.revealed ? 'rotate-y-180' : ''} 
