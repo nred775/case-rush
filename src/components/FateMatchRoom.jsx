@@ -48,6 +48,7 @@ const [rewardedLadies, setRewardedLadies] = useState(false);
 const [opponentCardRevealed, setOpponentCardRevealed] = useState(false);
 const [opponentAlreadyHandledDrawStart, setOpponentAlreadyHandledDrawStart] = useState(false);
 const [canPlayChoiceCards, setCanPlayChoiceCards] = useState(false);
+const [warningMessage, setWarningMessage] = useState(null);
 
 const lastOpponentCardRef = useRef(null);
 const hasHandledOpponentDrawStart = useRef(false);
@@ -106,23 +107,79 @@ useEffect(() => {
 
 
 const handlePlayChoiceCard = async (card) => {
+      if (card.name === "Echo" && roundNumber === 1) {
+    setWarningMessage("⛔ Echo cannot be used in the first round!");
+    setTimeout(() => setWarningMessage(null), 3000); // auto-dismiss after 3s
+    return;
+  }
+
+
   if (usedChoiceCards.includes(card.name)) return;
 
   const playerPath = `temptRooms/${roomId}/${playerRole}Card`;
 
+  let resultCard;
+
+if (card.name === "Echo") {
+  if (!lastPlayerCard || lastPlayerCard.name === "Echo") {
+    setWarningMessage("⚠️ Echo cannot copy a nonexistent or Echo card.");
+    setTimeout(() => setWarningMessage(null), 3000);
+    return;
+  }
+
+  const resolved =
+    lastPlayerCard.type === "power"
+      ? resolvePowerCard(lastPlayerCard, {
+          opponentCard,
+          lastWinner,
+          playerScore,
+          opponentScore,
+          lastPlayerCard,
+          roundNumber,
+        })
+      : lastPlayerCard.type === "choice"
+      ? resolveChoiceCard(lastPlayerCard, {
+          opponentCard,
+          lastWinner,
+          playerScore,
+          opponentScore,
+          lastPlayerCard,
+          roundNumber,
+        })
+      : { value: lastPlayerCard.value ?? 0, bonusPoints: lastPlayerCard.bonusPoints || 0 };
+
+  const safeSuit = lastPlayerCard.suit || "spades";
+  const valueCode =
+    lastPlayerCard.value === 14 ? "ace" :
+    lastPlayerCard.value === 13 ? "king" :
+    lastPlayerCard.value === 12 ? "queen" :
+    lastPlayerCard.value === 11 ? "jack" : lastPlayerCard.value;
+
+  const imagePath = `/fate-card-images/${valueCode}_${safeSuit}.jpg`;
+
+  resultCard = {
+    ...lastPlayerCard, // clones name, suit, rarity, etc
+    value: resolved.value,
+    bonusPoints: resolved.bonusPoints,
+    type: "regular", // force it to be seen as a normal card
+    imageOverride: imagePath,
+    originalName: "Echo", // optional metadata if needed
+  };
+}
+
+ else {
   const resolved = resolveChoiceCard(card, {
-  opponentCard: opponentCard ?? {},
-  lastWinner,
-  playerScore,
-  opponentScore,
-  lastPlayerCard,
-  roundNumber,
-});
+    opponentCard: opponentCard ?? {},
+    lastWinner,
+    playerScore,
+    opponentScore,
+    lastPlayerCard,
+    roundNumber,
+  });
 
-console.log(`[CHOICE] ${card.name} resolved against ${opponentCard?.name} to`, resolved);
+  resultCard = { ...card, value: resolved.value, type: "choice" };
+}
 
-
-  const resultCard = { ...card, value: resolved.value, type: "choice" };
 
   // ✅ Trigger opponent flip (NO shuffle)
   await set(ref(rtdb, `temptRooms/${roomId}/${playerRole}DrawStarted`), "flipOnly");
@@ -251,63 +308,87 @@ lastOpponentCardRef.current = oppCard;
 
  {
 
-let resolvedPlayerCard = myCard;
-let resolvedOpponentCard = oppCard;
-let extraPointsPlayer = 0;
-let extraPointsOpponent = 0;
+// STEP 1: Resolve Player Card
+const baseContext = {
+  playerScore,
+  opponentScore,
+  lastWinner,
+  roundNumber,
+  lastPlayerCard: myCard,
+};
 
-let playerResult, opponentResult;
+// Resolve player's card
+let resolvedPlayerCard;
+if (myCard.type === "power") {
+  resolvedPlayerCard = {
+    ...myCard,
+    ...resolvePowerCard(myCard, {
+      ...baseContext,
+      opponentCard: oppCard,
+    }),
+  };
+} else if (myCard.type === "choice") {
+  resolvedPlayerCard = {
+    ...myCard,
+    ...resolveChoiceCard(myCard, {
+  ...baseContext,
+  opponentCard: {
+    ...oppCard,
+    type: oppCard.type || "regular", // fallback if missing
+    
+  },
+  
+}),
 
-if (myCard.value === 16) {
-  playerResult = resolvePowerCard(myCard, {
-    opponentCard: oppCard,
+  };
+} else {
+  resolvedPlayerCard = { ...myCard };
+}
+
+// Resolve opponent's card
+let resolvedOpponentCard;
+if (oppCard.type === "power") {
+  resolvedOpponentCard = {
+    ...oppCard,
+    ...resolvePowerCard(oppCard, {
+      ...baseContext,
+      opponentCard: myCard,
+    }),
+  };
+} else if (oppCard.type === "choice") {
+  resolvedOpponentCard = {
+    ...oppCard,
+    ...resolveChoiceCard(oppCard, {
+      ...baseContext,
+      opponentCard: {
+        ...myCard,
+        type: myCard.type || "regular",
+      },
+    }),
+  };
+}
+ else {
+  resolvedOpponentCard = { ...oppCard };
+}
+
+
+// STEP 3: Re-resolve player card if needed (for mutual power awareness)
+if (myCard.type === "power") {
+  const finalContext = {
+    opponentCard: resolvedOpponentCard,
+    opponentResolvedValue: resolvedOpponentCard.value,
     lastWinner,
     playerScore,
     opponentScore,
-  });
+    lastPlayerCard: myCard,
+    roundNumber,
+  };
+  Object.assign(resolvedPlayerCard, resolvePowerCard(myCard, finalContext));
 }
 
-if (oppCard.value === 16) {
-  opponentResult = resolvePowerCard(oppCard, {
-    opponentCard: myCard,
-    lastWinner: lastWinner === "player" ? "opponent" : lastWinner,
-    playerScore: opponentScore,
-    opponentScore: playerScore,
-  });
-}
-
-// Re-resolve with full context if both are power cards
-if (myCard.value === 16 && oppCard.value === 16) {
-  playerResult = resolvePowerCard(myCard, {
-    opponentCard: oppCard,
-    opponentResolvedValue: opponentResult?.value,
-    lastWinner,
-    playerScore,
-    opponentScore,
-  });
-
-  opponentResult = resolvePowerCard(oppCard, {
-    opponentCard: myCard,
-    opponentResolvedValue: playerResult?.value,
-    lastWinner: lastWinner === "player" ? "opponent" : lastWinner,
-    playerScore: opponentScore,
-    opponentScore: playerScore,
-  });
-}
-
-if (playerResult) {
-  resolvedPlayerCard = { ...myCard, value: playerResult.value };
-  extraPointsPlayer = playerResult.bonusPoints;
-}
-
-if (opponentResult) {
-  resolvedOpponentCard = { ...oppCard, value: opponentResult.value };
-  extraPointsOpponent = opponentResult.bonusPoints;
-}
-
-
-
-
+// STEP 4: Final compare + bonus
+const extraPointsPlayer = resolvedPlayerCard.bonusPoints || 0;
+const extraPointsOpponent = resolvedOpponentCard.bonusPoints || 0;
 
 let winner;
 if (resolvedPlayerCard.value > resolvedOpponentCard.value) {
@@ -424,19 +505,42 @@ const adjustLadies = async (isForfeitWin = false) => {
     if (!userSnap.exists()) return;
 
     const currentLadies = userSnap.data().ladies || 0;
-    const amount = Math.floor(Math.random() * 5) + 3;
-    const wonMatch = isForfeitWin || playerScore > opponentScore;
 
-    const newLadies = wonMatch
-      ? currentLadies + amount
-      : Math.max(0, currentLadies - amount);
+    let change = 0;
+
+    if (room?.forfeit) {
+      // Forfeit logic
+      if (room.forfeit === playerRole) {
+        // You quit, lose your score
+        change = -playerScore;
+      } else {
+        // Opponent quit, gain your score
+        change = playerScore;
+      }
+    } else if (playerScore > opponentScore) {
+      change = playerScore;
+    } else if (playerScore < opponentScore) {
+      change = -playerScore;
+    } else {
+      change = 0; // tie
+    }
+
+    const newLadies = Math.max(0, currentLadies + change);
 
     await updateDoc(userRef, { ladies: newLadies });
-    setLadiesChange(wonMatch ? `+${amount} Ladies` : `-${amount} Ladies`);
+
+    if (change > 0) {
+      setLadiesChange(`+${change} Ladies`);
+    } else if (change < 0) {
+      setLadiesChange(`${change} Ladies`);
+    } else {
+      setLadiesChange(null); // don't show a message if it's 0
+    }
   } catch (err) {
     console.error("Failed to update Ladies:", err);
   }
 };
+
 
 
 
@@ -597,6 +701,7 @@ if (opponentDoc?.exists()) {
 
     return () => clearTimeout(timer);
   }, [countdown]);
+const isChoiceTurn = drawTurn === playerRole && !playerCard;
 
 const handleQuitMatch = async () => {
   if (!roomId || !playerRole || !room) return;
@@ -779,11 +884,14 @@ if (countdown === 0) {
           {playerLoadout?.equippedChoiceCards
   ?.filter((card) => !usedChoiceCards.includes(card.name))
   .map((card, idx) => (
-    <div key={idx} className={`${!canPlayChoiceCards ? "pointer-events-none opacity-50" : ""}`}>
+<div
+  key={idx}
+  className={`${!canPlayChoiceCards || !isChoiceTurn ? "pointer-events-none opacity-50" : ""}`}
+>
       <RegularCard
         card={card}
         isSelected={false}
-        onClick={() => canPlayChoiceCards && handlePlayChoiceCard(card)}
+onClick={() => canPlayChoiceCards && isChoiceTurn && handlePlayChoiceCard(card)}
       />
     </div>
 ))}
@@ -815,6 +923,11 @@ if (countdown === 0) {
           </p>
         ) : null}
       </div>
+{warningMessage && (
+  <div className="mt-4 px-4 py-2 bg-yellow-500 text-black font-bold rounded-lg shadow-lg animate-pulse">
+    {warningMessage}
+  </div>
+)}
 
 
       {/* Round Outcome + Ready Button */}
@@ -839,14 +952,14 @@ if (countdown === 0) {
 
 
         {roundWinner && !readyNext && (
-          <button
-  onClick={handleReadyNextRound}
-  className="mt-4 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 px-6 py-3 text-white font-bold rounded-xl shadow-lg hover:scale-105 hover:shadow-pink-400 transition-all duration-200"
->
-  ✅ Ready for Next Round
-</button>
+  <button
+    onClick={handleReadyNextRound}
+    className="mt-4 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 px-6 py-3 text-white font-bold rounded-xl shadow-lg hover:scale-105 hover:shadow-pink-400 transition-all duration-200"
+  >
+    {roundNumber === 8 ? "🏁 End Game" : "✅ Ready for Next Round"}
+  </button>
+)}
 
-        )}
 
         {readyNext && !opponentReadyNext && (
 <p className="mt-2 text-pink-400 font-bold animate-pulse drop-shadow-[0_0_6px_rgba(255,105,180,0.8)]">

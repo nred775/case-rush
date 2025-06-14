@@ -60,14 +60,29 @@ export function resolvePowerCard(card, context) {
         ? { value: 13, bonusPoints: 1 }
         : { value: 13, bonusPoints: 0 };
 
-    case "Lucky Seven":
-      if (
-        oppVal < 7 ||
-        (oppVal > 7 && oppVal % 2 === 1)
-      ) {
-        return { value: 7, bonusPoints: 0 };
-      }
-      return { value: 7, bonusPoints: 0 };
+    case "Lucky Seven": {
+  const oddActingCards = [
+    "Comeback Jack", // acts as Jack
+    "Crowned Punisher", // acts as King
+    "The King", // acts as King
+    "Crowned Victor", // acts as King
+    "Queen’s Wrath", // acts as Queen but we ignore Q
+    "Executioner Nine", // acts as 9 unless vs 8
+    "Vengeful Nine"
+  ];
+
+  const oppName = opponentCard?.name || "";
+  const normalizedOppName = oppName.toLowerCase().trim();
+  const actsAsOdd = oddActingCards.some(name => name.toLowerCase().trim() === normalizedOppName);
+
+  const beatsByValue = oppVal < 7 || (oppVal > 7 && oppVal % 2 === 1);
+
+  if (beatsByValue || actsAsOdd) {
+    return { value: 99, bonusPoints: 0 }; // wins
+  }
+
+  return { value: 0, bonusPoints: 0 }; // loses
+}
 
     case "Ten of Might":
       return { value: 10, bonusPoints: 1 };

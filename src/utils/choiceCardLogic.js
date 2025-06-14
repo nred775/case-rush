@@ -1,4 +1,20 @@
 // src/utils/choiceCardLogic.js
+import { resolvePowerCard } from "./powerCardLogic"; // Make sure this import is at the top
+
+
+const choiceCardBeatsMap = {
+  "Head Chopper": ["J", "Q", "K", "Comeback Jack", "The King", "Queen’s Wrath", "Crowned Victor", "Crowned Punisher"],
+  "Joker Topper": ["Joker (Red)", "Joker (Black)"],
+  "Even Slayer": ["10 of Might", "Elite Eight", "Ace of Power", "Queen’s Wrath"],
+  "Heart Breaker": ["♥"],
+  "Spade Slicer": ["♠"],
+  "Diamond Dagger": ["♦"],
+  "Club Crusher": ["♣"],
+  // The following are special logic cases handled in the function
+  "Desperation Draw": [],
+  "Time Bomb": [],
+  "Echo": [],
+};
 
 export function resolveChoiceCard(card, context) {
   const {
@@ -10,74 +26,68 @@ export function resolveChoiceCard(card, context) {
     roundNumber,
   } = context;
 
-  switch (card.name) {
-    case "Head Chopper":
-  // Beats J, Q, K, Comeback Jack, The King, and Queen's Wrath
-  return ["J", "Q", "K", "Comeback Jack", "The King", "Queen’s Wrath"].includes(opponentCard?.name)
-    ? { value: 99, bonusPoints: 0 }
-    : { value: 0, bonusPoints: 0 };
+  const name = card.name;
+  const oppName = opponentCard?.name;
+  const oppSuit = opponentCard?.suit;
+  const oppValue = opponentCard?.value;
+  const oppSymbol = suitToSymbol(oppSuit);
+console.log("Resolving", name, "vs", opponentCard?.name, opponentCard?.type);
+
+  if (name === "Desperation Draw") {
+    return playerScore <= opponentScore - 3 ? { value: 99, bonusPoints: 0 } : { value: 0, bonusPoints: 0 };
+  }
+
+  if (name === "Time Bomb") {
+    return roundNumber === 8 ? { value: 99, bonusPoints: 0 } : { value: 0, bonusPoints: 0 };
+  }
 
 
 
-    case "Joker Topper":
-      // Only beats Jokers
-      return opponentCard?.name?.includes("Joker")
-        ? { value: 99, bonusPoints: 0 }
-        : { value: 0, bonusPoints: 0 };
-
-   case "Even Slayer":
-  // Beats even-numbered regular cards and select power cards
-  const evenSlayerTargets = [
-    "10 of Might",
-    "Elite Eight",
-    "Ace of Power",
-    "Queen’s Wrath",
-  ];
-  const isRegularEven = opponentCard?.type === "regular" && opponentCard?.value % 2 === 0;
-  const isNamedTarget = evenSlayerTargets.includes(opponentCard?.name);
-  return isRegularEven || isNamedTarget
-    ? { value: 99, bonusPoints: 0 }
-    : { value: 0, bonusPoints: 0 };
 
 
+  // Handle suit-based win logic
+  if (["Heart Breaker", "Spade Slicer", "Diamond Dagger", "Club Crusher"].includes(name)) {
+    return choiceCardBeatsMap[name].includes(oppSymbol)
+      ? { value: 99, bonusPoints: 0 }
+      : { value: 0, bonusPoints: 0 };
+  }
 
-    case "Heart Breaker":
-      return opponentCard?.suit === "hearts"
-        ? { value: 99, bonusPoints: 0 }
-        : { value: 0, bonusPoints: 0 };
+    const beatsList = choiceCardBeatsMap[name] || [];
 
-    case "Spade Slicer":
-      return opponentCard?.suit === "spades"
-        ? { value: 99, bonusPoints: 0 }
-        : { value: 0, bonusPoints: 0 };
+const normalizedOppName = (oppName || "")
+  .toLowerCase()
+  .replace(/[^a-z0-9]/gi, "")
+  .trim();
 
-    case "Diamond Dagger":
-      return opponentCard?.suit === "diamonds"
-        ? { value: 99, bonusPoints: 0 }
-        : { value: 0, bonusPoints: 0 };
+const normalizedBeatsList = (beatsList || []).map(n =>
+  n.toLowerCase().replace(/[^a-z0-9]/gi, "").trim()
+);
 
-    case "Club Crusher":
-      return opponentCard?.suit === "clubs"
-        ? { value: 99, bonusPoints: 0 }
-        : { value: 0, bonusPoints: 0 };
+const isEvenCard = oppValue % 2 === 0 || normalizedOppName === "10ofmight";
 
-    case "Desperation Draw":
-      return playerScore <= opponentScore - 3
-        ? { value: 99, bonusPoints: 0 }
-        : { value: 0, bonusPoints: 0 };
+let wins = false;
 
-    case "Time Bomb":
-      return roundNumber === 8
-        ? { value: 99, bonusPoints: 0 }
-        : { value: 0, bonusPoints: 0 };
+if (name === "Head Chopper") {
+  wins = [11, 12, 13].includes(oppValue) || normalizedBeatsList.includes(normalizedOppName);
+} else if (name === "Even Slayer") {
+  wins = isEvenCard || normalizedBeatsList.includes(normalizedOppName);
+} else {
+  wins = normalizedBeatsList.includes(normalizedOppName);
+}
 
-    case "Echo":
-      return {
-        value: lastPlayerCard?.value ?? 0,
-        bonusPoints: 0,
-      };
 
-    default:
-      return { value: card.value, bonusPoints: 0 };
+
+  return wins ? { value: 99, bonusPoints: 0 } : { value: 0, bonusPoints: 0 };
+
+
+}
+
+function suitToSymbol(suit) {
+  switch (suit) {
+    case "hearts": return "♥";
+    case "diamonds": return "♦";
+    case "clubs": return "♣";
+    case "spades": return "♠";
+    default: return "";
   }
 }
