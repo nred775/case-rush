@@ -8,7 +8,7 @@ import { getLevelColorClass } from "../utils/levelStyles";
 
 
 export default function WelcomePage({ username, setShowFriends, resetCrate, resetWheel, setShowNotifications }) {
-  const pages = ["store", "core", "games", "social", "fate"];
+  const pages = ["store", "core", "games", "social", "--"];
   const [page, setPage] = useState(2);
   const prevPageRef = useRef(0);
   const direction = page > prevPageRef.current ? 1 : -1;
@@ -83,7 +83,6 @@ useEffect(() => {
     sortKeys={sortKeys}
     onlineCount={onlineCount}
   />,
-  <FateSection key="temptladyfate" />,
 ];
 
 
@@ -358,12 +357,7 @@ const StoreSection = () => (
       ]}
       className="store-button w-48"
     />
-    <StoreNavButton
-  to="/fate-shop"
-  label="Fate Shop"
-  imgList={["images/fate-shop.png"]} // just one image = no cycling
-  className="store-button w-48"
-/>
+   
 
   </Section>
 );
@@ -401,12 +395,7 @@ const CoreSection = () => (
       img="/images/achievements.png"
       className="core-button-local"
     />
-    <NavButton
-      to="/fate-deck"
-      label="Fate Deck"
-      img="/images/fate-deck.png"
-      className="core-button-local"
-    />
+    
   </Section>
 );
 
@@ -513,12 +502,7 @@ const SocialSection = ({ setShowFriends, setShowNotifications, leaders, sortInde
 }
 
   >
-  <NavButton
-  to="/fate-leaderboard"
-  label="Fate Leaderboard"
-  img="/images/leaderboard.png" // change path if needed
-  className="social-button-rect"
-/>
+  
     <NavButton
       label="Friends"
       img="/images/friends.png"
@@ -547,29 +531,5 @@ const SocialSection = ({ setShowFriends, setShowNotifications, leaders, sortInde
 
   </Section>
 );
-const FateSection = () => (
-  <Section
-    title="♠️ Tempt Lady Fate"
-    sectionClass="section-fate fate-bg-glow"
-    titleClass="text-pink-300 animate-title-pulse"
-  >
-    <Link to="/temptladyfate">
-      <NavButton label="Play" img="/images/fate-play.png" className="core-button-local" />
-    </Link>
-<Link to="/fate-leaderboard">
-      <NavButton label="Leaderboard" img="/images/leaderboard.png" className="core-button-local" />
-    </Link>
-    <Link to="/fate-deck">
-      <NavButton label="Deck" img="/images/fate-deck.png" className="core-button-local" />
-    </Link>
 
-    <Link to="/fate-shop">
-      <NavButton label="Packs" img="/images/fate-shop.png" className="core-button-local" />
-    </Link>
-    <Link to="/card-checker">
-  <NavButton label="Card Checker" img="/images/fate-check.png" className="core-button-local" />
-</Link>
-
-  </Section>
-);
 
